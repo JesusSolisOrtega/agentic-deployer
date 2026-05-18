@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HITL — Panel de Operaciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* Design tokens                                                      */
+    /* ------------------------------------------------------------------ */
+    :root {
+      --bg-primary:    #0f1117;
+      --bg-surface:    #1a1d27;
+      --bg-card:       #222632;
+      --bg-hover:      #2a2f3e;
+      --border:        #2e3348;
+      --text-primary:  #e4e6ef;
+      --text-secondary:#8b8fa7;
+      --text-muted:    #5c6078;
+      --accent:        #6c63ff;
+      --accent-hover:  #7e77ff;
+      --accent-glow:   rgba(108, 99, 255, 0.25);
+      --green:         #22c55e;
+      --green-bg:      rgba(34, 197, 94, 0.12);
+      --green-border:  rgba(34, 197, 94, 0.25);
+      --amber:         #f59e0b;
+      --amber-bg:      rgba(245, 158, 11, 0.12);
+      --amber-border:  rgba(245, 158, 11, 0.25);
+      --red:           #ef4444;
+      --red-bg:        rgba(239, 68, 68, 0.10);
+      --radius:        10px;
+      --shadow:        0 4px 24px rgba(0,0,0,0.35);
+      --transition:    all 0.2s ease;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Reset & base                                                       */
+    /* ------------------------------------------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Layout                                                             */
+    /* ------------------------------------------------------------------ */
+    .shell {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Header                                                             */
+    /* ------------------------------------------------------------------ */
+    .header {
+      margin-bottom: 36px;
+    }
+
+    .header__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--amber);
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    .header__badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: var(--amber);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Stats bar                                                          */
+    /* ------------------------------------------------------------------ */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover { border-color: var(--accent); }
+
+    .stat-card__label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-card__value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Table                                                              */
+    /* ------------------------------------------------------------------ */
+    .table-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-hover); }
+
+    tbody td {
+      padding: 14px 18px;
+      vertical-align: middle;
+    }
+
+    .cell-id {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .cell-image {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Status badges                                                      */
+    /* ------------------------------------------------------------------ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge--pending {
+      color: var(--amber);
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+    }
+
+    .badge--deployed {
+      color: var(--green);
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Buttons                                                            */
+    /* ------------------------------------------------------------------ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn--approve {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    .btn--approve:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn--approve:active { transform: translateY(0); }
+
+    .btn--approve:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Toast notification                                                  */
+    /* ------------------------------------------------------------------ */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--green-border);
+      color: var(--text-primary);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+
+    .toast.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast__icon {
+      width: 22px;
+      height: 22px;
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Empty state                                                        */
+    /* ------------------------------------------------------------------ */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state__icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Fade-in animation                                                  */
+    /* ------------------------------------------------------------------ */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Spinner                                                            */
+    /* ------------------------------------------------------------------ */
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Header ---------------------------------------------------------- -->
+  <header class="header">
+    <div class="header__badge">Human-in-the-Loop</div>
+    <h1>Panel de Operaciones</h1>
+    <p>Middleware Orquestador de Despliegues — Aprobación manual de intenciones MCP</p>
+  </header>
+
+  <!-- Stats ----------------------------------------------------------- -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-card__label">Pendientes</div>
+      <div class="stat-card__value" id="stat-pending">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Aprobados hoy</div>
+      <div class="stat-card__value" id="stat-approved">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Estado API</div>
+      <div class="stat-card__value" id="stat-api" style="font-size:14px;color:var(--text-muted);">Conectando…</div>
+    </div>
+  </div>
+
+  <!-- Table ----------------------------------------------------------- -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Servicio</th>
+          <th>Imagen</th>
+          <th>Puerto</th>
+          <th>CPU / RAM</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="deployments-body">
+        <!-- Rows injected by JS -->
+      </tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-state__icon">📭</div>
+      <p>No hay despliegues pendientes de aprobación</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast ------------------------------------------------------------- -->
+<div class="toast" id="toast">
+  <span class="toast__icon">✓</span>
+  <span id="toast-message">Despliegue simulado con éxito</span>
+</div>
+
+<!-- ================================================================== -->
+<!-- JavaScript — Vanilla, zero frameworks                               -->
+<!-- ================================================================== -->
+<script>
+  const API_BASE = 'http://localhost:8000';
+  let approvedCount = 0;
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.textContent = message;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 4000);
+  }
+
+  function setApiStatus(ok) {
+    const el = document.getElementById('stat-api');
+    if (ok) {
+      el.textContent = '● Online';
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = '● Offline';
+      el.style.color = 'var(--red)';
+    }
+  }
+
+  // ── Fetch pending deployments ────────────────────────────────────────
+
+  async function loadPending() {
+    try {
+      const res = await fetch(`${API_BASE}/hitl/pending`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      setApiStatus(true);
+      document.getElementById('stat-pending').textContent = data.length;
+
+      const tbody = document.getElementById('deployments-body');
+      const empty = document.getElementById('empty-state');
+
+      if (data.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      tbody.innerHTML = data.map((d, i) => `
+        <tr class="fade-in" style="animation-delay:${i * 60}ms">
+          <td class="cell-id">${d.id}</td>
+          <td>${d.intent.nombre}</td>
+          <td class="cell-image">${d.intent.imagen}</td>
+          <td>${d.intent.puerto_interno}</td>
+          <td>${d.intent.cpu} / ${d.intent.ram}</td>
+          <td><span class="badge badge--pending">Pendiente</span></td>
+          <td>
+            <button
+              class="btn btn--approve"
+              id="approve-btn-${d.id}"
+              onclick="approveDeployment('${d.id}', this)"
+            >Aprobar</button>
+          </td>
+        </tr>
+      `).join('');
+
+    } catch (err) {
+      console.error('Error cargando pendientes:', err);
+      setApiStatus(false);
+    }
+  }
+
+  // ── Approve deployment ───────────────────────────────────────────────
+
+  async function approveDeployment(id, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Desplegando…';
+
+    try {
+      const res = await fetch(`${API_BASE}/hitl/approve/${id}`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      approvedCount++;
+      document.getElementById('stat-approved').textContent = approvedCount;
+
+      showToast(`Despliegue simulado con éxito → ${data.result_url}`);
+
+      // Reload table after brief delay for visual feedback
+      setTimeout(() => loadPending(), 600);
+
+    } catch (err) {
+      console.error('Error aprobando:', err);
+      btn.disabled = false;
+      btn.textContent = 'Reintentar';
+      showToast(`Error: ${err.message}`);
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadPending();
+  });
+</script>
+
+</body>
+</html>

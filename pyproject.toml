@@ -1,0 +1,102 @@
+# ===========================================================================
+# pyproject.toml — Configuración centralizada de herramientas QA
+# ===========================================================================
+# Este archivo gobierna pytest, ruff, mypy y coverage desde un solo lugar.
+# Referencia: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+# ===========================================================================
+
+[project]
+name = "middleware-orquestador-hitl"
+version = "0.1.0"
+description = "MVP — Middleware Orquestador de Despliegues con HITL y protocolo MCP"
+requires-python = ">=3.11"
+
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["app/tests", "tests"]
+addopts = [
+    "--strict-markers",
+    "--tb=short",
+    # Cobertura automática sobre el paquete app/
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-config=pyproject.toml",
+]
+markers = [
+    "e2e: Tests end-to-end que requieren servidor corriendo (deselect con -m 'not e2e')",
+]
+
+
+# ---------------------------------------------------------------------------
+# coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/tests/*",
+    "app/infrastructure/*",
+    "app/domain/ports.py",
+    "app/main.py",
+    "app/__init__.py",
+    "app/*/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+precision = 1
+fail_under = 90
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__",
+    "if TYPE_CHECKING",
+    "\\.\\.\\.",
+]
+
+
+# ---------------------------------------------------------------------------
+# ruff  (linter + formatter ultra-rápido)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errores
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (orden de imports)
+    "UP",   # pyupgrade (modernizar sintaxis)
+    "B",    # bugbear (errores comunes)
+    "SIM",  # simplify (simplificaciones de código)
+    "RUF",  # reglas propias de ruff
+]
+ignore = [
+    "E501",   # line too long — lo controla line-length
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+
+# ---------------------------------------------------------------------------
+# mypy  (análisis estático de tipado)
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+# No romper por imports de terceros sin stubs
+ignore_missing_imports = true
+
+# Excluir tests del chequeo estricto de tipos
+[[tool.mypy.overrides]]
+module = ["app.tests.*"]
+disallow_untyped_defs = false
