@@ -14,13 +14,13 @@ from hypothesis import strategies as st
 
 from app.application.security_validator import SecurityContextValidator
 from app.domain.exceptions import SecurityViolationError
-from app.domain.models import DeploymentIntent
+from app.domain.models import DeploymentAction, DeploymentIntent
 
 # ---------------------------------------------------------------------------
-# Estrategias de generación
+# Estrategias de generacion
 # ---------------------------------------------------------------------------
 
-# Generador de nombres válidos (1-30 chars alfanuméricos con guiones)
+# Generador de nombres validos (1-30 chars alfanumericos con guiones)
 valid_name = st.from_regex(r"[a-z][a-z0-9\-]{0,29}", fullmatch=True)
 
 # Generador de requests CPU estilo K8s (ej: "100m", "500m", "1")
@@ -29,10 +29,10 @@ valid_cpu = st.sampled_from(["100m", "250m", "500m", "1", "2"])
 # Generador de requests RAM estilo K8s (ej: "64Mi", "128Mi", "256Mi")
 valid_ram = st.sampled_from(["64Mi", "128Mi", "256Mi", "512Mi", "1Gi"])
 
-# Generador de imágenes seguras (sin :latest)
+# Generador de imagenes seguras (sin :latest)
 safe_image = st.from_regex(r"[a-z]{3,15}:[0-9]+\.[0-9]+(\.[0-9]+)?", fullmatch=True)
 
-# Generador de imágenes inseguras (siempre contiene :latest)
+# Generador de imagenes inseguras (siempre contiene :latest)
 unsafe_latest_image = st.from_regex(r"[a-z]{3,15}:latest", fullmatch=True)
 
 # Generador de puertos seguros (>= 1024)
@@ -54,7 +54,7 @@ def deployment_intent_dict(
     force_latest_image: bool = False,
 ) -> dict:
     """
-    Genera un diccionario que representa un DeploymentIntent.
+    Genera un diccionario que representa un DeploymentIntent (action=CREATE).
 
     Permite forzar condiciones inseguras para probar que el validador
     las detecta de forma determinista.
@@ -67,6 +67,7 @@ def deployment_intent_dict(
 
     return {
         "nombre": nombre,
+        "action": "CREATE",
         "imagen": imagen,
         "puerto_interno": puerto,
         "cpu": cpu,
@@ -100,7 +101,6 @@ class TestSecurityContextValidator:
         with pytest.raises(SecurityViolationError) as exc_info:
             validator.validate(intent)
 
-        # Verificar que al menos una violación menciona el puerto
         assert any("Puerto privilegiado" in v for v in exc_info.value.violations)
 
     @given(data=deployment_intent_dict(force_unsafe_port=False, force_latest_image=True))
@@ -121,7 +121,7 @@ class TestSecurityContextValidator:
     @settings(max_examples=100)
     def test_both_violations_detected_simultaneously(self, data: dict) -> None:
         """
-        PROPIEDAD: Si AMBAS condiciones inseguras están presentes,
+        PROPIEDAD: Si AMBAS condiciones inseguras estan presentes,
         el validador detecta las DOS en una sola pasada.
         """
         intent = DeploymentIntent(**data)
@@ -139,9 +139,20 @@ class TestSecurityContextValidator:
     def test_safe_intent_never_raises(self, data: dict) -> None:
         """
         PROPIEDAD: Si el puerto es >= 1024 y la imagen NO contiene ':latest',
-        el validador NUNCA lanza excepción.
+        el validador NUNCA lanza excepcion.
         """
         intent = DeploymentIntent(**data)
 
-        # No debe lanzar ninguna excepción
+        # No debe lanzar ninguna excepcion
+        validator.validate(intent)
+
+    @given(nombre=valid_name)
+    @settings(max_examples=50)
+    def test_delete_action_always_passes(self, nombre: str) -> None:
+        """
+        PROPIEDAD: Las acciones DELETE NUNCA lanzan excepcion
+        independientemente de los demas campos.
+        """
+        intent = DeploymentIntent(nombre=nombre, action=DeploymentAction.DELETE)
+        # No debe lanzar ninguna excepcion
         validator.validate(intent)

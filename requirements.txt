@@ -2,6 +2,10 @@
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
 pydantic>=2,<3
+requests>=2,<3
+
+# Agent Layer
+streamlit>=1.45,<2
 
 # Testing
 pytest>=8,<9

@@ -12,7 +12,7 @@ import pytest
 
 from app.application.use_cases import ProcessDeploymentUseCase, deployment_store
 from app.domain.exceptions import SecurityViolationError
-from app.domain.models import DeploymentIntent, DeploymentStatus
+from app.domain.models import DeploymentAction, DeploymentIntent, DeploymentStatus
 
 
 @pytest.fixture(autouse=True)
@@ -85,3 +85,17 @@ class TestProcessDeploymentUseCase:
 
         assert r1.id != r2.id
         assert len(deployment_store) == 2
+
+    def test_delete_intent_skips_validation(self) -> None:
+        """Una intencion DELETE se guarda sin validar imagen ni puerto."""
+        use_case = ProcessDeploymentUseCase()
+        intent = DeploymentIntent(
+            nombre="servicio-viejo",
+            action=DeploymentAction.DELETE,
+        )
+
+        record = use_case.execute(intent)
+
+        assert record.status == DeploymentStatus.PENDING_APPROVAL
+        assert record.intent.action.value == "DELETE"
+        assert record.id in deployment_store

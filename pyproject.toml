@@ -40,6 +40,7 @@ omit = [
     "app/tests/*",
     "app/infrastructure/*",
     "app/domain/ports.py",
+    "app/agent_layer/chat_app.py",
     "app/main.py",
     "app/__init__.py",
     "app/*/__init__.py",
