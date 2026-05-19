@@ -48,21 +48,21 @@ pass() {
 # ===========================================================================
 # PASO 1 — Análisis estático (Linter)
 # ===========================================================================
-step "PASO 1/4 — Análisis estático con Ruff"
+step "PASO 1/5 — Análisis estático con Ruff"
 ${VENV_BIN}/ruff check app/
 pass "Ruff: sin errores de linting"
 
 # ===========================================================================
 # PASO 2 — Análisis de tipado
 # ===========================================================================
-step "PASO 2/4 — Análisis de tipado con mypy"
+step "PASO 2/5 — Análisis de tipado con mypy"
 ${VENV_BIN}/mypy app/ --config-file="${PROJECT_DIR}/pyproject.toml"
 pass "mypy: tipado correcto"
 
 # ===========================================================================
 # PASO 3 — Tests E2E / UI (requiere servidor)
 # ===========================================================================
-step "PASO 3/4 — Tests E2E con Playwright"
+step "PASO 3/5 — Tests E2E con Playwright"
 
 # Arrancar uvicorn en background
 echo "  Arrancando servidor FastAPI en background..."
@@ -97,9 +97,43 @@ pass "Playwright E2E: tests pasados"
 # ===========================================================================
 # PASO 4 — Tests unitarios + PBT con cobertura
 # ===========================================================================
-step "PASO 4/4 — Property-Based Testing + Cobertura"
+step "PASO 4/5 — Property-Based Testing + Cobertura"
 ${PYTHON} -m pytest app/tests/ -v
 pass "Hypothesis PBT + Coverage: completado"
+
+# ===========================================================================
+# PASO 5 — Pruebas de Carga (Locust)
+# ===========================================================================
+step "PASO 5/5 — Pruebas de Carga con Locust"
+
+echo "  Arrancando servidor FastAPI en background..."
+${UVICORN} app.infrastructure.main:app --host 127.0.0.1 --port 8000 &
+UVICORN_PID=$!
+
+# Esperar a que el servidor esté listo
+for i in $(seq 1 15); do
+    if curl -s http://127.0.0.1:8000/health > /dev/null 2>&1; then
+        echo "  Servidor listo (PID: ${UVICORN_PID})"
+        break
+    fi
+    if [ "$i" -eq 15 ]; then
+        echo -e "${RED}Error: El servidor no arrancó en 15 segundos${RESET}"
+        kill ${UVICORN_PID} 2>/dev/null || true
+        exit 1
+    fi
+    sleep 1
+done
+
+echo "  Ejecutando Locust en modo headless (10 usuarios, 5s)..."
+${VENV_BIN}/locust -f locustfile.py --headless -u 10 -r 2 --run-time 5s --host=http://127.0.0.1:8000 || {
+    kill ${UVICORN_PID} 2>/dev/null || true
+    exit 1
+}
+
+# Parar servidor
+kill ${UVICORN_PID} 2>/dev/null || true
+wait ${UVICORN_PID} 2>/dev/null || true
+pass "Locust Load Testing: completado"
 
 # ===========================================================================
 # Resumen final

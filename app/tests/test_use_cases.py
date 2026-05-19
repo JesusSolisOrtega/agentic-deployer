@@ -99,3 +99,21 @@ class TestProcessDeploymentUseCase:
         assert record.status == DeploymentStatus.PENDING_APPROVAL
         assert record.intent.action.value == "DELETE"
         assert record.id in deployment_store
+
+    def test_create_intent_missing_image_raises_error(self) -> None:
+        """Falla validacion si action=CREATE pero falta la imagen."""
+        with pytest.raises(ValueError, match="El campo 'imagen' es obligatorio"):
+            DeploymentIntent(
+                nombre="test",
+                action=DeploymentAction.CREATE,
+                puerto_interno=8080,
+            )
+
+    def test_create_intent_missing_port_raises_error(self) -> None:
+        """Falla validacion si action=CREATE pero falta el puerto."""
+        with pytest.raises(ValueError, match="El campo 'puerto_interno' es obligatorio"):
+            DeploymentIntent(
+                nombre="test",
+                action=DeploymentAction.CREATE,
+                imagen="nginx:latest",
+            )

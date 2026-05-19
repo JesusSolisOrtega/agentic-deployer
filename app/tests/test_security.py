@@ -146,13 +146,24 @@ class TestSecurityContextValidator:
         # No debe lanzar ninguna excepcion
         validator.validate(intent)
 
-    @given(nombre=valid_name)
+    @given(
+        nombre=valid_name,
+        imagen=unsafe_latest_image | st.none(),
+        puerto=unsafe_port | st.none()
+    )
     @settings(max_examples=50)
-    def test_delete_action_always_passes(self, nombre: str) -> None:
+    def test_delete_action_always_passes(
+        self, nombre: str, imagen: str | None, puerto: int | None
+    ) -> None:
         """
         PROPIEDAD: Las acciones DELETE NUNCA lanzan excepcion
-        independientemente de los demas campos.
+        independientemente de los demas campos (incluso si son invalidos).
         """
-        intent = DeploymentIntent(nombre=nombre, action=DeploymentAction.DELETE)
+        intent = DeploymentIntent(
+            nombre=nombre,
+            action=DeploymentAction.DELETE,
+            imagen=imagen,
+            puerto_interno=puerto
+        )
         # No debe lanzar ninguna excepcion
         validator.validate(intent)

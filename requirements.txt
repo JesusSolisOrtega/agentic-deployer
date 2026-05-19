@@ -16,3 +16,4 @@ pytest-playwright>=0.7,<1
 # QA / Análisis estático
 ruff>=0.11,<1
 mypy>=1.15,<2
+locust>=2,<3
