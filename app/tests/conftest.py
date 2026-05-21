@@ -1,5 +1,4 @@
-import pytest
-from hypothesis import settings, HealthCheck
+from hypothesis import HealthCheck, settings
 
 # Perfil global para que Hypothesis no falle por los executors paralelos/aislados de mutmut
 settings.register_profile(
