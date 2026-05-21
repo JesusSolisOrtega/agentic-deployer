@@ -20,11 +20,6 @@ testpaths = ["app/tests", "tests"]
 addopts = [
     "--strict-markers",
     "--tb=short",
-    # Cobertura automática sobre el paquete app/
-    "--cov=app",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov",
-    "--cov-config=pyproject.toml",
 ]
 markers = [
     "e2e: Tests end-to-end que requieren servidor corriendo (deselect con -m 'not e2e')",

@@ -98,7 +98,7 @@ pass "Playwright E2E: tests pasados"
 # PASO 4 — Tests unitarios + PBT con cobertura
 # ===========================================================================
 step "PASO 4/5 — Property-Based Testing + Cobertura"
-${PYTHON} -m pytest app/tests/ -v
+${PYTHON} -m pytest app/tests/ -v --cov=app --cov-report=term-missing --cov-report=html:htmlcov --cov-config=pyproject.toml
 pass "Hypothesis PBT + Coverage: completado"
 
 # ===========================================================================

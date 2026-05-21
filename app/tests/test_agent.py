@@ -57,10 +57,10 @@ class TestCalculateOptimalResources:
         ],
         ids=[
             "negativo", "cero",
-            "mínimo_básico", "máximo_básico",
-            "mínimo_estándar", "máximo_estándar",
-            "mínimo_alto", "máximo_alto",
-            "mínimo_enterprise", "gran_escala",
+            "minimo_basico", "maximo_basico",
+            "minimo_estandar", "maximo_estandar",
+            "minimo_alto", "maximo_alto",
+            "minimo_enterprise", "gran_escala",
         ],
     )
     def test_boundary_values(
