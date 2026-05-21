@@ -117,3 +117,15 @@ Y para ver el código exacto de un mutante específico (por ejemplo, el mutante 
 ```bash
 mutmut show 3
 ```
+
+---
+
+## 🧹 Limpieza del Repositorio
+
+A medida que ejecutas tests, linters y pruebas de mutación, se generarán diversas cachés y archivos temporales (`__pycache__`, `.pytest_cache`, `mutants/`, `.mutmut-cache`, reportes de cobertura, etc.). 
+
+Para dejar el repositorio completamente limpio y en su estado original, puedes ejecutar el script preparado para ello:
+
+```bash
+./clean.sh
+```
