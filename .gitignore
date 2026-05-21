@@ -23,8 +23,9 @@ htmlcov/
 .ruff_cache/
 
 # ── mutmut ────────────────────────────────────────────────────
-.mutmut-cache/
+.mutmut-cache
 html/
+mutants/
 
 # ── IDE ───────────────────────────────────────────────────────
 .vscode/
