@@ -1,19 +1,19 @@
 """
-Servidor MCP -- herramientas del SIC universitario.
+MCP Server -- University IT Service (SIC) tools.
 
-Implementado con el SDK oficial de MCP v2 (MCPServer).
-Expone herramientas via el protocolo Model Context Protocol (MCP)
-que envian peticiones POST a http://localhost:8000/mcp/intent.
+Implemented with the official MCP v2 SDK (MCPServer).
+Exposes tools via the Model Context Protocol (MCP)
+that send POST requests to http://localhost:8000/mcp/intent.
 
-Herramientas:
-  - deploy_congress_web:       Web estatica para congreso (nginx:alpine).
-  - deploy_department_cms:     WordPress para departamento.
-  - delete_university_service: Baja de un servicio existente.
+Tools:
+  - deploy_congress_web:       Static web for congress (nginx:alpine).
+  - deploy_department_cms:     WordPress for department.
+  - delete_university_service: Decommission an existing service.
 
-Modos de ejecucion:
+Execution modes:
   - stdio (Claude Desktop):  python -m app.agent_layer.mcp_server
   - SSE (web):               python -m app.agent_layer.mcp_server --sse
-  - Importable:               from app.agent_layer.mcp_server import mcp_server
+  - Importable:              from app.agent_layer.mcp_server import mcp_server
 """
 
 from __future__ import annotations
@@ -26,22 +26,21 @@ import requests
 from mcp.server.mcpserver import MCPServer
 
 # ---------------------------------------------------------------------------
-# Configuracion
+# Configuration
 # ---------------------------------------------------------------------------
 
 BACKEND_URL = "http://localhost:8000"
 
 # ---------------------------------------------------------------------------
-# Servidor MCP
+# MCP Server
 # ---------------------------------------------------------------------------
 
 mcp_server = MCPServer(
     name="agentic-deployer",
     instructions=(
-        "Servidor MCP del SIC (Servicio de Informatica y Comunicaciones) "
-        "de la Universidad. Proporciona herramientas para solicitar despliegues "
-        "y bajas de servicios en el cluster Kubernetes. Todas las solicitudes "
-        "quedan pendientes de aprobacion por un tecnico del SIC."
+        "MCP Server for the University IT Service (SIC). "
+        "Provides tools to request deployments and decommissioning of services "
+        "in the Kubernetes cluster. All requests are pending approval by an IT technician."
     ),
 )
 
@@ -50,18 +49,18 @@ mcp_server = MCPServer(
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _calculate_congress_resources(trafico_esperado: str) -> dict[str, str]:
-    """Calcula CPU/RAM segun trafico esperado para un congreso."""
-    trafico = trafico_esperado.lower()
-    if any(k in trafico for k in ["alto", "high", ">500", "1000"]):
+def _calculate_congress_resources(expected_traffic: str) -> dict[str, str]:
+    """Calculates CPU/RAM based on expected traffic for a congress."""
+    traffic = expected_traffic.lower()
+    if any(k in traffic for k in ["alto", "high", ">500", "1000"]):
         return {"cpu": "1", "ram": "512Mi"}
-    if any(k in trafico for k in ["medio", "medium", "200", "300", "400", "500"]):
+    if any(k in traffic for k in ["medio", "medium", "200", "300", "400", "500"]):
         return {"cpu": "500m", "ram": "256Mi"}
     return {"cpu": "250m", "ram": "128Mi"}
 
 
 def _send_intent(payload: dict) -> dict:
-    """Envia la intencion al backend y devuelve la respuesta."""
+    """Sends the intent to the backend and returns the response."""
     response = requests.post(
         f"{BACKEND_URL}/mcp/intent",
         json=payload,
@@ -72,29 +71,29 @@ def _send_intent(payload: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Herramientas MCP (registradas con el SDK oficial)
+# MCP Tools (registered with the official SDK)
 # ---------------------------------------------------------------------------
 
 @mcp_server.tool()
 def deploy_congress_web(
-    nombre_proyecto: str,
-    trafico_esperado: str = "bajo",
+    project_name: str,
+    expected_traffic: str = "low",
 ) -> str:
-    """Solicita el despliegue de una web estatica para un congreso academico.
+    """Requests the deployment of a static web for an academic congress.
 
-    El SIC fuerza imagen nginx:alpine y puerto 8080.
-    CPU y RAM se calculan segun el trafico esperado.
+    IT enforces nginx:alpine image and port 8080.
+    CPU and RAM are calculated based on expected traffic.
 
     Args:
-        nombre_proyecto: Nombre del congreso (ej: 'congreso-ia-2025').
-        trafico_esperado: Nivel de trafico: 'bajo', 'medio' o 'alto'.
+        project_name: Name of the congress (e.g. 'ai-congress-2025').
+        expected_traffic: Traffic level: 'low', 'medium', or 'high'.
     """
-    resources = _calculate_congress_resources(trafico_esperado)
+    resources = _calculate_congress_resources(expected_traffic)
     payload = {
-        "nombre": nombre_proyecto,
+        "name": project_name,
         "action": "CREATE",
-        "imagen": "nginx:alpine",
-        "puerto_interno": 8080,
+        "image": "nginx:alpine",
+        "internal_port": 8080,
         "cpu": resources["cpu"],
         "ram": resources["ram"],
     }
@@ -103,19 +102,19 @@ def deploy_congress_web(
 
 
 @mcp_server.tool()
-def deploy_department_cms(nombre_departamento: str) -> str:
-    """Solicita el despliegue de un WordPress para un departamento universitario.
+def deploy_department_cms(department_name: str) -> str:
+    """Requests the deployment of a WordPress for a university department.
 
-    El SIC fuerza imagen wordpress:6.4, puerto 8080, 500m CPU y 1024Mi RAM.
+    IT enforces wordpress:6.4 image, port 8080, 500m CPU and 1024Mi RAM.
 
     Args:
-        nombre_departamento: Nombre del departamento (ej: 'informatica').
+        department_name: Name of the department (e.g. 'computer-science').
     """
     payload = {
-        "nombre": f"cms-{nombre_departamento}",
+        "name": f"cms-{department_name}",
         "action": "CREATE",
-        "imagen": "wordpress:6.4",
-        "puerto_interno": 8080,
+        "image": "wordpress:6.4",
+        "internal_port": 8080,
         "cpu": "500m",
         "ram": "1024Mi",
     }
@@ -124,18 +123,18 @@ def deploy_department_cms(nombre_departamento: str) -> str:
 
 
 @mcp_server.tool()
-def deploy_python_app(nombre_proyecto: str, version_python: str = "3.12") -> str:
-    """Solicita el despliegue de una aplicacion Python generica.
+def deploy_python_app(project_name: str, python_version: str = "3.12") -> str:
+    """Requests the deployment of a generic Python application.
 
     Args:
-        nombre_proyecto: Nombre del proyecto (ej: 'api-notas').
-        version_python: Version de Python a utilizar (ej: '3.11', '3.12').
+        project_name: Name of the project (e.g. 'grades-api').
+        python_version: Python version to use (e.g. '3.11', '3.12').
     """
     payload = {
-        "nombre": nombre_proyecto,
+        "name": project_name,
         "action": "CREATE",
-        "imagen": f"python:{version_python}-slim",
-        "puerto_interno": 8000,
+        "image": f"python:{python_version}-slim",
+        "internal_port": 8000,
         "cpu": "250m",
         "ram": "256Mi",
     }
@@ -144,14 +143,14 @@ def deploy_python_app(nombre_proyecto: str, version_python: str = "3.12") -> str
 
 
 @mcp_server.tool()
-def delete_university_service(nombre_servicio: str) -> str:
-    """Solicita la baja de un servicio existente en el cluster.
+def delete_university_service(service_name: str) -> str:
+    """Requests the decommissioning of an existing service in the cluster.
 
     Args:
-        nombre_servicio: Nombre del servicio a dar de baja.
+        service_name: Name of the service to decommission.
     """
     payload = {
-        "nombre": nombre_servicio,
+        "name": service_name,
         "action": "DELETE",
     }
     result = _send_intent(payload)
@@ -159,12 +158,12 @@ def delete_university_service(nombre_servicio: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Registros compatibles con AgentOrchestrator y tests existentes
+# Registries compatible with AgentOrchestrator and existing tests
 # ---------------------------------------------------------------------------
-# El AgentOrchestrator usa TOOL_REGISTRY (name -> callable) y
-# TOOL_DEFINITIONS (formato OpenAI) para el dispatch. Mantenemos
-# ambos para compatibilidad, generando TOOL_DEFINITIONS a partir
-# del schema que el SDK de MCP ya genera automaticamente.
+# The AgentOrchestrator uses TOOL_REGISTRY (name -> callable) and
+# TOOL_DEFINITIONS (OpenAI format) for dispatch. We maintain both for
+# compatibility, generating TOOL_DEFINITIONS from the schema that the
+# MCP SDK automatically generates.
 
 TOOL_REGISTRY: dict[str, typing.Callable[..., typing.Any]] = {
     "deploy_congress_web": lambda **kwargs: json.loads(deploy_congress_web(**kwargs)),
@@ -173,30 +172,30 @@ TOOL_REGISTRY: dict[str, typing.Callable[..., typing.Any]] = {
     "delete_university_service": lambda **kwargs: json.loads(delete_university_service(**kwargs)),
 }
 
-# Definiciones en formato OpenAI Function Calling (para el AgentOrchestrator)
+# Definitions in OpenAI Function Calling format (for AgentOrchestrator)
 TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
             "name": "deploy_congress_web",
             "description": (
-                "Solicita el despliegue de una web estatica para un congreso "
-                "o evento academico. El SIC asigna imagen y recursos."
+                "Requests the deployment of a static web for a congress "
+                "or academic event. IT assigns image and resources."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_proyecto": {
+                    "project_name": {
                         "type": "string",
-                        "description": "Nombre del congreso o evento.",
+                        "description": "Name of the congress or event.",
                     },
-                    "trafico_esperado": {
+                    "expected_traffic": {
                         "type": "string",
-                        "enum": ["bajo", "medio", "alto"],
-                        "description": "Nivel de trafico esperado.",
+                        "enum": ["low", "medium", "high"],
+                        "description": "Expected traffic level.",
                     },
                 },
-                "required": ["nombre_proyecto"],
+                "required": ["project_name"],
             },
         },
     },
@@ -205,18 +204,17 @@ TOOL_DEFINITIONS = [
         "function": {
             "name": "deploy_department_cms",
             "description": (
-                "Solicita el despliegue de un CMS WordPress para un "
-                "departamento universitario."
+                "Requests the deployment of a WordPress CMS for a university department."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_departamento": {
+                    "department_name": {
                         "type": "string",
-                        "description": "Nombre del departamento.",
+                        "description": "Name of the department.",
                     },
                 },
-                "required": ["nombre_departamento"],
+                "required": ["department_name"],
             },
         },
     },
@@ -225,22 +223,22 @@ TOOL_DEFINITIONS = [
         "function": {
             "name": "deploy_python_app",
             "description": (
-                "Solicita el despliegue de una aplicacion Python generica."
+                "Requests the deployment of a generic Python application."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_proyecto": {
+                    "project_name": {
                         "type": "string",
-                        "description": "Nombre del proyecto.",
+                        "description": "Name of the project.",
                     },
-                    "version_python": {
+                    "python_version": {
                         "type": "string",
-                        "description": "Version de Python a utilizar (ej: 3.11, 3.12).",
+                        "description": "Python version to use (e.g. 3.11, 3.12).",
                         "default": "3.12",
                     },
                 },
-                "required": ["nombre_proyecto"],
+                "required": ["project_name"],
             },
         },
     },
@@ -249,18 +247,17 @@ TOOL_DEFINITIONS = [
         "function": {
             "name": "delete_university_service",
             "description": (
-                "Solicita la baja de un servicio existente en el cluster "
-                "universitario."
+                "Requests the decommissioning of an existing service in the university cluster."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_servicio": {
+                    "service_name": {
                         "type": "string",
-                        "description": "Nombre del servicio a dar de baja.",
+                        "description": "Name of the service to decommission.",
                     },
                 },
-                "required": ["nombre_servicio"],
+                "required": ["service_name"],
             },
         },
     },
@@ -268,7 +265,7 @@ TOOL_DEFINITIONS = [
 
 
 # ---------------------------------------------------------------------------
-# Punto de entrada: ejecutar el servidor MCP
+# Entry point: run the MCP server
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -278,5 +275,5 @@ if __name__ == "__main__":
     elif "--http" in sys.argv:
         transport = "streamable-http"
 
-    print(f"Iniciando servidor MCP '{mcp_server.name}' con transporte: {transport}")
+    print(f"Starting MCP server '{mcp_server.name}' with transport: {transport}")
     mcp_server.run(transport=transport)

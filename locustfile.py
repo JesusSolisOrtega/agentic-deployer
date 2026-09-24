@@ -1,19 +1,25 @@
+"""
+Locust load testing script.
+
+Simulates the traffic of users (PDI/PAS) against the orchestrator middleware.
+"""
+
 from locust import HttpUser, between, task
 
 
 class UniversityLoadUser(HttpUser):
-    """Simula el trafico de PDI/PAS hacia el Middleware Orquestador."""
+    """Simulates PDI/PAS traffic towards the Orchestrator Middleware."""
 
     wait_time = between(1, 3)
 
     @task(3)
     def simulate_mcp_agent_request(self) -> None:
-        """Simula al Agente MCP enviando una intencion de despliegue (Peso 3)."""
+        """Simulates the MCP Agent sending a deployment intent (Weight 3)."""
         payload = {
-            "nombre": "load-test-service",
+            "name": "load-test-service",
             "action": "CREATE",
-            "imagen": "docker.io/library/nginx:alpine",
-            "puerto_interno": 8080,
+            "image": "docker.io/library/nginx:alpine",
+            "internal_port": 8080,
             "cpu": "250m",
             "ram": "128Mi",
         }
@@ -21,7 +27,7 @@ class UniversityLoadUser(HttpUser):
 
     @task(1)
     def simulate_hitl_technician(self) -> None:
-        """Simula al Tecnico recargando el panel de control (Peso 1)."""
-        # Hacemos GET al frontend y también al endpoint de datos
+        """Simulates the Technician reloading the dashboard (Weight 1)."""
+        # We perform GET to the frontend and also to the data endpoint
         self.client.get("/frontend/index.html")
         self.client.get("/hitl/pending")

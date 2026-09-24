@@ -1,17 +1,21 @@
+"""
+Tests for MCP Server tool helpers.
+"""
+
 import pytest
 from unittest.mock import patch, Mock
 import requests
 from app.agent_layer.mcp_server import _calculate_congress_resources, _send_intent
 
-def test_calculate_congress_resources_alto():
+def test_calculate_congress_resources_high():
     for k in ["alto", "high", ">500", "1000"]:
         assert _calculate_congress_resources(k) == {"cpu": "1", "ram": "512Mi"}
 
-def test_calculate_congress_resources_medio():
+def test_calculate_congress_resources_medium():
     for k in ["medio", "medium", "200", "300", "400", "500"]:
         assert _calculate_congress_resources(k) == {"cpu": "500m", "ram": "256Mi"}
 
-def test_calculate_congress_resources_bajo():
+def test_calculate_congress_resources_low():
     assert _calculate_congress_resources("bajo") == {"cpu": "250m", "ram": "128Mi"}
 
 @patch("app.agent_layer.mcp_server.requests.post")

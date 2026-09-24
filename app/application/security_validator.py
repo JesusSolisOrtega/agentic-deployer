@@ -1,7 +1,7 @@
 """
-Validador de politicas de seguridad.
+Security policy validator.
 
-Logica pura (sin I/O, sin estado) -> ideal para Property-Based Testing.
+Pure logic (no I/O, no state) -> ideal for Property-Based Testing.
 """
 
 from __future__ import annotations
@@ -12,14 +12,14 @@ from app.domain.models import DeploymentAction, DeploymentIntent
 
 class SecurityContextValidator:
     """
-    Aplica politicas de seguridad sobre una intencion de despliegue.
+    Applies security policies to a deployment intent.
 
-    Reglas actuales (solo aplican a action=CREATE):
-      1. El puerto interno debe ser >= 1024 (puertos privilegiados prohibidos).
-      2. La imagen NO puede usar la etiqueta ':latest' (inmutabilidad).
-      3. La imagen debe provenir de un registro confiable (Whitelist).
-      4. Las cuotas de Hardware no pueden exceder 4 Cores o 8 GiB.
-      5. Las variables de entorno no pueden contener secretos en texto plano.
+    Current rules (only apply to action=CREATE):
+      1. Internal port must be >= 1024 (privileged ports prohibited).
+      2. The image CANNOT use the ':latest' tag (immutability).
+      3. The image must come from a trusted registry (Whitelist).
+      4. Hardware quotas cannot exceed 4 Cores or 8 GiB.
+      5. Environment variables cannot contain plaintext secrets.
     """
 
     ALLOWED_REGISTRIES = ("docker.io/", "quay.io/", "harbor.universidad.edu/")
@@ -43,40 +43,40 @@ class SecurityContextValidator:
 
     def validate(self, intent: DeploymentIntent) -> None:
         """
-        Valida la intencion contra todas las politicas.
+        Validates the intent against all policies.
         """
         if intent.action == DeploymentAction.DELETE:
             return
 
         violations: list[str] = []
 
-        if intent.puerto_interno is not None and intent.puerto_interno < 1024:
-            violations.append(f"Puerto privilegiado no permitido: {intent.puerto_interno} < 1024")
+        if intent.internal_port is not None and intent.internal_port < 1024:
+            violations.append(f"Privileged port not allowed: {intent.internal_port} < 1024")
 
-        if intent.imagen:
-            if ":latest" in intent.imagen:
-                violations.append(f"Etiqueta ':latest' prohibida en imagen: {intent.imagen}")
+        if intent.image:
+            if ":latest" in intent.image:
+                violations.append(f"':latest' tag prohibited in image: {intent.image}")
 
-            if not any(intent.imagen.startswith(reg) for reg in self.ALLOWED_REGISTRIES):
-                violations.append(f"Registro no confiable. Imagen debe empezar por {self.ALLOWED_REGISTRIES}")
+            if not any(intent.image.startswith(reg) for reg in self.ALLOWED_REGISTRIES):
+                violations.append(f"Untrusted registry. Image must start with {self.ALLOWED_REGISTRIES}")
 
         try:
             cpu_m = self._parse_cpu(intent.cpu)
             if cpu_m > self.MAX_CPU_MILLICORES:
-                violations.append(f"Cuota CPU excedida: {intent.cpu} > {self.MAX_CPU_MILLICORES}m")
+                violations.append(f"CPU quota exceeded: {intent.cpu} > {self.MAX_CPU_MILLICORES}m")
         except ValueError:
             pass
 
         try:
             ram_mi = self._parse_ram(intent.ram)
             if ram_mi > self.MAX_RAM_MI:
-                violations.append(f"Cuota RAM excedida: {intent.ram} > {self.MAX_RAM_MI}Mi")
+                violations.append(f"RAM quota exceeded: {intent.ram} > {self.MAX_RAM_MI}Mi")
         except ValueError:
             pass
 
         for key in intent.env_vars:
             if any(forbidden in key.lower() for forbidden in self.FORBIDDEN_ENV_KEYS):
-                violations.append(f"Posible secreto en texto plano en variable: {key}")
+                violations.append(f"Potential plaintext secret in variable: {key}")
 
         if violations:
             raise SecurityViolationError(violations)

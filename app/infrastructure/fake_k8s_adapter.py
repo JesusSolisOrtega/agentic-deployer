@@ -1,8 +1,8 @@
 """
-Adaptador fake de Kubernetes/OKD.
+Fake Kubernetes/OKD adapter.
 
-Implementa el puerto DeployPort sin depender de un cluster real.
-Simula la generacion de un YAML y devuelve una URL inventada.
+Implements the DeployPort without depending on a real cluster.
+Simulates generating a YAML and returns a mock URL.
 """
 
 from __future__ import annotations
@@ -14,17 +14,17 @@ from pathlib import Path
 from app.domain.models import DeploymentAction, DeploymentIntent
 from app.domain.ports import DeployPort
 
-# Directorio de salida para los manifiestos generados
+# Output directory for the generated manifests
 OUTPUT_DIR = Path(os.getcwd()) / "outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 
 class FakeK8sAdapter(DeployPort):
     """
-    Adaptador de despliegue para pruebas y desarrollo local.
+    Deployment adapter for local testing and development.
 
-    Genera un YAML simulado, lo imprime en consola y devuelve
-    una URL ficticia como si el servicio estuviese levantado en OKD.
+    Generates a simulated YAML, prints it to the console, and returns
+    a mock URL as if the service were deployed on OKD.
     """
 
     def deploy(self, intent: DeploymentIntent) -> str:
@@ -33,30 +33,30 @@ class FakeK8sAdapter(DeployPort):
         return self._simulate_create(intent)
 
     def _simulate_create(self, intent: DeploymentIntent) -> str:
-        """Simula un CREATE en OKD y guarda el manifiesto."""
+        """Simulates a CREATE on OKD and saves the manifest."""
         fake_yaml = textwrap.dedent(f"""\
             ---
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: {intent.nombre}
+              name: {intent.name}
               labels:
-                app: {intent.nombre}
+                app: {intent.name}
             spec:
               replicas: 1
               selector:
                 matchLabels:
-                  app: {intent.nombre}
+                  app: {intent.name}
               template:
                 metadata:
                   labels:
-                    app: {intent.nombre}
+                    app: {intent.name}
                 spec:
                   containers:
-                    - name: {intent.nombre}
-                      image: {intent.imagen}
+                    - name: {intent.name}
+                      image: {intent.image}
                       ports:
-                        - containerPort: {intent.puerto_interno}
+                        - containerPort: {intent.internal_port}
                       resources:
                         requests:
                           cpu: {intent.cpu}
@@ -65,56 +65,56 @@ class FakeK8sAdapter(DeployPort):
             apiVersion: v1
             kind: Service
             metadata:
-              name: {intent.nombre}-svc
+              name: {intent.name}-svc
             spec:
               selector:
-                app: {intent.nombre}
+                app: {intent.name}
               ports:
                 - protocol: TCP
                   port: 80
-                  targetPort: {intent.puerto_interno}
+                  targetPort: {intent.internal_port}
             ---
             apiVersion: networking.k8s.io/v1
             kind: Ingress
             metadata:
-              name: {intent.nombre}-ingress
+              name: {intent.name}-ingress
             spec:
               rules:
-                - host: {intent.nombre}.apps.universidad.edu
+                - host: {intent.name}.apps.universidad.edu
                   http:
                     paths:
                       - path: /
                         pathType: Prefix
                         backend:
                           service:
-                            name: {intent.nombre}-svc
+                            name: {intent.name}-svc
                             port:
                               number: 80
         """)
 
-        # Guardar en archivo para tener la evidencia del "Golden Path"
-        output_file = OUTPUT_DIR / f"{intent.nombre}.yaml"
+        # Save to file to have evidence of the "Golden Path"
+        output_file = OUTPUT_DIR / f"{intent.name}.yaml"
         output_file.write_text(fake_yaml)
 
         print("=" * 60)
-        print(f"🚀 K8s ADAPTER -- Manifiesto generado en: {output_file}")
+        print(f"🚀 K8s ADAPTER -- Manifest generated at: {output_file}")
         print("=" * 60)
 
-        return f"https://{intent.nombre}.apps.universidad.edu"
+        return f"https://{intent.name}.apps.universidad.edu"
 
     def _simulate_delete(self, intent: DeploymentIntent) -> str:
-        """Simula un DELETE en OKD."""
-        # Si existe el manifiesto previo, lo borramos (simulando que se aplica el delete)
-        output_file = OUTPUT_DIR / f"{intent.nombre}.yaml"
+        """Simulates a DELETE on OKD."""
+        # If the previous manifest exists, we delete it (simulating the delete applied)
+        output_file = OUTPUT_DIR / f"{intent.name}.yaml"
         deleted = False
         if output_file.exists():
             output_file.unlink()
             deleted = True
 
         print("=" * 60)
-        print(f"🗑️  K8s ADAPTER -- Borrado de '{intent.nombre}'")
+        print(f"🗑️  K8s ADAPTER -- Deletion of '{intent.name}'")
         if deleted:
-            print(f"   Archivo {output_file.name} eliminado.")
+            print(f"   File {output_file.name} deleted.")
         print("=" * 60)
 
-        return f"https://{intent.nombre}.apps.universidad.edu [DELETED]"
+        return f"https://{intent.name}.apps.universidad.edu [DELETED]"

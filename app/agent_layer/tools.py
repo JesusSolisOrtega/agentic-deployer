@@ -1,10 +1,10 @@
 """
-Catálogo de herramientas MCP — funciones invocables por el Agente LLM.
+MCP Tools Catalog — functions callable by the LLM Agent.
 
-Cada herramienta tiene:
-  - La función Python que ejecuta la lógica.
-  - Su definición en formato OpenAI Function Calling (TOOL_DEFINITIONS).
-  - Un registro name→function para dispatch dinámico (TOOL_REGISTRY).
+Each tool has:
+  - The Python function that executes the logic.
+  - Its definition in OpenAI Function Calling format (TOOL_DEFINITIONS).
+  - A name->function registry for dynamic dispatch (TOOL_REGISTRY).
 """
 
 from __future__ import annotations
@@ -17,18 +17,18 @@ BACKEND_URL = "http://localhost:8000"
 
 
 # ---------------------------------------------------------------------------
-# Herramientas
+# Tools
 # ---------------------------------------------------------------------------
 
 def calculate_optimal_resources(users: int) -> dict:
     """
-    Calcula CPU y RAM recomendados según el número de usuarios esperados.
+    Calculates recommended CPU and RAM based on expected users.
 
     Tiers:
-      <= 0      -> 100m / 64Mi   (mínimo)
-      1-100     -> 250m / 128Mi  (básico)
-      101-1000  -> 500m / 256Mi  (estándar)
-      1001-10K  -> 1    / 512Mi  (alto)
+      <= 0      -> 100m / 64Mi   (minimum)
+      1-100     -> 250m / 128Mi  (basic)
+      101-1000  -> 500m / 256Mi  (standard)
+      1001-10K  -> 1    / 512Mi  (high)
       >10K      -> 2    / 1Gi    (enterprise)
     """
     if users <= 0:
@@ -43,26 +43,26 @@ def calculate_optimal_resources(users: int) -> dict:
 
 
 def format_deployment_intent(
-    nombre: str,
-    imagen: str,
-    puerto_interno: int,
+    name: str,
+    image: str,
+    internal_port: int,
     cpu: str = "250m",
     ram: str = "128Mi",
 ) -> dict:
     """
-    Empaqueta los datos en un JSON válido y los envía al backend
-    vía POST http://localhost:8000/mcp/intent.
+    Packages the data into a valid JSON and sends it to the backend
+    via POST http://localhost:8000/mcp/intent.
 
     Returns:
-        Respuesta del backend (id, status, message).
+        Backend response (id, status, message).
 
     Raises:
-        requests.HTTPError: Si el backend rechaza la solicitud.
+        requests.HTTPError: If the backend rejects the request.
     """
     payload: dict[str, str | int] = {
-        "nombre": nombre,
-        "imagen": imagen,
-        "puerto_interno": puerto_interno,
+        "name": name,
+        "image": image,
+        "internal_port": internal_port,
         "cpu": cpu,
         "ram": ram,
     }
@@ -74,7 +74,7 @@ def format_deployment_intent(
 
 
 # ---------------------------------------------------------------------------
-# Definiciones de herramientas (formato OpenAI Function Calling)
+# Tool Definitions (OpenAI Function Calling format)
 # ---------------------------------------------------------------------------
 
 TOOL_DEFINITIONS = [
@@ -83,15 +83,15 @@ TOOL_DEFINITIONS = [
         "function": {
             "name": "calculate_optimal_resources",
             "description": (
-                "Calcula los recursos óptimos (CPU y RAM) para un despliegue "
-                "según el número de usuarios esperados."
+                "Calculates optimal resources (CPU and RAM) for a deployment "
+                "based on the expected number of users."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "users": {
                         "type": "integer",
-                        "description": "Número estimado de usuarios concurrentes.",
+                        "description": "Estimated number of concurrent users.",
                     },
                 },
                 "required": ["users"],
@@ -103,34 +103,34 @@ TOOL_DEFINITIONS = [
         "function": {
             "name": "format_deployment_intent",
             "description": (
-                "Crea y envía una solicitud de despliegue al orquestador. "
-                "Usar cuando se tienen todos los datos necesarios."
+                "Creates and sends a deployment request to the orchestrator. "
+                "Use when all necessary data is available."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre": {
+                    "name": {
                         "type": "string",
-                        "description": "Nombre del servicio a desplegar.",
+                        "description": "Name of the service to deploy.",
                     },
-                    "imagen": {
+                    "image": {
                         "type": "string",
-                        "description": "Imagen de contenedor (ej: nginx:1.25.3).",
+                        "description": "Container image (e.g. nginx:1.25.3).",
                     },
-                    "puerto_interno": {
+                    "internal_port": {
                         "type": "integer",
-                        "description": "Puerto expuesto por el contenedor.",
+                        "description": "Port exposed by the container.",
                     },
                     "cpu": {
                         "type": "string",
-                        "description": "Request de CPU en notación K8s (ej: 250m).",
+                        "description": "CPU request in K8s notation (e.g. 250m).",
                     },
                     "ram": {
                         "type": "string",
-                        "description": "Request de memoria (ej: 128Mi).",
+                        "description": "Memory request (e.g. 128Mi).",
                     },
                 },
-                "required": ["nombre", "imagen", "puerto_interno"],
+                "required": ["name", "image", "internal_port"],
             },
         },
     },
@@ -138,7 +138,7 @@ TOOL_DEFINITIONS = [
 
 
 # ---------------------------------------------------------------------------
-# Registro de herramientas (dispatch dinámico name → function)
+# Tool Registry (dynamic dispatch name -> function)
 # ---------------------------------------------------------------------------
 
 TOOL_REGISTRY: dict[str, typing.Callable[..., dict]] = {

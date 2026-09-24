@@ -1,7 +1,7 @@
 """
-Punto de entrada para uvicorn.
+Entry point for uvicorn.
 
-Uso:
+Usage:
     uvicorn app.infrastructure.main:app --reload --port 8000
 """
 

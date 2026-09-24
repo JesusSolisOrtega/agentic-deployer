@@ -1,10 +1,10 @@
 from hypothesis import HealthCheck, settings
 
-# Perfil global para que Hypothesis no falle por los executors paralelos/aislados de mutmut
+# Global profile so Hypothesis doesn't fail due to mutmut's isolated/parallel executors
 settings.register_profile(
     "mutmut_profile",
     suppress_health_check=[HealthCheck.differing_executors]
 )
 
-# Cargar el perfil automáticamente
+# Load profile automatically
 settings.load_profile("mutmut_profile")

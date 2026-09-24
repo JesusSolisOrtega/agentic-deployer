@@ -1,8 +1,8 @@
 """
-Caso de uso principal: procesar una intención de despliegue.
+Main use case: process a deployment intent.
 
-Orquesta la validación de seguridad y el almacenamiento en memoria.
-NO conoce la infraestructura (solo depende del dominio).
+Orchestrates security validation and memory storage.
+Does NOT know infrastructure (depends only on domain).
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from app.application.security_validator import SecurityContextValidator
 from app.domain.models import DeploymentIntent, DeploymentRecord
 
 # ---------------------------------------------------------------------------
-# Almacén en memoria (estado global del prototipo)
+# In-memory store (global state of the prototype)
 # ---------------------------------------------------------------------------
 # dict[id → DeploymentRecord]
 deployment_store: dict[str, DeploymentRecord] = {}
@@ -19,9 +19,9 @@ deployment_store: dict[str, DeploymentRecord] = {}
 
 class ProcessDeploymentUseCase:
     """
-    Recibe una intención del Agente MCP, la valida contra políticas
-    de seguridad y la persiste en memoria con estado PENDING_APPROVAL
-    para que un humano la apruebe vía HITL.
+    Receives an intent from the MCP Agent, validates it against security
+    policies, and persists it in memory with status PENDING_APPROVAL
+    so that a human can approve it via HITL.
     """
 
     def __init__(self) -> None:
@@ -29,21 +29,21 @@ class ProcessDeploymentUseCase:
 
     def execute(self, intent: DeploymentIntent) -> DeploymentRecord:
         """
-        Procesa la intención de despliegue.
+        Processes the deployment intent.
 
         Args:
-            intent: Intención recibida del agente MCP.
+            intent: Intent received from the MCP agent.
 
         Returns:
-            El registro de despliegue creado (estado PENDING_APPROVAL).
+            The created deployment record (status PENDING_APPROVAL).
 
         Raises:
-            SecurityViolationError: Si la intención viola políticas de seguridad.
+            SecurityViolationError: If the intent violates security policies.
         """
-        # 1. Validar políticas de seguridad
+        # 1. Validate security policies
         self._validator.validate(intent)
 
-        # 2. Crear registro y persistir en memoria
+        # 2. Create record and persist in memory
         record = DeploymentRecord(intent=intent)
         deployment_store[record.id] = record
 

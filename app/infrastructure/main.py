@@ -1,10 +1,10 @@
 """
-API REST — Capa de infraestructura (adaptador de entrada HTTP).
+REST API — Infrastructure layer (HTTP input adapter).
 
-Expone los endpoints que conectan:
-  • El Agente MCP  →  POST /mcp/intent
-  • El panel HITL  →  GET  /hitl/pending
-  • El panel HITL  →  POST /hitl/approve/{id}
+Exposes the endpoints connecting:
+  • The MCP Agent  →  POST /mcp/intent
+  • The HITL Panel →  GET  /hitl/pending
+  • The HITL Panel →  POST /hitl/approve/{id}
 """
 
 from __future__ import annotations
@@ -22,16 +22,16 @@ from app.domain.models import DeploymentIntent, DeploymentRecord, DeploymentStat
 from app.infrastructure.fake_k8s_adapter import FakeK8sAdapter
 
 # ---------------------------------------------------------------------------
-# App FastAPI
+# FastAPI App
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
-    title="Middleware Orquestador de Despliegues",
-    description="MVP con HITL (Human-in-the-Loop) y protocolo MCP",
+    title="Deployment Orchestrator Middleware",
+    description="MVP with HITL (Human-in-the-Loop) and MCP protocol",
     version="0.1.0",
 )
 
-# CORS — permite que el frontend (servido en file:// o distinto puerto) acceda a la API
+# CORS — allows the frontend (served on file:// or another port) to access the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,18 +39,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir frontend estático en /frontend
+# Serve static frontend at /frontend
 _frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if _frontend_dir.is_dir():
     app.mount("/frontend", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
 
-# Inyección de dependencias (manual, sin framework DI — prototipo)
+# Dependency injection (manual, no DI framework — prototype)
 use_case = ProcessDeploymentUseCase()
 k8s_adapter = FakeK8sAdapter()
 
 
 # ---------------------------------------------------------------------------
-# Schemas de respuesta
+# Response Schemas
 # ---------------------------------------------------------------------------
 
 class IntentResponse(BaseModel):
@@ -78,15 +78,15 @@ class ErrorResponse(BaseModel):
     "/mcp/intent",
     response_model=IntentResponse,
     status_code=201,
-    summary="Recibir intención de despliegue del Agente MCP",
+    summary="Receive deployment intent from the MCP Agent",
     tags=["MCP"],
 )
 def create_intent(intent: DeploymentIntent) -> IntentResponse:
     """
-    Simula la entrada del Agente MCP.
+    Simulates the MCP Agent input.
 
-    Recibe el JSON de la intención de despliegue, ejecuta la validación
-    de seguridad y, si pasa, la guarda con estado PENDING_APPROVAL.
+    Receives the deployment intent JSON, executes security validation,
+    and if successful, saves it with PENDING_APPROVAL status.
     """
     try:
         record = use_case.execute(intent)
@@ -94,7 +94,7 @@ def create_intent(intent: DeploymentIntent) -> IntentResponse:
         raise HTTPException(
             status_code=422,
             detail={
-                "message": "La intención viola políticas de seguridad",
+                "message": "The intent violates security policies",
                 "violations": exc.violations,
             },
         ) from exc
@@ -102,18 +102,18 @@ def create_intent(intent: DeploymentIntent) -> IntentResponse:
     return IntentResponse(
         id=record.id,
         status=record.status.value,
-        message="Intención registrada. Pendiente de aprobación humana.",
+        message="Intent registered. Pending human approval.",
     )
 
 
 @app.get(
     "/hitl/pending",
     response_model=list[DeploymentRecord],
-    summary="Listar despliegues pendientes de aprobación",
+    summary="List deployments pending approval",
     tags=["HITL"],
 )
 def list_pending() -> list[DeploymentRecord]:
-    """Devuelve todos los registros con estado PENDING_APPROVAL."""
+    """Returns all records with PENDING_APPROVAL status."""
     return [
         record
         for record in deployment_store.values()
@@ -124,27 +124,27 @@ def list_pending() -> list[DeploymentRecord]:
 @app.post(
     "/hitl/approve/{deployment_id}",
     response_model=ApproveResponse,
-    summary="Aprobar un despliegue pendiente",
+    summary="Approve a pending deployment",
     tags=["HITL"],
 )
 def approve_deployment(deployment_id: str) -> ApproveResponse:
     """
-    Cambia el estado a APPROVED y ejecuta el FakeK8sAdapter.
+    Changes status to APPROVED and executes the FakeK8sAdapter.
 
-    Devuelve la URL (ficticia) del servicio desplegado.
+    Returns the (mock) URL of the deployed service.
     """
     record = deployment_store.get(deployment_id)
 
     if record is None:
-        raise HTTPException(status_code=404, detail=f"Despliegue '{deployment_id}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Deployment '{deployment_id}' not found")
 
     if record.status != DeploymentStatus.PENDING_APPROVAL:
         raise HTTPException(
             status_code=409,
-            detail=f"El despliegue '{deployment_id}' no está pendiente (estado actual: {record.status.value})",
+            detail=f"Deployment '{deployment_id}' is not pending (current status: {record.status.value})",
         )
 
-    # Aprobar y desplegar
+    # Approve and deploy
     record.status = DeploymentStatus.APPROVED
     try:
         result_url = k8s_adapter.deploy(record.intent)
@@ -152,7 +152,7 @@ def approve_deployment(deployment_id: str) -> ApproveResponse:
         record.status = DeploymentStatus.DEPLOYED
     except Exception as exc:
         record.status = DeploymentStatus.FAILED
-        raise HTTPException(status_code=500, detail=f"Error en despliegue: {exc}") from exc
+        raise HTTPException(status_code=500, detail=f"Deployment error: {exc}") from exc
 
     return ApproveResponse(
         id=record.id,

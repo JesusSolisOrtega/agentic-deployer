@@ -1,8 +1,8 @@
 """
-Puertos (interfaces) del dominio.
+Domain ports (interfaces).
 
-Definen los contratos que la infraestructura debe implementar.
-El dominio NUNCA importa implementaciones concretas; solo estos ABCs.
+Define the contracts that the infrastructure must implement.
+The domain NEVER imports concrete implementations; only these ABCs.
 """
 
 from __future__ import annotations
@@ -14,23 +14,23 @@ from app.domain.models import DeploymentIntent
 
 class DeployPort(ABC):
     """
-    Puerto de salida para ejecutar un despliegue en el clúster.
+    Outbound port to execute a deployment on the cluster.
 
-    Cualquier adaptador (fake, OKD real, EKS…) debe implementar este contrato.
+    Any adapter (fake, real OKD, EKS...) must implement this contract.
     """
 
     @abstractmethod
     def deploy(self, intent: DeploymentIntent) -> str:
         """
-        Ejecuta el despliegue de la intención dada.
+        Executes the deployment of the given intent.
 
         Args:
-            intent: La intención de despliegue validada y aprobada.
+            intent: The validated and approved deployment intent.
 
         Returns:
-            URL del servicio desplegado.
+            URL of the deployed service.
 
         Raises:
-            RuntimeError: Si el despliegue falla.
+            RuntimeError: If the deployment fails.
         """
         ...

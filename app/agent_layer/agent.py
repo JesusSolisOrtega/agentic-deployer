@@ -1,14 +1,14 @@
 """
-Orquestador del Agente LLM.
+LLM Agent Orchestrator.
 
-Desacopla la lógica de orquestación (tool-calling loop) del cliente LLM
-concreto, haciéndolo 100 % testeable con mocks.
+Decouples the orchestration logic (tool-calling loop) from the concrete
+LLM client, making it 100% testable with mocks.
 
-Componentes:
-  - ToolCall / AgentResponse: dataclasses de comunicación.
-  - LLMClient (ABC): interfaz que cualquier proveedor debe implementar.
-  - FakeLLMClient: simulación sin API key para desarrollo y demo.
-  - AgentOrchestrator: bucle ReAct (Reason + Act) que ejecuta herramientas.
+Components:
+  - ToolCall / AgentResponse: communication dataclasses.
+  - LLMClient (ABC): interface that any provider must implement.
+  - FakeLLMClient: simulation without API key for dev and demo.
+  - AgentOrchestrator: ReAct (Reason + Act) loop that executes tools.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from app.agent_layer.tools import TOOL_DEFINITIONS, TOOL_REGISTRY
 
 @dataclass
 class ToolCall:
-    """Representa una invocación de herramienta solicitada por el LLM."""
+    """Represents a tool invocation requested by the LLM."""
 
     id: str
     name: str
@@ -37,20 +37,20 @@ class ToolCall:
 
 @dataclass
 class AgentResponse:
-    """Respuesta del LLM: texto libre y/o llamadas a herramientas."""
+    """LLM Response: free text and/or tool calls."""
 
     content: str | None = None
     tool_calls: list[ToolCall] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
-# LLM Client — Interfaz abstracta
+# LLM Client — Abstract Interface
 # ---------------------------------------------------------------------------
 
 class LLMClient(ABC):
     """
-    Contrato para cualquier cliente LLM (OpenAI, LiteLLM, Ollama…).
-    Recibe mensajes + herramientas, devuelve un AgentResponse.
+    Contract for any LLM client (OpenAI, LiteLLM, Ollama...).
+    Receives messages + tools, returns an AgentResponse.
     """
 
     @abstractmethod
@@ -63,20 +63,20 @@ class LLMClient(ABC):
 
 
 # ---------------------------------------------------------------------------
-# Fake LLM — Simulación basada en reglas para demo
+# Fake LLM — Rule-based simulation for demo
 # ---------------------------------------------------------------------------
 
 class FakeLLMClient(LLMClient):  # pragma: no cover
     """
-    Cliente LLM simulado que usa pattern-matching para extraer
-    parámetros de despliegue del texto del usuario.
+    Mocked LLM client that uses pattern-matching to extract
+    deployment parameters from the user's text.
 
-    Perfecto para desarrollo local y demos sin necesidad de API key.
+    Perfect for local development and demos without an API key.
     """
 
     SYSTEM_PROMPT = (
-        "Eres un asistente de despliegues. Ayudas a los equipos "
-        "a solicitar despliegues en el clúster OKD de forma sencilla."
+        "You are a deployment assistant. You help teams "
+        "request deployments in the OKD cluster easily."
     )
 
     def chat(
@@ -86,32 +86,32 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
     ) -> AgentResponse:
         last = messages[-1]
 
-        # ── Después de ejecutar una herramienta → resumir resultado ────
+        # ── After executing a tool -> summarize result ────
         if last.get("role") == "tool":
             return self._summarize_tool_result(last, messages)
 
-        # ── Mensaje de usuario → extraer parámetros ────────────────────
+        # ── User message -> extract parameters ────────────────────
         params = self._extract_params_from_history(messages)
-        nombre = params.get("nombre")
-        imagen = params.get("imagen")
-        puerto = params.get("puerto_interno")
-        usuarios = params.get("usuarios")
+        name = params.get("name")
+        image = params.get("image")
+        port = params.get("internal_port")
+        users = params.get("users")
 
-        # Si hay usuarios pero aún no calculamos recursos → calcular
-        if usuarios and not self._has_resource_result(messages):
+        # If there are users but we haven't calculated resources -> calculate
+        if users and not self._has_resource_result(messages):
             return AgentResponse(
                 content=None,
                 tool_calls=[
                     ToolCall(
                         id=f"call_{uuid.uuid4().hex[:6]}",
                         name="calculate_optimal_resources",
-                        arguments={"users": usuarios},
+                        arguments={"users": users},
                     ),
                 ],
             )
 
-        # Si tenemos nombre + imagen + puerto → desplegar
-        if nombre and imagen and puerto:
+        # If we have name + image + port -> deploy
+        if name and image and port:
             cpu = params.get("cpu", "250m")
             ram = params.get("ram", "128Mi")
             return AgentResponse(
@@ -121,9 +121,9 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
                         id=f"call_{uuid.uuid4().hex[:6]}",
                         name="format_deployment_intent",
                         arguments={
-                            "nombre": nombre,
-                            "imagen": imagen,
-                            "puerto_interno": puerto,
+                            "name": name,
+                            "image": image,
+                            "internal_port": port,
                             "cpu": cpu,
                             "ram": ram,
                         },
@@ -131,27 +131,27 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
                 ],
             )
 
-        # Faltan datos → preguntar
+        # Missing data -> ask
         missing = []
-        if not nombre:
-            missing.append("el **nombre** del servicio")
-        if not imagen:
-            missing.append("la **imagen** de contenedor (ej: `nginx:1.25.3`)")
-        if not puerto:
-            missing.append("el **puerto** interno")
+        if not name:
+            missing.append("the **name** of the service")
+        if not image:
+            missing.append("the container **image** (e.g. `nginx:1.25.3`)")
+        if not port:
+            missing.append("the internal **port**")
 
         return AgentResponse(
             content=(
-                "Necesito algo más de información para preparar el despliegue:\n"
+                "I need some more information to prepare the deployment:\n"
                 + "\n".join(f"- {m}" for m in missing)
-                + "\n\n¿Me los puedes proporcionar?"
+                + "\n\nCould you provide them?"
             ),
         )
 
-    # ── Helpers privados ───────────────────────────────────────────────
+    # ── Private helpers ───────────────────────────────────────────────
 
     def _extract_params_from_history(self, messages: list[dict]) -> dict:
-        """Extrae parámetros de despliegue de todos los mensajes del usuario."""
+        """Extracts deployment parameters from all user messages."""
         all_text = " ".join(
             m.get("content", "")
             for m in messages
@@ -160,30 +160,30 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
 
         params: dict = {}
 
-        # Imagen: word:tag o word/word:tag (excluir :latest-like que no parezca imagen)
+        # Image: word:tag or word/word:tag (exclude :latest-like that doesn't look like image)
         img_match = re.search(r"([\w\-]+(?:/[\w\-]+)?:[\w\.\-]+)", all_text)
         if img_match:
-            params["imagen"] = img_match.group(1)
+            params["image"] = img_match.group(1)
 
-        # Puerto: número después de "puerto"
+        # Port: number after "puerto" (we keep "puerto" since the UI is in Spanish)
         port_match = re.search(r"puerto\s+(\d+)", all_text)
         if port_match:
-            params["puerto_interno"] = int(port_match.group(1))
+            params["internal_port"] = int(port_match.group(1))
 
-        # Nombre del servicio
+        # Service name
         name_match = re.search(
             r"(?:servicio|nombre|llamad[oa]|desplegar|deploy)\s+[\"']?([\w\-]+)",
             all_text,
         )
         if name_match:
-            params["nombre"] = name_match.group(1)
+            params["name"] = name_match.group(1)
 
-        # Usuarios
+        # Users
         users_match = re.search(r"(\d+)\s*usuarios", all_text)
         if users_match:
-            params["usuarios"] = int(users_match.group(1))
+            params["users"] = int(users_match.group(1))
 
-        # Si ya calculamos recursos, inyectarlos
+        # If resources are calculated, inject them
         resources = self._get_resource_result(messages)
         if resources:
             params["cpu"] = resources.get("cpu", "250m")
@@ -213,11 +213,11 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
             deploy_id = result.get("id", "???")
             return AgentResponse(
                 content=(
-                    f"✅ **Solicitud enviada a revisión.**\n\n"
+                    f"✅ **Request sent for review.**\n\n"
                     f"- **ID:** `{deploy_id}`\n"
-                    f"- **Estado:** Pendiente de aprobación\n\n"
-                    f"Un técnico de operaciones la revisará en el "
-                    f"[panel HITL](http://localhost:8000/frontend/index.html)."
+                    f"- **Status:** Pending approval\n\n"
+                    f"An IT technician will review it in the "
+                    f"[HITL dashboard](http://localhost:8000/frontend/index.html)."
                 ),
             )
 
@@ -225,26 +225,26 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
             tier = result.get("tier", "")
             cpu = result.get("cpu", "")
             ram = result.get("ram", "")
-            # Continuar con el despliegue — re-analizar el historial
+            # Continue with deployment -> re-parse history
             params = self._extract_params_from_history(messages)
-            nombre = params.get("nombre")
-            imagen = params.get("imagen")
-            puerto = params.get("puerto_interno")
+            name = params.get("name")
+            image = params.get("image")
+            port = params.get("internal_port")
 
-            if nombre and imagen and puerto:
+            if name and image and port:
                 return AgentResponse(
                     content=(
-                        f"📊 Para tu volumen de usuarios recomiendo tier "
-                        f"**{tier}** ({cpu} CPU, {ram} RAM). Enviando solicitud…"
+                        f"📊 For your volume of users I recommend tier "
+                        f"**{tier}** ({cpu} CPU, {ram} RAM). Sending request..."
                     ),
                     tool_calls=[
                         ToolCall(
                             id=f"call_{uuid.uuid4().hex[:6]}",
                             name="format_deployment_intent",
                             arguments={
-                                "nombre": nombre,
-                                "imagen": imagen,
-                                "puerto_interno": puerto,
+                                "name": name,
+                                "image": image,
+                                "internal_port": port,
                                 "cpu": cpu,
                                 "ram": ram,
                             },
@@ -254,22 +254,22 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
 
             return AgentResponse(
                 content=(
-                    f"📊 Recursos recomendados: **{tier}** ({cpu} CPU, {ram} RAM).\n"
-                    f"Dame el nombre del servicio, imagen y puerto para continuar."
+                    f"📊 Recommended resources: **{tier}** ({cpu} CPU, {ram} RAM).\n"
+                    f"Give me the service name, image, and port to continue."
                 ),
             )
 
-        return AgentResponse(content=f"Herramienta `{tool_name}` ejecutada.")
+        return AgentResponse(content=f"Tool `{tool_name}` executed.")
 
 
 # ---------------------------------------------------------------------------
-# OpenAI LLM Client (compatible con Ollama / LiteLLM)
+# OpenAI LLM Client (compatible with Ollama / LiteLLM)
 # ---------------------------------------------------------------------------
 
 class OpenAILLMClient(LLMClient):
     """
-    Cliente LLM real usando la API de OpenAI.
-    Compatible con Ollama local (http://localhost:11434/v1).
+    Real LLM client using the OpenAI API.
+    Compatible with local Ollama (http://localhost:11434/v1).
     """
 
     def __init__(
@@ -306,7 +306,7 @@ class OpenAILLMClient(LLMClient):
 
         if choice.tool_calls:
             for tc in choice.tool_calls:
-                # El LLM genera los argumentos como un string JSON
+                # The LLM generates the arguments as a JSON string
                 try:
                     args = json.loads(tc.function.arguments)
                 except json.JSONDecodeError:
@@ -324,15 +324,15 @@ class OpenAILLMClient(LLMClient):
 
 
 # ---------------------------------------------------------------------------
-# Orquestador del Agente (bucle ReAct)
+# Agent Orchestrator (ReAct loop)
 # ---------------------------------------------------------------------------
 
 class AgentOrchestrator:
     """
-    Bucle ReAct: recibe un mensaje del usuario, interactúa con el LLM
-    y ejecuta herramientas hasta obtener una respuesta final.
+    ReAct loop: receives a user message, interacts with the LLM
+    and executes tools until a final response is obtained.
 
-    Es 100 % agnóstico al proveedor de LLM gracias a la interfaz LLMClient.
+    It is 100% LLM provider agnostic thanks to the LLMClient interface.
     """
 
     def __init__(
@@ -352,27 +352,27 @@ class AgentOrchestrator:
         max_iterations: int = 5,
     ) -> tuple[str, list[dict]]:
         """
-        Procesa un mensaje del usuario.
+        Processes a user message.
 
         Args:
-            user_message: Texto del usuario.
-            history: Historial de conversación (se muta in-place).
-            max_iterations: Límite de iteraciones tool-calling.
+            user_message: User text.
+            history: Conversation history (mutated in-place).
+            max_iterations: Tool-calling iterations limit.
 
         Returns:
-            Tupla (respuesta_texto, historial_actualizado).
+            Tuple (text_response, updated_history).
         """
         history.append({"role": "user", "content": user_message})
 
         for _ in range(max_iterations):
             response = self.llm.chat(history, self.tool_definitions)
 
-            # Sin tool calls → respuesta final
+            # No tool calls -> final response
             if not response.tool_calls:
                 history.append({"role": "assistant", "content": response.content})
                 return response.content or "", history
 
-            # Registrar la respuesta del asistente con tool calls
+            # Register the assistant's response with tool calls
             assistant_msg: dict = {
                 "role": "assistant",
                 "content": response.content,
@@ -390,11 +390,11 @@ class AgentOrchestrator:
             }
             history.append(assistant_msg)
 
-            # Ejecutar cada herramienta
+            # Execute each tool
             for tc in response.tool_calls:
                 fn = self.tool_registry.get(tc.name)
                 if fn is None:
-                    result = {"error": f"Herramienta '{tc.name}' no encontrada"}
+                    result = {"error": f"Tool '{tc.name}' not found"}
                 else:
                     try:
                         result = fn(**tc.arguments)
@@ -408,7 +408,7 @@ class AgentOrchestrator:
                     "content": json.dumps(result, ensure_ascii=False),
                 })
 
-        # Límite alcanzado
-        fallback = "He alcanzado el límite de iteraciones. ¿Puedes reformular?"
+        # Limit reached
+        fallback = "Iteration limit reached. Could you rephrase?"
         history.append({"role": "assistant", "content": fallback})
         return fallback, history

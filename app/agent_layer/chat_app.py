@@ -1,15 +1,15 @@
 """
-Interfaz de chat -- Asistente Virtual del SIC (Servicio de Informatica).
+Chat interface -- Virtual Assistant of the IT Service (SIC).
 
-Ejecutar con:
+Run with:
     streamlit run app/agent_layer/chat_app.py
 
-Flujo:
-  1. El usuario (PDI/PAS) describe lo que necesita en lenguaje natural.
-  2. El Agente analiza y extrae parametros usando el system prompt del SIC.
-  3. Si faltan datos, pregunta en el chat.
-  4. Si tiene todo, invoca la herramienta MCP correspondiente.
-  5. Muestra confirmacion de envio a revision del tecnico del SIC.
+Flow:
+  1. The user describes what they need in natural language.
+  2. The Agent parses and extracts parameters using the SIC system prompt.
+  3. If data is missing, it asks in the chat.
+  4. If it has everything, it invokes the corresponding MCP tool.
+  5. Shows confirmation of sending to IT technician for review.
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from app.agent_layer.agent import (
 from app.agent_layer.mcp_server import TOOL_DEFINITIONS, TOOL_REGISTRY
 
 # ---------------------------------------------------------------------------
-# System Prompt del SIC
+# SIC System Prompt
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = (
@@ -48,11 +48,11 @@ SYSTEM_PROMPT = (
 
 
 # ---------------------------------------------------------------------------
-# Fake LLM adaptado al SIC (pattern matching para demo)
+# Fake LLM adapted to SIC (pattern matching for demo)
 # ---------------------------------------------------------------------------
 
 class SICFakeLLMClient(LLMClient):  # pragma: no cover
-    """LLM simulado con reglas del SIC universitario."""
+    """Mocked LLM with university IT rules."""
 
     def chat(
         self,
@@ -61,21 +61,21 @@ class SICFakeLLMClient(LLMClient):  # pragma: no cover
     ) -> AgentResponse:
         last = messages[-1]
 
-        # Despues de tool result -> resumir
+        # After tool result -> summarize
         if last.get("role") == "tool":
             return self._after_tool(last)
 
         text = self._all_user_text(messages)
 
-        # Detectar baja/borrado
+        # Detect decommissioning
         if any(k in text for k in ["baja", "borrar", "eliminar", "delete", "dar de baja"]):
-            nombre = self._extract_service_name(text)
-            if nombre:
+            name = self._extract_service_name(text)
+            if name:
                 return AgentResponse(
                     tool_calls=[ToolCall(
                         id=f"call_{uuid.uuid4().hex[:6]}",
                         name="delete_university_service",
-                        arguments={"nombre_servicio": nombre},
+                        arguments={"service_name": name},
                     )],
                 )
             return AgentResponse(
@@ -83,22 +83,22 @@ class SICFakeLLMClient(LLMClient):  # pragma: no cover
                 "?Cual es?",
             )
 
-        # Detectar congreso/evento
+        # Detect congress/event
         if any(k in text for k in ["congreso", "evento", "jornada", "conferencia", "web"]):
-            nombre = self._extract_project_name(text)
-            if nombre:
-                trafico = "medio"
+            name = self._extract_project_name(text)
+            if name:
+                traffic = "medium"
                 if any(k in text for k in ["alto", "muchos", "1000", "grande"]):
-                    trafico = "alto"
+                    traffic = "high"
                 elif any(k in text for k in ["bajo", "pequeno", "pocos"]):
-                    trafico = "bajo"
+                    traffic = "low"
                 return AgentResponse(
                     tool_calls=[ToolCall(
                         id=f"call_{uuid.uuid4().hex[:6]}",
                         name="deploy_congress_web",
                         arguments={
-                            "nombre_proyecto": nombre,
-                            "trafico_esperado": trafico,
+                            "project_name": name,
+                            "expected_traffic": traffic,
                         },
                     )],
                 )
@@ -107,15 +107,15 @@ class SICFakeLLMClient(LLMClient):  # pragma: no cover
                 "?Como se llama el evento o proyecto?",
             )
 
-        # Detectar wordpress/departamento
+        # Detect wordpress/department
         if any(k in text for k in ["wordpress", "departamento", "cms", "pagina departamento"]):
-            nombre = self._extract_dept_name(text)
-            if nombre:
+            name = self._extract_dept_name(text)
+            if name:
                 return AgentResponse(
                     tool_calls=[ToolCall(
                         id=f"call_{uuid.uuid4().hex[:6]}",
                         name="deploy_department_cms",
-                        arguments={"nombre_departamento": nombre},
+                        arguments={"department_name": name},
                     )],
                 )
             return AgentResponse(
