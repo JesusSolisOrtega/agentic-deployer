@@ -26,7 +26,7 @@ from playwright.sync_api import Page, expect
 
 SAFE_INTENT = {
     "nombre": "test-e2e-service",
-    "imagen": "nginx:1.25.3",
+    "imagen": "docker.io/library/nginx:1.25.3",
     "puerto_interno": 8080,
     "cpu": "250m",
     "ram": "128Mi",

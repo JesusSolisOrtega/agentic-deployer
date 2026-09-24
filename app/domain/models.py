@@ -65,11 +65,17 @@ class DeploymentIntent(BaseModel):
     )
     cpu: str = Field(
         default="250m",
-        description="Request de CPU (notacion K8s, ej: 250m)",
+        pattern=r"^\d+(m)?$",
+        description="Request de CPU (notacion K8s, ej: 250m o 1)",
     )
     ram: str = Field(
         default="128Mi",
-        description="Request de memoria (ej: 128Mi)",
+        pattern=r"^\d+(Mi|Gi|Ti)$",
+        description="Request de memoria (ej: 128Mi o 1Gi)",
+    )
+    env_vars: dict[str, str] = Field(
+        default_factory=dict,
+        description="Diccionario de variables de entorno del contenedor",
     )
 
     @model_validator(mode="after")

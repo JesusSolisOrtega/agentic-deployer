@@ -12,7 +12,7 @@ class UniversityLoadUser(HttpUser):
         payload = {
             "nombre": "load-test-service",
             "action": "CREATE",
-            "imagen": "nginx:alpine",
+            "imagen": "docker.io/library/nginx:alpine",
             "puerto_interno": 8080,
             "cpu": "250m",
             "ram": "128Mi",

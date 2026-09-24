@@ -36,3 +36,15 @@ mutants/
 # ── OS ────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# ── Scratch & Temporal Files ──────────────────────────────────
+/outputs/
+/promt TFM
+/run_tests_only.sh
+/test
+
+# Ignorar todos los markdowns de lluvia de ideas en la raíz
+/*.md
+# Pero conservar el README y el compilado final del TFM
+!/README.md
+!/TFM_Completo.md

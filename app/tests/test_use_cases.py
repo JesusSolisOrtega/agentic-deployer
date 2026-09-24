@@ -29,7 +29,7 @@ class TestProcessDeploymentUseCase:
         use_case = ProcessDeploymentUseCase()
         intent = DeploymentIntent(
             nombre="api-test",
-            imagen="nginx:1.25.3",
+            imagen="docker.io/library/nginx:1.25.3",
             puerto_interno=8080,
             cpu="250m",
             ram="128Mi",
@@ -47,7 +47,7 @@ class TestProcessDeploymentUseCase:
         use_case = ProcessDeploymentUseCase()
         intent = DeploymentIntent(
             nombre="hack-service",
-            imagen="nginx:1.25.3",
+            imagen="docker.io/library/nginx:1.25.3",
             puerto_interno=80,
         )
 
@@ -62,7 +62,7 @@ class TestProcessDeploymentUseCase:
         use_case = ProcessDeploymentUseCase()
         intent = DeploymentIntent(
             nombre="bad-image",
-            imagen="nginx:latest",
+            imagen="docker.io/library/nginx:latest",
             puerto_interno=8080,
         )
 
@@ -76,7 +76,7 @@ class TestProcessDeploymentUseCase:
         use_case = ProcessDeploymentUseCase()
         intent = DeploymentIntent(
             nombre="svc",
-            imagen="python:3.12",
+            imagen="docker.io/library/python:3.12",
             puerto_interno=8080,
         )
 
@@ -115,5 +115,5 @@ class TestProcessDeploymentUseCase:
             DeploymentIntent(
                 nombre="test",
                 action=DeploymentAction.CREATE,
-                imagen="nginx:latest",
+                imagen="docker.io/library/nginx:1.25.3",
             )

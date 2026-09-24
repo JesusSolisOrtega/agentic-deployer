@@ -29,11 +29,11 @@ valid_cpu = st.sampled_from(["100m", "250m", "500m", "1", "2"])
 # Generador de requests RAM estilo K8s (ej: "64Mi", "128Mi", "256Mi")
 valid_ram = st.sampled_from(["64Mi", "128Mi", "256Mi", "512Mi", "1Gi"])
 
-# Generador de imagenes seguras (sin :latest)
-safe_image = st.from_regex(r"[a-z]{3,15}:[0-9]+\.[0-9]+(\.[0-9]+)?", fullmatch=True)
+# Generador de imagenes seguras (registro permitido, sin :latest)
+safe_image = st.from_regex(r"(docker\.io/|harbor\.universidad\.edu/)[a-z]{3,10}:[0-9]+\.[0-9]+", fullmatch=True)
 
 # Generador de imagenes inseguras (siempre contiene :latest)
-unsafe_latest_image = st.from_regex(r"[a-z]{3,15}:latest", fullmatch=True)
+unsafe_latest_image = st.from_regex(r"(docker\.io/|harbor\.universidad\.edu/)[a-z]{3,10}:latest", fullmatch=True)
 
 # Generador de puertos seguros (>= 1024)
 safe_port = st.integers(min_value=1024, max_value=65535)
@@ -64,6 +64,7 @@ def deployment_intent_dict(
     puerto = draw(unsafe_port if force_unsafe_port else safe_port)
     cpu = draw(valid_cpu)
     ram = draw(valid_ram)
+    env: dict[str, str] = {}
 
     return {
         "nombre": nombre,
@@ -72,6 +73,7 @@ def deployment_intent_dict(
         "puerto_interno": puerto,
         "cpu": cpu,
         "ram": ram,
+        "env_vars": env,
     }
 
 
@@ -167,3 +169,37 @@ class TestSecurityContextValidator:
         )
         # No debe lanzar ninguna excepcion
         validator.validate(intent)
+
+    @given(data=deployment_intent_dict())
+    @settings(max_examples=50)
+    def test_untrusted_registry_always_raises(self, data: dict) -> None:
+        """PROPIEDAD: Imagenes fuera de la whitelist siempre son rechazadas."""
+        data["imagen"] = "hacker.io/miner:1.0"
+        intent = DeploymentIntent(**data)
+        with pytest.raises(SecurityViolationError) as exc_info:
+            validator.validate(intent)
+        assert any("Registro no confiable" in v for v in exc_info.value.violations)
+
+    @given(data=deployment_intent_dict())
+    @settings(max_examples=50)
+    def test_hardware_quotas_always_raises(self, data: dict) -> None:
+        """PROPIEDAD: Superar 4 cores o 8Gi de RAM siempre lanza violacion."""
+        data["cpu"] = "5"      # Equivale a 5000m > 4000m
+        data["ram"] = "10Gi"   # Equivale a 10240Mi > 8192Mi
+        intent = DeploymentIntent(**data)
+        with pytest.raises(SecurityViolationError) as exc_info:
+            validator.validate(intent)
+        violations = exc_info.value.violations
+        assert any("Cuota CPU excedida" in v for v in violations)
+        assert any("Cuota RAM excedida" in v for v in violations)
+
+    @given(data=deployment_intent_dict())
+    @settings(max_examples=50)
+    def test_secrets_in_env_always_raises(self, data: dict) -> None:
+        """PROPIEDAD: Detectar palabras como 'password' o 'secret' en dict env_vars lanza violacion."""
+        data["env_vars"] = {"DB_PASSWORD": "supersecret", "API_KEY": "123"}
+        intent = DeploymentIntent(**data)
+        with pytest.raises(SecurityViolationError) as exc_info:
+            validator.validate(intent)
+        violations = exc_info.value.violations
+        assert any("Posible secreto en texto plano" in v for v in violations)

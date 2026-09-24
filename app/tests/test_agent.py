@@ -361,7 +361,7 @@ class TestMCPTools:
         assert sent["imagen"] == "nginx:alpine"
         assert sent["puerto_interno"] == 8080
         assert sent["cpu"] == "1"
-        assert result["id"] == "abc123"
+        assert json.loads(result)["id"] == "abc123"
 
     def test_deploy_department_cms_sends_correct_payload(self) -> None:
         with patch("app.agent_layer.mcp_server.requests.post") as mock_post:
@@ -381,7 +381,27 @@ class TestMCPTools:
         assert sent["imagen"] == "wordpress:6.4"
         assert sent["cpu"] == "500m"
         assert sent["ram"] == "1024Mi"
-        assert result["id"] == "def456"
+        assert json.loads(result)["id"] == "def456"
+
+    def test_deploy_python_app_sends_correct_payload(self) -> None:
+        from app.agent_layer.mcp_server import deploy_python_app
+        with patch("app.agent_layer.mcp_server.requests.post") as mock_post:
+            mock_resp = MagicMock()
+            mock_resp.json.return_value = {
+                "id": "py789", "status": "PENDING_APPROVAL",
+                "message": "OK",
+            }
+            mock_resp.raise_for_status = MagicMock()
+            mock_post.return_value = mock_resp
+
+            result = deploy_python_app("api-test", "3.11")
+
+        sent = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1]["json"]
+        assert sent["nombre"] == "api-test"
+        assert sent["action"] == "CREATE"
+        assert sent["imagen"] == "python:3.11-slim"
+        assert sent["puerto_interno"] == 8000
+        assert json.loads(result)["id"] == "py789"
 
     def test_delete_university_service_sends_delete_action(self) -> None:
         with patch("app.agent_layer.mcp_server.requests.post") as mock_post:
@@ -399,10 +419,11 @@ class TestMCPTools:
         assert sent["nombre"] == "servicio-viejo"
         assert sent["action"] == "DELETE"
         assert "imagen" not in sent
-        assert result["id"] == "ghi789"
+        assert json.loads(result)["id"] == "ghi789"
 
     def test_tool_registry_has_all_tools(self) -> None:
         """El registry contiene las 3 herramientas del SIC."""
         assert "deploy_congress_web" in MCP_TOOL_REGISTRY
         assert "deploy_department_cms" in MCP_TOOL_REGISTRY
+        assert "deploy_python_app" in MCP_TOOL_REGISTRY
         assert "delete_university_service" in MCP_TOOL_REGISTRY

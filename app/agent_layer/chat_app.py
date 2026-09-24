@@ -15,11 +15,18 @@ Flujo:
 from __future__ import annotations
 
 import json
+import os
 import uuid
 
 import streamlit as st
 
-from app.agent_layer.agent import AgentOrchestrator, AgentResponse, LLMClient, ToolCall
+from app.agent_layer.agent import (
+    AgentOrchestrator,
+    AgentResponse,
+    LLMClient,
+    OpenAILLMClient,
+    ToolCall,
+)
 from app.agent_layer.mcp_server import TOOL_DEFINITIONS, TOOL_REGISTRY
 
 # ---------------------------------------------------------------------------
@@ -210,8 +217,18 @@ if "messages" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = [{"role": "system", "content": SYSTEM_PROMPT}]
 if "agent" not in st.session_state:
+    provider = os.getenv("LLM_PROVIDER", "fake").lower()
+
+    llm: LLMClient
+    if provider == "ollama":
+        llm = OpenAILLMClient(model="llama3.1", base_url="http://localhost:11434/v1", api_key="ollama")
+    elif provider == "openai":
+        llm = OpenAILLMClient(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY", ""))
+    else:
+        llm = SICFakeLLMClient()
+
     st.session_state.agent = AgentOrchestrator(
-        llm=SICFakeLLMClient(),
+        llm=llm,
         tool_registry=TOOL_REGISTRY,
         tool_definitions=TOOL_DEFINITIONS,
     )

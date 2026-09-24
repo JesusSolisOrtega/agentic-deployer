@@ -14,6 +14,7 @@ Componentes:
 from __future__ import annotations
 
 import json
+import os
 import re
 import uuid
 from abc import ABC, abstractmethod
@@ -259,6 +260,67 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
             )
 
         return AgentResponse(content=f"Herramienta `{tool_name}` ejecutada.")
+
+
+# ---------------------------------------------------------------------------
+# OpenAI LLM Client (compatible con Ollama / LiteLLM)
+# ---------------------------------------------------------------------------
+
+class OpenAILLMClient(LLMClient):
+    """
+    Cliente LLM real usando la API de OpenAI.
+    Compatible con Ollama local (http://localhost:11434/v1).
+    """
+
+    def __init__(
+        self,
+        model: str = "llama3.1",
+        base_url: str | None = None,
+        api_key: str | None = None,
+    ) -> None:
+        from openai import OpenAI
+
+        self.model = model
+        self.client = OpenAI(
+            base_url=base_url or os.getenv("LLM_BASE_URL", "http://localhost:11434/v1"),
+            api_key=api_key or os.getenv("LLM_API_KEY", "ollama"),
+        )
+
+    def chat(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+    ) -> AgentResponse:
+        kwargs: dict = {
+            "model": self.model,
+            "messages": messages,
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+
+        response = self.client.chat.completions.create(**kwargs)
+        choice = response.choices[0].message
+
+        agent_response = AgentResponse(content=choice.content)
+
+        if choice.tool_calls:
+            for tc in choice.tool_calls:
+                # El LLM genera los argumentos como un string JSON
+                try:
+                    args = json.loads(tc.function.arguments)
+                except json.JSONDecodeError:
+                    args = {}
+
+                agent_response.tool_calls.append(
+                    ToolCall(
+                        id=tc.id,
+                        name=tc.function.name,
+                        arguments=args,
+                    )
+                )
+
+        return agent_response
 
 
 # ---------------------------------------------------------------------------

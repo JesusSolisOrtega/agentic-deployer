@@ -1,131 +1,74 @@
-# Middleware Orquestador de Despliegues (HITL + MCP)
+# Agentic Deployer: Orquestación de Infraestructura con IA Generativa
 
-MVP de un Middleware para la orquestación de despliegues que integra "Human-in-the-Loop" (HITL) y el protocolo "Model Context Protocol" (MCP).
+**Trabajo de Fin de Máster (TFM)**
+
+Este repositorio contiene la prueba de concepto y el producto mínimo viable (MVP) del "Agentic Deployer", un sistema diseñado para gobernar el comportamiento estocástico de los Modelos de Lenguaje Grandes (LLM) y utilizarlos como motores de provisión de infraestructura en entornos corporativos críticos.
+
+## 🏗️ Arquitectura del Sistema
+
+El proyecto demuestra que es posible delegar la abstracción de operaciones complejas a una Inteligencia Artificial sin comprometer la seguridad del centro de datos. Para ello, implementa tres patrones arquitectónicos fundamentales:
+
+1. **Arquitectura Hexagonal (Ports and Adapters):** Aísla la lógica de negocio y las políticas de seguridad (`SecurityContextValidator`) del modelo de IA. La IA interactúa como un actor no privilegiado en la capa externa, sin acceso directo a Kubernetes.
+2. **Model Context Protocol (MCP):** Define un contrato estándar para inyectar capacidades de despliegue en cualquier LLM (OpenAI, Ollama, Anthropic) vía `stdio`, aislando las credenciales y garantizando la Soberanía del Dato.
+3. **Human-In-The-Loop (HITL):** Una máquina de estados finita (FSM) que garantiza que ninguna alteración de la infraestructura se ejecuta sin la aprobación asíncrona de un Ingeniero de Operaciones a través de un panel de control.
 
 ## 🚀 Instalación y Configuración
 
-Se recomienda utilizar Python 3.11 o superior.
-
-### 1. Entorno Virtual y Dependencias
+El sistema requiere **Python 3.11 o superior**.
 
 ```bash
-# Crear entorno virtual
+# 1. Crear y activar el entorno virtual
 python3 -m venv .venv
-
-# Activar entorno
 source .venv/bin/activate
 
-# Instalar dependencias base
+# 2. Instalar dependencias del proyecto
 pip install -r requirements.txt
-```
 
-### 2. Configuración de Playwright (para tests E2E)
-El proyecto utiliza Playwright para las pruebas de interfaz de usuario de la vista HITL.
-```bash
-pip install pytest-playwright
+# 3. Configurar navegadores para los tests E2E
 playwright install chromium
 ```
 
----
-
 ## ⚙️ Ejecución del Proyecto
 
-Para levantar el servidor FastAPI localmente (que incluye la API y sirve el panel estático HITL):
+El sistema se divide en dos grandes bloques de ejecución paralelos: el Backend de Operaciones (Hexagonal) y la Interfaz Cognitiva del Usuario.
 
+### 1. Levantar el Backend (FastAPI + Panel HITL)
+Este servidor expone el contrato de herramientas MCP y sirve la interfaz estática para el Técnico de Operaciones.
 ```bash
 uvicorn app.infrastructure.main:app --reload --port 8000
 ```
+- **Panel de Aprobación (HITL):** [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
 
-- **Panel HITL**: [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
-- **Documentación API (Swagger UI)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## 🧪 Pruebas y Aseguramiento de Calidad (QA)
-
-El proyecto cuenta con un script de bash que ejecuta de forma automática toda la suite de validación como un pipeline de CI local.
-
-### Ejecutar todo el Pipeline (Recomendado)
+### 2. Levantar el Agente LLM (Chat UI)
+En una terminal separada, levanta la interfaz conversacional para que el Investigador solicite infraestructura en lenguaje natural. 
+*(Nota: Requiere tener exportada la variable `OPENAI_API_KEY` o configurar Ollama localmente).*
 ```bash
-chmod +x run_tests.sh
-./run_tests.sh
+streamlit run app/agent_layer/chat_app.py
 ```
-Este script ejecutará secuencialmente:
-1. **Análisis estático** (Linter con Ruff)
-2. **Análisis de tipado** (Mypy)
-3. **Tests E2E de Interfaz** (Playwright) *(levanta servidor efímero)*
-4. **Property-Based Testing y Tests Unitarios** con análisis de cobertura (Pytest + Hypothesis)
-5. **Pruebas de Carga** (Locust)
 
-### Ejecutar Pruebas Individualmente
+## 🧪 Aseguramiento de Calidad Avanzado (QA)
 
-- **Tests Unitarios y PBT**: 
-  ```bash
-  python -m pytest app/tests/ -v
-  ```
-- **Tests E2E (UI)** *(Requiere que el servidor de FastAPI esté levantado)*: 
-  ```bash
-  python -m pytest tests/test_ui.py -v
-  ```
-- **Pruebas de Carga**: 
-  ```bash
-  locust -f locustfile.py --headless -u 10 -r 2 --run-time 5s --host=http://127.0.0.1:8000
-  ```
+Para garantizar la estabilidad del sistema frente al ruido inyectado por la IA, este TFM implementa un *Pipeline* de pruebas agresivo y multicapa, superando la cobertura clásica:
 
----
+- **Testing Unitario y de Integración:** Validación matemática del Dominio.
+- **Pruebas Basadas en Propiedades (Hypothesis):** Fuzzing de entropía masiva contra el validador de seguridad.
+- **Mutation Testing (Mutmut):** Generación de clones maliciosos para auditar la solidez de las propias pruebas.
+- **Pruebas Metamórficas:** Evaluación del LLM ante ruido léxico, faltas de ortografía e inversión sintáctica.
+- **Testing E2E (Playwright) y Carga (Locust):** Auditoría del flujo HITL y rendimiento de la API.
 
-## 🧬 Tests de Mutación (Mutation Testing)
-
-> **¿Qué son los tests de mutación?**
-> A diferencia de los unit tests, **no se diseñan ni se programan**. La herramienta (`mutmut`) lee tu código de producción, le introduce fallos intencionados o "mutantes" (como cambiar un `>` por `<`, eliminar un `if`, alterar una cadena) y luego ejecuta tus tests existentes sobre ese código roto. 
-> - Si tus tests **pasan** ❌: El mutante sobrevive (tus tests no son suficientemente exhaustivos).
-> - Si tus tests **fallan** ✅: El mutante muere (tus tests están detectando el fallo correctamente).
-
-Para lanzar un análisis de mutación a **TODO el proyecto** (`app/`) y generar el informe:
-
-### 1. Ejecutar las mutaciones en todo el directorio
-*(Atención: esto puede tardar un poco dependiendo de la cantidad de archivos y de cuánto tarden tus tests en ejecutarse).*
+### Ejecución de la Suite de Pruebas
 
 ```bash
-# Activa tu entorno virtual (si no lo está)
-source .venv/bin/activate
+# Ejecutar toda la batería estática, de propiedades y metamórfica:
+python -m pytest app/tests/ -v
 
-# Asegúrate de tener mutmut instalado
-pip install mutmut
+# Ejecutar las pruebas E2E de interfaz (requiere que FastAPI esté corriendo en el puerto 8000):
+python -m pytest tests/test_ui.py -v
 
-# (Opcional) La configuración de mutmut se encuentra en el archivo setup.cfg
-# Ejecuta mutmut contra toda la carpeta (leerá la configuración de setup.cfg)
+# Ejecutar auditoría de Mutantes en todo el sistema:
 mutmut run
 ```
 
-### 2. Generar y Visualizar el Informe
-La versión 3 de mutmut ha sustituido los antiguos informes HTML por una interfaz interactiva de terminal (TUI) y comandos directos.
+## 📄 Memoria del Proyecto
 
-Para abrir el explorador interactivo en tu terminal:
-```bash
-mutmut browse
-```
-
-*(En esta interfaz podrás navegar con las flechas y el teclado por todos los archivos y ver qué líneas exactas han sobrevivido a tus tests).*
-
-Si prefieres ver un listado resumido en la consola de cuántos mutantes sobrevivieron en cada archivo:
-```bash
-mutmut results
-```
-
-Y para ver el código exacto de un mutante específico (por ejemplo, el mutante número 3):
-```bash
-mutmut show 3
-```
-
----
-
-## 🧹 Limpieza del Repositorio
-
-A medida que ejecutas tests, linters y pruebas de mutación, se generarán diversas cachés y archivos temporales (`__pycache__`, `.pytest_cache`, `mutants/`, `.mutmut-cache`, reportes de cobertura, etc.). 
-
-Para dejar el repositorio completamente limpio y en su estado original, puedes ejecutar el script preparado para ello:
-
-```bash
-./clean.sh
-```
+Toda la fundamentación teórica, diagramas arquitectónicos, decisiones de diseño y análisis de resultados se encuentran documentados en los archivos Markdown dentro del directorio `/memoria`. Se proveen scripts (como `combinar_tfm_y_toc.py`) para compilar un documento único listo para su exportación a PDF.
