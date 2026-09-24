@@ -1,15 +1,15 @@
 """
-Test E2E de la interfaz HITL usando Playwright.
+E2E Test of the HITL interface using Playwright.
 
-Flujo:
-  1. Crea un DeploymentIntent seguro vía POST /mcp/intent.
-  2. Abre el panel HITL en un navegador headless.
-  3. Espera a que la tabla cargue y hace clic en "Aprobar".
-  4. Valida que el toast de éxito aparece en pantalla.
+Flow:
+  1. Creates a safe DeploymentIntent via POST /mcp/intent.
+  2. Opens the HITL panel in a headless browser.
+  3. Waits for the table to load and clicks "Approve".
+  4. Validates that the success toast appears on screen.
 
-Requisitos:
-  - El servidor FastAPI debe estar corriendo en http://localhost:8000
-  - Ejecutar: pip install pytest-playwright && playwright install chromium
+Requirements:
+  - The FastAPI server must be running at http://localhost:8000
+  - Run: pip install pytest-playwright && playwright install chromium
 """
 
 from __future__ import annotations
@@ -21,13 +21,13 @@ from playwright.sync_api import Page, expect
 
 
 # ---------------------------------------------------------------------------
-# Datos de prueba
+# Test data
 # ---------------------------------------------------------------------------
 
 SAFE_INTENT = {
-    "nombre": "test-e2e-service",
-    "imagen": "docker.io/library/nginx:1.25.3",
-    "puerto_interno": 8080,
+    "name": "test-e2e-service",
+    "image": "docker.io/library/nginx:1.25.3",
+    "internal_port": 8080,
     "cpu": "250m",
     "ram": "128Mi",
 }
@@ -37,47 +37,47 @@ FRONTEND_URL = f"{API_BASE}/frontend/index.html"
 
 
 # ---------------------------------------------------------------------------
-# Test E2E
+# E2E Test
 # ---------------------------------------------------------------------------
 
 @pytest.mark.e2e
 class TestHITLPanel:
-    """Tests end-to-end del panel Human-in-the-Loop."""
+    """End-to-end tests for the Human-in-the-Loop panel."""
 
     def test_approve_deployment_shows_success_toast(self, page: Page) -> None:
         """
-        Flujo completo: crear intención → abrir panel → aprobar → ver toast.
+        Complete flow: create intent → open panel → approve → see toast.
         """
-        # ── 1. Crear un despliegue pendiente via la API ─────────────────
+        # ── 1. Create a pending deployment via API ────────────────────────
         response = page.request.post(
             f"{API_BASE}/mcp/intent",
             data=SAFE_INTENT,
         )
-        assert response.ok, f"POST /mcp/intent falló: {response.status} — {response.text()}"
+        assert response.ok, f"POST /mcp/intent failed: {response.status} — {response.text()}"
         intent_data = response.json()
         deployment_id = intent_data["id"]
         assert intent_data["status"] == "PENDING_APPROVAL"
 
-        # ── 2. Abrir el panel HITL ──────────────────────────────────────
+        # ── 2. Open the HITL panel ─────────────────────────────────────────
         page.goto(FRONTEND_URL)
 
-        # ── 3. Esperar a que la tabla cargue con nuestro despliegue ─────
-        #    Buscar la fila que contiene el ID del despliegue creado
+        # ── 3. Wait for the table to load with our deployment ──────────────
+        #    Search for the row containing the created deployment ID
         row = page.locator("tr", has_text=deployment_id)
         expect(row).to_be_visible(timeout=5000)
 
-        # Verificar que el nombre del servicio aparece en la tabla
+        # Verify that the service name appears in the table
         expect(row.locator("td", has_text="test-e2e-service")).to_be_visible()
 
-        # ── 4. Hacer clic en el botón "Aprobar" de esa fila ─────────────
+        # ── 4. Click the "Aprobar" button in that row ───────────────────────
         approve_btn = row.locator("button.btn--approve")
         expect(approve_btn).to_be_visible()
         approve_btn.click()
 
-        # ── 5. Validar que el toast de éxito aparece ────────────────────
+        # ── 5. Validate that the success toast appears ───────────────────────
         toast = page.locator("#toast")
         expect(toast).to_have_class(re.compile(r"visible"), timeout=10000)
 
-        # Verificar el texto del mensaje de éxito
+        # Verify the text of the success message (this is still in Spanish in the UI)
         toast_message = page.locator("#toast-message")
         expect(toast_message).to_contain_text("Despliegue simulado con éxito")

@@ -498,12 +498,12 @@
           : '<span class="badge badge--create">Crear</span>';
         const btnClass = isDelete ? 'btn btn--delete' : 'btn btn--approve';
         const btnText = isDelete ? 'Aprobar Borrado' : 'Aprobar';
-        const imagen = d.intent.imagen || 'N/A';
-        const puerto = d.intent.puerto_interno || 'N/A';
+        const imagen = d.intent.image || 'N/A';
+        const puerto = d.intent.internal_port || 'N/A';
         return `
         <tr class="fade-in" style="animation-delay:${i * 60}ms">
           <td class="cell-id">${d.id}</td>
-          <td>${d.intent.nombre}</td>
+          <td>${d.intent.name}</td>
           <td>${actionBadge}</td>
           <td class="cell-image">${imagen}</td>
           <td>${puerto}</td>

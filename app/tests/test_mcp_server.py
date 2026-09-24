@@ -2,10 +2,13 @@
 Tests for MCP Server tool helpers.
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
 import requests
+
 from app.agent_layer.mcp_server import _calculate_congress_resources, _send_intent
+
 
 def test_calculate_congress_resources_high():
     for k in ["alto", "high", ">500", "1000"]:
@@ -23,9 +26,9 @@ def test_send_intent_success(mock_post):
     mock_response = Mock()
     mock_response.json.return_value = {"status": "ok"}
     mock_post.return_value = mock_response
-    
+
     res = _send_intent({"test": "data"})
-    
+
     assert res == {"status": "ok"}
     mock_post.assert_called_once_with(
         "http://localhost:8000/mcp/intent",
@@ -39,6 +42,6 @@ def test_send_intent_error(mock_post):
     mock_response = Mock()
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("Error 500")
     mock_post.return_value = mock_response
-    
+
     with pytest.raises(requests.exceptions.HTTPError):
         _send_intent({"test": "data"})
