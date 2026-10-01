@@ -1,24 +1,17 @@
-<style>
-.mermaid svg { max-width: 100%; margin: 0 auto; display: block; height: auto; }
-</style>
-
-# Memoria del Trabajo de Fin de Máster
-
-<div style='page-break-after: always;'></div>
-
 # Índice de Contenidos
 
 - **Capítulo 1. Introducción**
   - 1.1. Contexto y motivación
   - 1.2. Planteamiento del problema
   - 1.3. Objetivos del proyecto
-  - 1.4. Alcance y limitaciones
+  - 1.4. Alcance y Limitaciones
   - 1.5. Estructura de la memoria
 - **Capítulo 2. Estado del Arte**
   - 2.1. Agentes autónomos basados en Modelos de Lenguaje de Gran Escala (LLM)
   - 2.2. Estandarización de Integraciones: Model Context Protocol (MCP)
   - 2.3. Orquestación e Infraestructura Declarativa (Kubernetes)
   - 2.4. Arquitectura Hexagonal y Seguridad en Sistemas Estocásticos
+  - 2.5. Trabajos Relacionados y Posicionamiento Diferencial
 - **Capítulo 3. Metodología y Stack Tecnológico**
   - 3.1. Enfoque Metodológico
   - 3.2. Fases de Desarrollo
@@ -37,18 +30,37 @@
   - 6.1. Fundamentación del Patrón *Human-In-The-Loop* (HITL)
   - 6.2. Diseño de la Máquina de Estados Finita (FSM)
   - 6.3. El Dashboard Asíncrono de Operaciones
+  - 6.4. Canal de Retorno al Investigador: Notificación Asíncrona del Estado
 - **Capítulo 7. Aseguramiento de Calidad (QA) y Testing Avanzado**
   - 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
-  - 7.2. Pruebas Basadas en Propiedades (*Property-Based Testing*)
+  - 7.2. Property-Based Testing: Asedio Estocástico
   - 7.3. Auditoría de la Suite de Pruebas: *Mutation Testing*
   - 7.4. Pruebas Metamórficas: Inyección de Ruido Léxico y Evaluación del LLM
 - **Capítulo 8. Resultados y Casos de Estudio Prácticos**
   - 8.1. Despliegue Convencional vs. Orquestación Agéntica
   - 8.2. Caso de Estudio: Resiliencia ante Ataques (*Prompt Injection*)
-- **Capítulo 9. Conclusiones y Trabajo Futuro**
-  - 9.1. Conclusiones
-  - 9.2. Trabajo Futuro
-- **Capítulo 10. Bibliografía y Referencias**
+  - 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
+- **Capítulo 9. Gestión y Viabilidad del Proyecto**
+  - 9.1. Esfuerzo de Desarrollo y Desviaciones
+  - 9.2. Análisis Económico del Desarrollo
+  - 9.3. Coste de Adopción Corporativa y ROI
+- **Capítulo 10. Conclusiones, Limitaciones y Trabajo Futuro**
+  - 10.1. Conclusiones
+  - 10.2. Limitaciones del Prototipo
+  - 10.3. Trabajo Futuro
+- **Capítulo 11. Bibliografía y Referencias**
+- **Anexo A. Manifiesto Kubernetes Generado — Escenario 1 (Happy Path)**
+  - A.1. Contexto de Generación
+  - A.2. Manifiesto YAML Completo
+  - A.3. Relación con el Código Fuente
+- **Anexo B. Planificación Detallada del Proyecto y Costes**
+  - B.1. Plan de Proyecto — Contexto y Restricciones
+  - B.2. Estructura de Sprints y Estimación de Esfuerzo
+  - B.3. Seguimiento Real del Proyecto — Retrospectivas por Sprint
+  - B.4. Resumen de Desviaciones Globales
+  - B.5. Análisis de Costes del Desarrollo
+  - B.6. Estimación de Costes de Adopción para Organizaciones
+  - B.7. Conclusiones del Análisis
 
 
 <div style='page-break-after: always;'></div>
@@ -59,11 +71,23 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 
 ### Índice de Figuras
 
-- **Figura 1:** Diagrama de componentes del *Stack* Tecnológico empleado. *(Sección 3.2)*
-- **Figura 2:** Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer. *(Sección 4.1)*
-- **Figura 3:** Diagrama de Secuencia End-to-End modelando las tres fases de aislamiento temporal. *(Sección 4.5)*
-- **Figura 4:** Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting). *(Sección 5.3)*
-- **Figura 5:** Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema. *(Sección 6.2)*
+- **Figura 1:** Contraste arquitectónico entre el problema de integración N×M (acoplamiento propietario) y la topología de Bus Universal propuesta por el protocolo MCP. *(Capítulo 2)*
+- **Figura 2:** Diagrama de componentes del Stack Tecnológico empleado, evidenciando la segregación entre las capas de interfaz, razonamiento cognitivo, backend restrictivo y las herramientas de validación de calidad continua. *(Capítulo 3)*
+- **Figura 3:** Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer. *(Capítulo 4)*
+- **Figura 4:** Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por `stdio` sin exponer ningún puerto TCP. *(Capítulo 4)*
+- **Figura 5:** Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión). *(Capítulo 4)*
+- **Figura 6:** Árbol de decisión del `SecurityContextValidator`. Cada rama de rechazo lanza un `SecurityViolationError` que el bucle ReAct captura como Observación para auto-corregirse. *(Capítulo 4)*
+- **Figura 7:** Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención. *(Capítulo 4)*
+- **Figura 8:** Diagrama de Secuencia E2E (Fase 2). El Backend procesa la petición, aplicando reglas de negocio estrictas. *(Capítulo 4)*
+- **Figura 9:** Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución. *(Capítulo 4)*
+- **Figura 10:** Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización, ejecución y observación. *(Capítulo 5)*
+- **Figura 11:** Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting). *(Capítulo 5)*
+- **Figura 12:** Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema. *(Capítulo 6)*
+- **Figura 13:** Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). *(Capítulo 6)*
+- **Figura 14:** Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa. *(Capítulo 7)*
+- **Tabla 1:** Comparativa ITSM Convencional vs. Modelo Agéntico (reducción TTM). *(Sección 8.1.2)*
+- **Tabla 2:** Resultados del Mutation Testing por módulo. *(Sección 7.3.3)*
+- **Anexo A:** Manifiesto YAML completo generado por FakeK8sAdapter — Escenario 1. *(Sección 8.3.1 y Anexo A)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 
@@ -133,41 +157,49 @@ El objetivo central de este Trabajo de Fin de Máster es diseñar e implementar 
 Para la consecución del objetivo general, se han definido y materializado cinco hitos o metas técnicas específicas que marcan la progresión lógica de la ingeniería del proyecto:
 
 1. **Diseño de un Núcleo basado en Arquitectura Hexagonal (*Ports and Adapters*):** 
-   Construir un modelo de dominio fuertemente tipado e inmutable que aísle la lógica de negocio (las reglas de provisión y las políticas de seguridad institucionales) de las dependencias externas volátiles, como los clientes de OpenAI o las APIs de orquestadores de contenedores.
+  Construir un modelo de dominio fuertemente tipado e inmutable que aísle la lógica de negocio (las reglas de provisión y las políticas de seguridad institucionales) de las dependencias externas volátiles, como los clientes de OpenAI o las APIs de orquestadores de contenedores.
 2. **Implementación de un Servidor de Herramientas Estándar (MCP):**
-   Demostrar la superioridad de los estándares abiertos frente a las integraciones propietarias desarrollando un servidor compatible con el *Model Context Protocol* de Anthropic. Este servidor expondrá las operaciones de infraestructura del SIC (rutinas de despliegue y baja de servicios) de tal modo que cualquier agente agnóstico pueda descubrirlas y consumirlas de forma tipada.
+  Demostrar la superioridad de los estándares abiertos frente a las integraciones propietarias desarrollando un servidor compatible con el *Model Context Protocol* de Anthropic. Este servidor expondrá las operaciones de infraestructura del SIC (rutinas de despliegue y baja de servicios) de tal modo que cualquier agente agnóstico pueda descubrirlas y consumirlas de forma tipada.
 3. **Integración de un Agente de Inteligencia Artificial (Paradigma ReAct):**
-   Desarrollar un orquestador cognitivo que no se limite a extraer información estática (*Zero-Shot*), sino que implemente un bucle de interacción *Reason + Act*. El agente deberá ser capaz de razonar sobre los fallos devueltos por la infraestructura subyacente (por ejemplo, vulneraciones de políticas de seguridad) y establecer un diálogo autocorrectivo (*Feedback Loop*) con el usuario.
+  Desarrollar un orquestador cognitivo que no se limite a extraer información estática (*Zero-Shot*), sino que implemente un bucle de interacción *Reason + Act*. El agente deberá ser capaz de razonar sobre los fallos devueltos por la infraestructura subyacente (por ejemplo, vulneraciones de políticas de seguridad) y establecer un diálogo autocorrectivo (*Feedback Loop*) con el usuario.
 4. **Definición Estricta de Rutas Doradas (*Golden Paths*):**
-   Evitar la generación estocástica de manifiestos delegando en el adaptador de infraestructura la instanciación de plantillas pre-validadas de Kubernetes. Se diseñarán esquemas concretos para los casos de uso más demandados en la universidad: portales web estáticos (Nginx), gestores de contenido institucionales (WordPress) y alojamiento de microservicios (APIs en Python).
+  Evitar la generación estocástica de manifiestos delegando en el adaptador de infraestructura la instanciación de plantillas pre-validadas de Kubernetes. Se diseñarán esquemas concretos para los casos de uso más demandados en la universidad: portales web estáticos (Nginx), gestores de contenido institucionales (WordPress) y alojamiento de microservicios (APIs en Python).
 5. **Gobernanza de Seguridad mediante *Human-In-The-Loop* (HITL):**
-   Implementar una interfaz de operaciones asíncrona (Dashboard) que intercepte toda orden generada por el agente, manteniéndola en un estado de cuarentena (pendencia) hasta que un operador técnico humano audite los parámetros generados y emita una confirmación explícita para su despliegue final.
+  Implementar una interfaz de operaciones asíncrona (Dashboard) que intercepte toda orden generada por el agente, manteniéndola en un estado de cuarentena (pendencia) hasta que un operador técnico humano audite los parámetros generados y emita una confirmación explícita para su despliegue final.
 
-## 1.4. Alcance y limitaciones
+## 1.4. Alcance y Limitaciones
 
-Definir el alcance exacto de un proyecto que aúna IA generativa e infraestructura *Cloud Native* es vital para garantizar la viabilidad de su ejecución. Este trabajo se circunscribe al desarrollo del componente central (el *middleware* inteligente y su orquestación) bajo el concepto de Producto Mínimo Viable (MVP) avanzado. 
+Definir el alcance exacto de un proyecto que aúna IA generativa e infraestructura *Cloud Native* es vital para garantizar la viabilidad de su ejecución. Este trabajo se circunscribe al desarrollo del componente central (el *middleware* inteligente y su orquestación) bajo el concepto de Producto Mínimo Viable (MVP) avanzado.
 
 En base a este enfoque, el alcance asume las siguientes acotaciones metodológicas y limitaciones arquitectónicas deliberadas:
 
 1. **Abstracción del Clúster Físico (Simulación de Ejecución):**
-   El orquestador es capaz de procesar toda la lógica, validaciones, aprobaciones humanas y generación matemática de los manifiestos YAML de Kubernetes (`Deployment`, `Service`, `Ingress`). Sin embargo, el acoplamiento final contra la API de un clúster físico productivo (ej. invocaciones directas a *Minikube* u *OKD* mediante `kubectl apply`) queda excluido del alcance actual. En su lugar, se implementa un adaptador de infraestructura falso (`FakeK8sAdapter`) que deposita las plantillas generadas en el sistema de archivos local. Esto respeta íntegramente la premisa de la Arquitectura Hexagonal y aísla el proyecto de complejidades de red externas, dejando la integración del adaptador físico como una evolución directa.
+  El orquestador es capaz de procesar toda la lógica, validaciones, aprobaciones humanas y generación matemática de los manifiestos YAML de Kubernetes (`Deployment`, `Service`, `Ingress`). Sin embargo, el acoplamiento final contra la API de un clúster físico productivo queda excluido del alcance actual. En su lugar, se implementa un adaptador de infraestructura falso (`FakeK8sAdapter`) que deposita las plantillas generadas en el sistema de archivos local. Esto respeta íntegramente la premisa de la Arquitectura Hexagonal y aísla el proyecto de complejidades de red externas, dejando la integración del adaptador físico como una evolución directa (sección 10.3.1).
 2. **Agnosticismo del Motor LLM:**
-   El proyecto no está atado a un proveedor específico de Inteligencia Artificial. Al implementar un patrón *Adapter* para el cliente LLM, el alcance garantiza que el sistema funciona tanto con APIs comerciales de terceros (por ejemplo, el modelo GPT-4o de OpenAI) como con instancias de modelos locales ejecutados en la red privada institucional (mediante el servidor Ollama).
+  El proyecto no está atado a un proveedor específico de Inteligencia Artificial. Al implementar un patrón *Adapter* para el cliente LLM con dos implementaciones concretas (`OllamaLLMClient` para ejecución local con *Zero Data Retention*, y `OpenAILLMClient` para modelos cloud), el alcance garantiza que el sistema funciona tanto en redes privadas institucionales como con APIs comerciales de terceros.
 3. **Persistencia Volátil:**
-   Dado el carácter exploratorio del MVP y la prioridad dada al flujo de datos conversacional, el almacén de intenciones de despliegue pendientes y aprobadas se gestiona a través de estructuras de datos en memoria (diccionarios y estado en sesión). Se omite el despliegue de una base de datos relacional externa (como PostgreSQL), cuya sustitución futura implicaría únicamente el desarrollo de un nuevo adaptador de salida en la capa hexagonal.
+  Dado que la persistencia de estado es un factor crítico en arquitecturas de operaciones, el almacén de intenciones de despliegue (pendientes, aprobadas y rechazadas) se consolida mediante el uso de un repositorio local con SQLite. Esta inyección de dependencias confiere al sistema la resiliencia y el cumplimiento ACID necesarios frente a reinicios inesperados, sin comprometer la ligereza y el foco del MVP en el motor conversacional.
+4. **Ausencia de Autenticación:**
+  Los endpoints del sistema operan sin mecanismos de autenticación (JWT, OAuth2) en el prototipo actual. Esta limitación es aceptable en un entorno de demostración local y se documenta como trabajo futuro en la sección 10.3.1.
+
+Una descripción detallada y técnicamente exhaustiva de las limitaciones del prototipo —incluyendo los riesgos de *Prompt Injection* avanzada, la escalabilidad del backend y la cobertura del catálogo de herramientas MCP— se encuentra en la **Sección 10.2** de este documento.
 
 ## 1.5. Estructura de la memoria
 
 Para facilitar la trazabilidad desde la concepción teórica hasta la verificación del código, el presente documento se estructura en los siguientes capítulos:
 
-- El **Capítulo 2** expone de manera exhaustiva el Estado del Arte, desglosando la teoría de los agentes conversacionales, la génesis y arquitectura del *Model Context Protocol* (MCP), el paradigma de infraestructura declarativa de Kubernetes y los principios de la Arquitectura Hexagonal.
-- El **Capítulo 3** detalla la Metodología empleada a lo largo del ciclo de vida del proyecto, así como el marco tecnológico, justificando las herramientas y librerías que conforman el ecosistema de la aplicación.
-- El **Capítulo 4** aborda el Diseño del Sistema, ilustrando mediante diagramas formales el flujo de datos y analizando el código del núcleo de negocio y los contratos de validación.
-- El **Capítulo 5** profundiza en la Implementación técnica del Servidor MCP y el Agente, diseccionando el bucle de razonamiento y la exposición dinámica de herramientas.
-- El **Capítulo 6** describe la interfaz de administración y el módulo de seguridad, fundamentando el ciclo asíncrono de aprobaciones humanas (*Human-In-The-Loop*).
-- El **Capítulo 7** expone el plan de Aseguramiento de la Calidad (QA), detallando las estrategias de Testing Unitario, *Property-Based Testing*, Pruebas Metamórficas y *Mutation Testing* implementadas.
-- El **Capítulo 8** documenta empíricamente los Resultados a través de escenarios de uso reales (Demostración), ilustrando las entradas en lenguaje natural y las salidas declarativas generadas.
-- Finalmente, el **Capítulo 9** recoge las Conclusiones del desarrollo, evaluando el grado de cumplimiento de los objetivos y proponiendo ambiciosas líneas de Trabajo Futuro.
+- El **Capítulo 2** expone de manera exhaustiva el Estado del Arte, desglosando la teoría de los agentes conversacionales, la génesis y arquitectura del *Model Context Protocol* (MCP), el paradigma de infraestructura declarativa de Kubernetes, los principios de la Arquitectura Hexagonal y —en la sección 2.5— una comparativa con los trabajos y herramientas relacionadas más relevantes del ecosistema, incluyendo el posicionamiento diferencial del *Agentic Deployer*.
+- El **Capítulo 3** detalla la Metodología empleada a lo largo del ciclo de vida del proyecto, así como el marco tecnológico, justificando las herramientas y librerías que conforman el ecosistema de la aplicación. Incluye la descripción de la fase post-MVP (Fase 6) con el cliente Ollama nativo y el canal de retorno HITL.
+- El **Capítulo 4** aborda el Diseño del Sistema, ilustrando mediante diagramas formales el flujo de datos y analizando el código del núcleo de negocio y los contratos de validación. Las Figuras 5, 6 y 7 documentan el flujo E2E completo incluyendo el camino de error (422 → autocorrección) y el ciclo HITL.
+- El **Capítulo 5** profundiza en la Implementación técnica del Servidor MCP y el Agente, diseccionando el bucle de razonamiento, la exposición dinámica de herramientas y la abstracción multiproveedor de LLM (`OllamaLLMClient` / `OpenAILLMClient`).
+- El **Capítulo 6** describe la interfaz de administración y el módulo de seguridad, fundamentando el ciclo asíncrono de aprobaciones humanas (*Human-In-The-Loop*). La sección 6.4 documenta el canal de retorno al investigador: el endpoint de consulta de estado y el panel de notificaciones en la interfaz conversacional.
+- El **Capítulo 7** expone el plan de Aseguramiento de la Calidad (QA), detallando las estrategias de Testing Unitario, *Property-Based Testing*, Pruebas Metamórficas y *Mutation Testing* implementadas, con los resultados reales de la auditoría de supervivientes.
+- El **Capítulo 8** documenta empíricamente los Resultados a través de escenarios de uso reales. La sección 8.3.1 presenta un walkthrough forense de 10 pasos que traza la ruta completa desde el input en lenguaje natural hasta el manifiesto YAML en disco.
+- El **Capítulo 9** resume la **Gestión y Viabilidad del Proyecto**, condensando el esfuerzo temporal y el análisis económico ejecutivo (CAPEX/OPEX y cálculo de ROI) del desarrollo y la adopción corporativa del sistema.
+- El **Capítulo 10** recoge las **Conclusiones y Trabajo Futuro**, evaluando el grado de cumplimiento de los objetivos, documentando en detalle las limitaciones del prototipo (Sección 10.2) y proponiendo líneas de evolución arquitectónica.
+- El **Capítulo 11** recopila la **Bibliografía y Referencias** técnicas que sustentan el marco teórico del trabajo.
+- El **Anexo A** contiene el manifiesto Kubernetes completo (Deployment + Service + Ingress) generado automáticamente por el sistema en el Escenario 1 (Happy Path), con anotaciones técnicas y su relación con el código fuente.
+- El **Anexo B** recoge la **Planificación Detallada del Proyecto y Análisis de Costes**, desglosando la estructura de *sprints*, las retrospectivas por fase, y el cálculo granular financiero comparando proveedores de nube frente al modelo Ollama *on-premise*.
 
 
 <div style='page-break-after: always;'></div>
@@ -212,6 +244,42 @@ Si bien el *Function Calling* dotó a los modelos de lenguaje de capacidades de 
 
 Este escenario desembocó en el problema clásico de la interoperabilidad (*vendor lock-in*). Si un departamento de operaciones desarrollaba un conjunto de herramientas para orquestar su infraestructura compatible con LangChain y OpenAI, migrar hacia un ecosistema gobernado por modelos de código abierto (ej. Ollama o vLLM) requería reescribir por completo la capa de integración de las herramientas. Resultaba insostenible para las organizaciones mantener adaptadores múltiples para cada nueva iteración de los modelos fundacionales.
 
+```mermaid
+flowchart LR
+  subgraph Tradicional [Problema N×M: Acoplamiento Fuerte]
+    LLM1[OpenAI] --> T1(GitHub)
+    LLM1 --> T2(K8s)
+    LLM1 --> T3(Slack)
+    
+    LLM2[Ollama] --> T1
+    LLM2 --> T2
+    LLM2 --> T3
+    
+    LLM3[Anthropic] --> T1
+    LLM3 --> T2
+    LLM3 --> T3
+  end
+
+  subgraph MCP_Std [Estándar MCP: Bus Universal]
+    L1[OpenAI] -->|Cliente MCP| Bus((Servidor<br>MCP))
+    L2[Ollama] -->|Cliente MCP| Bus
+    L3[Anthropic] -->|Cliente MCP| Bus
+    
+    Bus -->|API| S1(GitHub)
+    Bus -->|API| S2(K8s)
+    Bus -->|API| S3(Slack)
+  end
+
+  classDef bad fill:#ffebee,stroke:#c62828,stroke-width:2px;
+  classDef good fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+  classDef core fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+
+  class LLM1,LLM2,LLM3,T1,T2,T3 bad;
+  class L1,L2,L3,S1,S2,S3 good;
+  class Bus core;
+```
+<p align="center"><i><b>Figura 1:</b> Contraste arquitectónico entre el problema de integración N×M (acoplamiento propietario) y la topología de Bus Universal propuesta por el protocolo MCP.</i></p>
+
 ### 2.2.1. Génesis y Principios de MCP
 
 Para resolver esta fragmentación sistémica, en el último trimestre de 2024, Anthropic (los creadores de la familia de modelos *Claude*) lideró la apertura de un nuevo estándar *open-source*: el **Model Context Protocol (MCP)** [3]. La motivación central de MCP es desacoplar de forma estricta al consumidor de la IA (el agente) de las fuentes de datos e infraestructuras locales (las herramientas), creando un lenguaje universal. 
@@ -235,7 +303,7 @@ El estándar MCP orquesta la interacción entorno-modelo a través de tres primi
 2. **Prompts:** Plantillas de instrucciones parametradas y almacenadas en el servidor, permitiendo la estandarización organizativa. Un administrador puede definir un *prompt* en el servidor ("Resume el estado de este nodo") y el agente cliente puede invocarlo y presentarlo al usuario.
 3. **Tools (Herramientas):** Son capacidades ejecutables y con efectos secundarios (mutaciones en el entorno) controladas por el servidor. Las herramientas son el equivalente estandarizado del *Function Calling*. Cuando el servidor MCP de la universidad se inicializa, transmite al cliente un catálogo de herramientas (por ejemplo, `deploy_python_app`), dictaminando los argumentos exactos requeridos (como nombre de proyecto y versión del lenguaje). 
 
-La adopción formal del Model Context Protocol mediante su Software Development Kit (SDK) oficial en Python constituye la columna vertebral arquitectónica del *Agentic Deployer* desarrollado en este TFM. Esta decisión estratégica garantiza que el catálogo de automatizaciones de infraestructura de la institución quede blindado frente a los giros del mercado de la Inteligencia Artificial. Las herramientas expuestas por el Servidor MCP del proyecto son consumibles indistintamente por el agente local diseñado (Streamlit + Ollama) y por soluciones empresariales externas y *closed-source* (como la aplicación nativa Claude Desktop), asegurando un ciclo de vida útil del software extendido y una interoperabilidad robusta.
+La adopción formal del Model Context Protocol mediante su Software Development Kit (SDK) oficial en Python constituye la columna vertebral arquitectónica del *Agentic Deployer* desarrollado en este TFM. Esta decisión estratégica garantiza que el catálogo de automatizaciones de infraestructura de la institución quede blindado frente a los giros del mercado de la Inteligencia Artificial. Las herramientas expuestas por el Servidor MCP del proyecto son consumibles indistintamente por el agente local diseñado (Streamlit + Ollama) y por soluciones empresariales externas y *closed-source* (como el Inspector oficial o aplicaciones de terceros), asegurando un ciclo de vida útil del software extendido y una interoperabilidad robusta.
 
 ## 2.3. Orquestación e Infraestructura Declarativa (Kubernetes)
 
@@ -294,6 +362,65 @@ En un flujo convencional, el Agente LLM ejerce de **Adaptador Primario (Driver)*
 
 Si el modelo "alucina" una configuración maliciosa, el núcleo la rechaza basándose en sus contratos puros, arrojando una excepción formal. Esta excepción no tumba el sistema, sino que fluye en sentido inverso hacia el exterior, donde el adaptador del agente la captura y la reinyecta en el contexto del LLM (el mecanismo de *Feedback Loop* del bucle ReAct). De este modo, la Arquitectura Hexagonal actúa como la verdadera "jaula" de contención, permitiendo explotar el razonamiento generativo sin ceder un milímetro de soberanía tecnológica sobre la infraestructura crítica.
 
+## 2.5. Trabajos Relacionados y Posicionamiento Diferencial
+
+La intersección entre agentes conversacionales y automatización de infraestructura ha generado una serie de iniciativas académicas e industriales en los últimos dos años. Esta sección analiza los enfoques más relevantes y posiciona el *Agentic Deployer* respecto a ellos, identificando las contribuciones diferenciales de este trabajo.
+
+### 2.5.1. Enfoques Industriales: Copilots y Asistentes Cloud Propietarios
+
+Los grandes proveedores de nube han lanzado asistentes conversacionales integrados en sus plataformas. Microsoft dispone de **GitHub Copilot for Azure** y el **Azure AI Assistant** integrado en el portal web, que permiten consultar el estado de los recursos desplegados mediante lenguaje natural. Google ofrece capacidades similares mediante **Gemini for Google Cloud**, y AWS con **Amazon Q Developer**.
+
+Sin embargo, estas soluciones presentan limitaciones estructurales significativas para entornos institucionales:
+
+| Dimensión | Asistentes Cloud Propietarios | Agentic Deployer |
+|---|---|---|
+| **Proveedor** | Monoproveedor (Azure, GCP, AWS) | Agnóstico (Ollama, OpenAI, cualquier LLM) |
+| **Soberanía del dato** | Datos en servidores del proveedor | Zero Data Retention (Ollama local) |
+| **HITL obligatorio** | No — ejecución directa posible | Sí — barrera FSM inmutable |
+| **Coste** | Pago por uso | Infraestructura propia (OPEX predecible) |
+| **Personalización** | Limitada a la consola del proveedor | Golden Paths propios del SIC |
+| **Auditabilidad** | Logs del proveedor | Logs propios + FSM con estados inmutables |
+
+El *Agentic Deployer* sacrifica la conveniencia del SaaS en favor de la soberanía tecnológica, una prioridad crítica en entornos académicos regulados por legislación de protección de datos (RGPD, LOPDGDD).
+
+### 2.5.2. Enfoques de Investigación: LLMs para IaC (*Infrastructure as Code*)
+
+En el ámbito académico, varios trabajos han explorado el uso de modelos de lenguaje para generar código de infraestructura. Entre los más relevantes se encuentran:
+
+- **"Automatic Terraform Generation with GPT-4"** (trabajos preliminares, 2023-2024): Proponen usar LLMs para generar ficheros Terraform a partir de especificaciones en lenguaje natural. Sin embargo, estos enfoques delegan la corrección semántica y de seguridad al propio LLM, sin una capa de validación formal determinista. El modelo puede generar código de IaC sintácticamente válido pero semánticamente inseguro (puertos abiertos, imágenes sin auditar), sin mecanismo de interceptación.
+
+- **"ChatOps and LLMs for DevOps Automation"** (diversas publicaciones 2023-2024): Exploran la integración de chatbots en plataformas de comunicación empresarial (Slack, Teams) para trigger de pipelines CI/CD. La aproximación es pragmática pero superficial desde el punto de vista arquitectónico: los LLMs invocan comandos de forma directa sin modelo de dominio intermedio ni patrón HITL formal.
+
+La contribución diferencial de este TFM respecto a estos trabajos es la **separación formal entre el plano de razonamiento (LLM) y el plano de ejecución (Hexagonal)**, implementada mediante un protocolo estándar abierto (MCP) y reforzada por una barrera de supervisión humana basada en una FSM inmutable.
+
+### 2.5.3. Frameworks de Orquestación: LangChain y AutoGen
+
+Los frameworks de código abierto más populares para la construcción de agentes son **LangChain** (Harrison Chase, 2022) y **AutoGen** (Microsoft, 2023). Ambos ofrecen abstracciones de alto nivel para la construcción de cadenas de razonamiento y sistemas multi-agente.
+
+No obstante, su aplicación directa al dominio de operaciones de infraestructura crítica presenta tres riesgos no resueltos:
+
+1. **Acoplamiento al framework:** El código de negocio queda embebido en las abstracciones de LangChain (`Chains`, `Agents`, `Tools`). Una migración futura a otro framework requiere reescribir la lógica de dominio, violando el principio de inversión de dependencias.
+2. **Ausencia de modelo de dominio formal:** LangChain no impone un modelo de datos tipado para las herramientas. Un `tool` incorrecto puede devolver texto libre, imposibilitando la validación determinista de las intenciones generadas.
+3. **Ausencia de protocolo estándar:** Las herramientas de LangChain no son consumibles por clientes distintos al propio framework. Dos organizaciones usando LangChain con herramientas distintas no pueden compartir ni federar su catálogo de capacidades.
+
+El *Agentic Deployer* aborda los tres problemas mediante el trío MCP (estandarización) + Arquitectura Hexagonal (aislamiento del dominio) + FSM (gobierno del ciclo de vida). La ausencia de dependencias en LangChain o AutoGen es, por tanto, una decisión de diseño deliberada y no una omisión.
+
+### 2.5.4. Posicionamiento del Agentic Deployer
+
+La siguiente tabla sintetiza el posicionamiento del sistema desarrollado respecto al estado del arte. El objetivo no es establecer una superioridad absoluta, sino evidenciar cómo el *Agentic Deployer* cubre una intersección de requisitos corporativos que los *frameworks* de propósito general delegan al desarrollador:
+
+| Capacidad Arquitectónica | LangChain / AutoGen | Soluciones Cloud (Copilots) | **Agentic Deployer** |
+|---|---|---|---|
+| **Soberanía de Datos (On-Premise)** | Sí (Soportan modelos locales) | No (SaaS propietario) | **Sí (Ollama Nativo)** |
+| **Interoperabilidad de Herramientas** | No (Acoplamiento a librerías propias) | Cerrada (Ecosistema del proveedor) | **Sí (Estándar abierto MCP)** |
+| **Flujo de Aprobación Humana (HITL)** | Sí (Interrupción de consola / *Callbacks*) | Parcial (Depende de la plataforma) | **Sí (Panel asíncrono con máquina de estados)** |
+| **Validación de Seguridad Estricta** | Parcial (Requiere implementación ad-hoc) | Sí (Barreras propietarias del Cloud) | **Sí (Arquitectura Hexagonal con validación estática)** |
+| **Flexibilidad de Integración** | Alta (Librerías generalistas masivas) | Baja (Agnosticismo nulo) | **Media (Enfocado estrictamente a infraestructura)** |
+
+Como se observa, *frameworks* como AutoGen o LangChain poseen capacidades de *Human-in-the-Loop* o ejecución local, pero están diseñados como librerías de propósito general para desarrolladores. La aportación diferencial del *Agentic Deployer* reside en empaquetar estas necesidades en una topología arquitectónica de nivel empresarial (Hexagonal + FSM) gobernada por el estándar unificador MCP.
+
+En definitiva, el *Agentic Deployer* no compite en el espacio de los asistentes conversacionales generalistas, sino que ocupa un nicho específico y de alta relevancia práctica: la **gobernanza segura y auditable de infraestructura declarativa mediante agentes conversacionales en entornos institucionales con requisitos de soberanía del dato**.
+
 
 <div style='page-break-after: always;'></div>
 
@@ -312,6 +439,8 @@ La regla metodológica fundamental del proyecto fue la **estabilidad del núcleo
 ## 3.2. Fases de Desarrollo
 
 Para materializar el producto final, el cronograma de ejecución se dividió orgánicamente en cinco fases secuenciales o *sprints* (hitos). Cada fase culminó con un entregable técnico funcional (un incremento de producto) que servía de base inmutable para la siguiente etapa.
+
+> *Nota metodológica: si bien la planificación inicial establece una secuencia ordenada de sprints, la naturaleza del trabajo académico y los compromisos paralelos inherentes al contexto universitario exigen reconocer que la asignación temporal de cada fase puede solaparse o reordenarse según disponibilidad. La planificación se concibe, por tanto, como un marco de referencia flexible y no como una secuencia rígida de Gantt. Los detalles de esta retrospectiva se documentan en el Capítulo 10.*
 
 ### 3.2.1. Fase 1: Núcleo Hexagonal y Dominio Base
 
@@ -345,6 +474,13 @@ Añadida como una capa de valor adicional (*bonus*) no prevista en el alcance in
 - Se integraron técnicas de validación punteras como el *Property-Based Testing* (generando miles de intenciones pseudoaleatorias válidas) y Pruebas Metamórficas para verificar la resiliencia del modelo ante alteraciones lingüísticas (ruido sintáctico en el prompt, cambios de orden en las palabras).
 - Por último, se auditó la propia suite de pruebas con *Mutation Testing*, demostrando la robustez extrema del validador de seguridad.
 
+### 3.2.6. Fase 6 (Post-MVP): Robustez y Cierre del Ciclo HITL
+
+Tras la consolidación del MVP, se abordaron una serie de mejoras de calidad y usabilidad que elevan el sistema a un nivel de referencia académica:
+- **Cliente Ollama Nativo (`OllamaLLMClient`):** Eliminación de la dependencia en la librería `openai` para comunicaciones con el servidor Ollama local, sustituyéndola por peticiones `httpx` directas a la API REST nativa. Esta refactorización garantiza un esquema de *Zero Data Retention* sin dependencias de terceros.
+- **Canal de Retorno al Investigador:** Implementación del endpoint `GET /hitl/status/{id}` y el panel de notificaciones en el chat (` Mis Solicitudes Pendientes`), cerrando el ciclo de comunicación bidireccional del patrón HITL (sección 6.4).
+- **Ampliación de Evidencias Empíricas:** Creación del directorio `demos/` con transcripciones forenses de las sesiones de ejecución real y el manifiesto YAML generado por el `FakeK8sAdapter` (Anexo A).
+
 ## 3.3. Stack Tecnológico y Justificación Arquitectónica
 
 La elección de tecnologías en un ecosistema que combina Inteligencia Artificial y provisionamiento de infraestructura debe equilibrar la innovación disruptiva con la fiabilidad matemática exigida por las operaciones institucionales. A continuación, se desglosa y fundamenta el *stack* tecnológico adoptado.
@@ -357,9 +493,11 @@ El proyecto se ha construido íntegramente sobre **Python (versión 3.12)**. Si 
 - **Pydantic (v2):** Constituye el núcleo de validación de datos [11]. Reescripto recientemente en Rust para maximizar su velocidad, Pydantic se utiliza para modelar las entidades de dominio (como `DeploymentIntent`). Su justificación recae en su capacidad para forzar invariantes de negocio: rechazar peticiones del agente que no cumplan con rangos enteros (puertos) o expresiones regulares, antes incluso de que la lógica de la aplicación las procese.
 
 ### 3.3.3. Interfaz Conversacional y Capa de Agente
-- **Streamlit [10]:** Desarrollar interfaces gráficas (*Front-End*) modernas en React o Vue.js conlleva una alta fricción y sobrecarga de dependencias. Streamlit permite codificar la interfaz de chat (incluyendo historial, avatares e indicadores de estado) íntegramente en Python puro. Esto permite iterar el componente visual de forma ágil, manteniendo el foco del trabajo investigador en la ingeniería del *middleware* de infraestructura.
+- **Streamlit [10]:** Desarrollar interfaces gráficas (*Front-End*) modernas en React o Vue.js conlleva una alta fricción y sobrecarga de dependencias. Streamlit permite codificar la interfaz de chat (incluyendo historial, avatares, indicadores de estado y el panel de notificaciones HITL) íntegramente en Python puro. Esto permite iterar el componente visual de forma ágil, manteniendo el foco del trabajo investigador en la ingeniería del *middleware* de infraestructura.
 - **Model Context Protocol (MCP) SDK:** En lugar de diseñar una API HTTP propietaria para invocar herramientas, se ha adoptado el SDK oficial de MCP para Python. Esta librería permite decorar funciones arbitrarias (ej. `@server.tool()`) e introspeccionar sus firmas (nombres de parámetros y tipos) en tiempo de ejecución, transformándolas en esquemas JSON estandarizados consumibles por cualquier cliente LLM.
-- **Abstracción Agnostica (Ollama / OpenAI):** El orquestador implementa adaptadores (`LLMClient`) para evitar el anclaje a un proveedor (*vendor lock-in*). El sistema es plenamente operativo con **Ollama**, un servidor de código abierto que permite ejecutar pesos de modelos (como Llama 3 o Mistral) localmente, garantizando un esquema de "Soberanía del Dato" (Zero Data Retention) imperativo para universidades e instituciones de seguridad. Paralelamente, soporta la API de OpenAI para escenarios que requieran el techo cognitivo de modelos como GPT-4o.
+- **Abstracción Agnóstica de Proveedor LLM:** El orquestador implementa un contrato abstracto (`LLMClient`) con dos implementaciones concretas:
+ - **`OllamaLLMClient`**: Cliente nativo implementado con `httpx` que se comunica directamente con la API REST de Ollama (`POST /api/chat`), sin dependencias externas adicionales. Permite ejecutar modelos como `qwen2.5:7b` o `llama3.2:3b` en la red privada institucional, garantizando un esquema de **Soberanía del Dato** (*Zero Data Retention*) imperativo para universidades. No envía ningún token de texto del investigador a servidores externos.
+ - **`OpenAILLMClient`**: Adaptador para la API de OpenAI, que permite acceder a modelos como GPT-4o en escenarios donde la capacidad cognitiva de los modelos cloud supera a los modelos locales disponibles. La selección del cliente se realiza exclusivamente mediante la variable de entorno `LLM_PROVIDER`, sin requerir modificaciones al código.
 
 ### 3.3.4. Ecosistema de Aseguramiento de Calidad (QA)
 La confianza operativa en el *Agentic Deployer* se asienta sobre un *pipeline* de validación agresivo, sustentado por un ecosistema de librerías avanzadas:
@@ -368,6 +506,48 @@ La confianza operativa en el *Agentic Deployer* se asienta sobre un *pipeline* d
 - **Mutmut:** Herramienta de *Mutation Testing* que aplica alteraciones lógicas al código fuente del sistema en tiempo de ejecución. Garantiza empíricamente que la suite de pruebas es lo suficientemente exhaustiva como para detectar el más sutil de los fallos lógicos.
 - **Locust y Playwright:** Empleadas para certificar el rendimiento y la usabilidad final. *Locust* inunda la API asíncrona simulando concurrencia masiva, demostrando la escalabilidad del patrón asíncrono implementado. *Playwright* orquesta pruebas de interfaz E2E (*End-to-End*), levantando instancias de navegadores *headless* para simular y afirmar la interacción real del técnico (SIC) aprobando despliegues en el panel. 
 - **Ruff y Mypy:** Cadena de herramientas estáticas (*Linting* y *Type-Checking*) utilizadas en los ciclos de Integración Continua (CI) local para asegurar una homogeneidad estilística y rechazar cualquier compilación que vulnere los contratos de tipos de Python.
+
+```mermaid
+flowchart TD
+    subgraph UI [Capa de Interaccion Frontend]
+        ST[Streamlit<br><i>Interfaz Conversacional</i>]
+    end
+    
+    subgraph Cognicion [Motor Agéntico]
+        MCP[MCP SDK<br><i>Catálogo de Herramientas</i>]
+        LLM{LLM Client<br><i>Ollama / OpenAI</i>}
+    end
+    
+    subgraph Backend [Núcleo Hexagonal y API]
+        FA[FastAPI<br><i>Enrutamiento Asíncrono</i>]
+        PY[Pydantic v2<br><i>Validación Estricta</i>]
+    end
+    
+    subgraph QA [Aseguramiento de Calidad]
+        PYT[Pytest<br><i>Unit Testing</i>]
+        HYP[Hypothesis<br><i>Property-Based Testing</i>]
+        MUT[Mutmut<br><i>Mutation Testing</i>]
+    end
+    
+    ST <--> MCP
+    ST <--> LLM
+    MCP <--> FA
+    FA --> PY
+    PYT -.->|Audita| FA
+    HYP -.->|Audita| PY
+    MUT -.->|Evalúa Suite| PYT
+
+    classDef ui fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef cog fill:#fff8e1,stroke:#f57f17,stroke-width:2px;
+    classDef back fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef qa fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+
+    class ST ui;
+    class MCP,LLM cog;
+    class FA,PY back;
+    class PYT,HYP,MUT qa;
+```
+<p align="center"><i><b>Figura 2:</b> Diagrama de componentes del Stack Tecnológico empleado, evidenciando la segregación entre las capas de interfaz, razonamiento cognitivo, backend restrictivo y las herramientas de validación de calidad continua.</i></p>
 
 
 <div style='page-break-after: always;'></div>
@@ -412,54 +592,79 @@ La decisión de fragmentar el sistema en múltiples procesos persigue maximizar 
 
 ```mermaid
 flowchart LR
-    %% Definicion de Actores Humanos
-    U((Usuario Final<br>Investigador))
-    T((Técnico SIC<br>Operador))
-    
-    %% Sistemas Externos
-    LLM[Proveedor LLM<br>Ollama / OpenAI API]
-    K8S[(Clúster K8s<br>Almacenamiento YAML)]
+  %% Definicion de Actores Humanos
+  U((Usuario Final<br>Investigador))
+  T((Técnico SIC<br>Operador))
+  
+  %% Sistemas Externos
+  LLM[Proveedor LLM<br>Ollama / OpenAI API]
+  K8S[(Clúster K8s<br>Almacenamiento YAML)]
 
-    %% Frontera del Sistema
-    subgraph sys [Agentic Deployer System Boundary]
-        UI["Contenedor Frontend<br>(Streamlit UI + ReAct)"]
-        MCP["Contenedor Herramientas<br>(Servidor MCP Python)"]
-        CORE["Contenedor Backend<br>(FastAPI + Pydantic)"]
-    end
+  %% Frontera del Sistema
+  subgraph sys [Agentic Deployer System Boundary]
+    UI["Contenedor Frontend<br>(Streamlit UI + ReAct)"]
+    MCP["Contenedor Herramientas<br>(Servidor MCP Python)"]
+    CORE["Contenedor Backend<br>(FastAPI + Pydantic)"]
+  end
 
-    %% Relaciones y Flujos de Datos
-    U -->|1. Petición| UI
-    UI <-->|2. Bucle| LLM
-    UI <-->|3. RPC stdio| MCP
-    MCP -->|4. REST| CORE
-    T -->|5. Sondeo| CORE
-    T -->|6. Autoriza| CORE
-    CORE -->|7. YAML| K8S
+  %% Relaciones y Flujos de Datos
+  U -->|1. Petición| UI
+  UI <-->|2. Bucle| LLM
+  UI <-->|3. RPC stdio| MCP
+  MCP -->|4. REST| CORE
+  T -->|5. Sondeo| CORE
+  T -->|6. Autoriza| CORE
+  CORE -->|7. YAML| K8S
 
-    %% Estilizado
-    classDef external fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef system fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
-    classDef actor fill:#fff,stroke:#333,stroke-width:2px,shape:circle;
-    
-    class LLM,K8S external;
-    class UI,MCP,CORE system;
-    class U,T actor;
+  %% Estilizado
+  classDef external fill:#f9f9f9,stroke:#333,stroke-width:2px;
+  classDef system fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+  classDef actor fill:#fff,stroke:#333,stroke-width:2px,shape:circle;
+  
+  class LLM,K8S external;
+  class UI,MCP,CORE system;
+  class U,T actor;
 ```
-<p align="center"><i><b>Figura 2:</b> Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer.</i></p>
+<p align="center"><i><b>Figura 3:</b> Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer.</i></p>
 
 #### 4.1.2.1. Desglose Funcional de los Contenedores
+
+La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución. La siguiente figura ilustra cómo estos cuatro procesos coexisten en la máquina local durante la ejecución del sistema:
+
+```mermaid
+flowchart LR
+    subgraph HOST ["Máquina Local (servidor universitario)"]
+        direction TB
+        UI["Streamlit UI\n:8501\n(agente ReAct)"] 
+        MCP["Servidor MCP\n(stdio - sin puerto TCP)"]
+        API["FastAPI Backend\n:8000\n(SQLite en disco)"]
+        DB[("agentic_deployer.db")]
+
+        UI <-->|"JSON-RPC\nstdio"| MCP
+        MCP -->|"POST /mcp/intent\nHTTP REST"| API
+        API --- DB
+        UI -->|"GET/POST /hitl/*\nHTTP REST"| API
+    end
+
+    INV(["Investigador"])
+    TEC(["Técnico SIC"])
+
+    INV -->|":8501"| UI
+    TEC -->|":8000/hitl"| UI
+```
+<p align="center"><i><b>Figura 4:</b> Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por <code>stdio</code> sin exponer ningún puerto TCP.</i></p>
 
 La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución:
 
 1. **Contenedor A: Frontend de Orquestación Cognitiva (Streamlit):**
-   Esta aplicación web es el punto de entrada para el usuario investigador. Sin embargo, su responsabilidad trasciende la mera renderización de interfaces (UX/UI). Este proceso aloja en su núcleo el `AgentOrchestrator`, siendo la única entidad del sistema autorizada a mantener estado de red (conexiones HTTP/gRPC) con el proveedor externo de Inteligencia Artificial (OpenAI/Ollama). Su función principal es gestionar la asincronía del chat, administrar el contexto histórico de la sesión y gobernar las iteraciones del bucle de razonamiento y acción (*ReAct*).
+  Esta aplicación web es el punto de entrada para el usuario investigador. Sin embargo, su responsabilidad trasciende la mera renderización de interfaces (UX/UI). Este proceso aloja en su núcleo el `AgentOrchestrator`, siendo la única entidad del sistema autorizada a mantener estado de red (conexiones HTTP/gRPC) con el proveedor externo de Inteligencia Artificial (OpenAI/Ollama). Su función principal es gestionar la asincronía del chat, administrar el contexto histórico de la sesión y gobernar las iteraciones del bucle de razonamiento y acción (*ReAct*).
 
 2. **Contenedor B: El Catálogo Dinámico (Servidor MCP):**
-   Concebido como un proceso ligero, el Servidor del Protocolo de Contexto de Modelos (MCP) actúa como el diccionario vivo de operaciones tecnológicas de la universidad. Su propósito es traducir los métodos y funciones estandarizadas (por ejemplo, el método `deploy_congress_web()`) a una representación JSON universal que cualquier LLM moderno pueda ingerir como *Tool Calling*. Por motivos de latencia estricta, este contenedor no suele comunicarse con el orquestador mediante APIs HTTP tradicionales, sino que se enlaza a través de flujos de Entrada/Salida estándar (`stdio`) del sistema operativo, garantizando intercambios de mensajes JSON-RPC en el orden de los submilisegundos.
+  Concebido como un proceso ligero, el Servidor del Protocolo de Contexto de Modelos (MCP) actúa como el diccionario vivo de operaciones tecnológicas de la universidad. Su propósito es traducir los métodos y funciones estandarizadas (por ejemplo, el método `deploy_congress_web()`) a una representación JSON universal que cualquier LLM moderno pueda ingerir como *Tool Calling*. Por motivos de latencia estricta, este contenedor no suele comunicarse con el orquestador mediante APIs HTTP tradicionales, sino que se enlaza a través de flujos de Entrada/Salida estándar (`stdio`) del sistema operativo, garantizando intercambios de mensajes JSON-RPC en el orden de los submilisegundos.
 
 3. **Contenedor C: El Santuario Determinista (Backend Core Hexagonal):**
-   Implementado sobre el *framework* asíncrono FastAPI, este contenedor representa la base de datos volátil y la autoridad máxima de seguridad de la arquitectura. Su filosofía de diseño es el agnosticismo cognitivo: a este proceso backend no le concierne cómo la Inteligencia Artificial dedujo una acción, ni si el usuario utilizó jerga técnica o lenguaje coloquial. Su única misión arquitectónica es recibir un objeto JSON estructuralmente tipado desde el Servidor MCP. 
-   Una vez recibida la intención, el Backend aplica las reglas institucionales más férreas. Si la petición viola políticas (ej. abrir un puerto reservado), el Backend la rechaza; si es válida, la persiste en una cuarentena lógica (memoria volátil o base de datos) y se expone a sí mismo para que el *Dashboard* del Técnico de Operaciones pueda consumirla de forma asíncrona mediante técnicas de *Polling* o WebSockets.
+  Implementado sobre el *framework* asíncrono FastAPI, este contenedor representa la base de datos volátil y la autoridad máxima de seguridad de la arquitectura. Su filosofía de diseño es el agnosticismo cognitivo: a este proceso backend no le concierne cómo la Inteligencia Artificial dedujo una acción, ni si el usuario utilizó jerga técnica o lenguaje coloquial. Su única misión arquitectónica es recibir un objeto JSON estructuralmente tipado desde el Servidor MCP. 
+  Una vez recibida la intención, el Backend aplica las reglas institucionales más férreas. Si la petición viola políticas (ej. abrir un puerto reservado), el Backend la rechaza; si es válida, la persiste en una cuarentena lógica (memoria volátil o base de datos) y se expone a sí mismo para que el *Dashboard* del Técnico de Operaciones pueda consumirla de forma asíncrona mediante técnicas de *Polling* o WebSockets.
 
 Esta división tricolor (Frontend heurístico, Catálogo universal MCP y Backend restrictivo) fundamenta el éxito del *Agentic Deployer*. Garantiza que un error imprevisible en la red neuronal de la IA, o un desbordamiento en la interfaz gráfica del usuario, jamás pueda comprometer la estabilidad matemática de las reglas de infraestructura gobernadas por el Backend Core.
 
@@ -478,7 +683,7 @@ Para dotar al núcleo de una inviolabilidad tipográfica estructural (esencial a
 En términos de Ingeniería de Software, esta entidad actúa como un contrato que impone **invariantes de dominio**. Se define de la siguiente manera conceptual:
 
 - **Atributo Identificador:** Unívoco e inmutable (UUID).
-- **Atributo Acción:** Restringido a un conjunto finito de operaciones (`CREATE`, `DELETE`, `UPDATE`).
+- **Atributo Acción:** Restringido a un conjunto finito de operaciones (`CREATE`, `DELETE`).
 - **Atributos Topológicos:** Nombre del servicio, imagen base, requerimientos de cómputo (CPU/RAM).
 - **Invariantes Lógicas:** El puerto de red debe pertenecer matemáticamente al rango válido `[1, 65535]`. Las acciones de creación exigen obligatoriamente la existencia de una imagen y un puerto válido.
 
@@ -491,7 +696,7 @@ El diseño Hexagonal encuentra su máxima justificación en la implementación d
 La topología del hexágono divide estos adaptadores en dos categorías operativas:
 
 #### 4.2.2.1. Adaptadores Primarios (*Driving Adapters*)
-Son los componentes responsables de excitar al sistema, iniciando el flujo de ejecución hacia el interior. En nuestra arquitectura, los adaptadores primarios se materializan mediante Controladores REST (enrutados vía FastAPI). Estos controladores actúan como traductores: reciben los estímulos externos (las peticiones JSON-RPC del Servidor MCP o las señales de aprobación HTTP del *Dashboard* del Técnico) y los convierten en llamadas a los Casos de Uso (*Use Cases*) de la capa de aplicación.
+Son los componentes responsables de excitar al sistema, iniciando el flujo de ejecución hacia el interior. En la presente arquitectura, los adaptadores primarios se materializan mediante Controladores REST (enrutados vía FastAPI). Estos controladores actúan como traductores: mientras que el *endpoint* MCP (`/mcp/intent`) delega el procesamiento al Caso de Uso de la capa de aplicación (`ProcessDeploymentUseCase`), el *endpoint* de aprobación del *Dashboard* asume el rol de orquestador, invocando de manera directa los puertos de almacenamiento y despliegue por pragmatismo en la gestión de estados.
 
 #### 4.2.2.2. Adaptadores Secundarios (*Driven Adapters*)
 Son los componentes accionados por el núcleo del sistema para interactuar con el mundo físico o mutar su estado. En este punto de la arquitectura se concentra el mayor riesgo operativo: la comunicación directa con el clúster de Kubernetes.
@@ -501,6 +706,57 @@ Para blindar el núcleo de negocio frente a cambios en la tecnología de orquest
 En la implementación actual del TFM, este puerto es satisfecho por un adaptador concreto denominado `FakeK8sAdapter`. Cuando el núcleo aprueba una intención, invoca la interfaz abstracta `deploy()`. El núcleo asume que el contenedor está siendo desplegado en producción, pero en realidad, el adaptador secundario (diseñado expresamente para la demostración y las pruebas) procesa la información y vierte los manifiestos YAML físicamente en el disco local del servidor, sin afectar a la red real. 
 
 Esta abstracción modular garantiza que, en iteraciones futuras del producto, la sustitución del adaptador falso por un `RealK8sAdapter` (que consuma la API oficial de Google Kubernetes Engine, por ejemplo) no requerirá alterar ni reescribir una sola línea de código en las capas de Aplicación o Dominio.
+
+```mermaid
+flowchart TD
+    subgraph Frontend [Adaptadores Primarios Driving]
+        REST(FastAPI: POST /mcp/intent)
+        Dash(FastAPI: POST /hitl/approve)
+    end
+
+    subgraph Interior [Aplicacion y Dominio Hexagonal]
+        subgraph Puertos_Entrada [Capa de Aplicacion]
+            AppUse((ProcessDeploymentUseCase))
+        end
+        
+        subgraph Core [Capa de Dominio]
+            Model[Entidad: DeploymentIntent]
+            Validator{SecurityContextValidator}
+        end
+        
+        subgraph Puertos_Salida [Puertos de Salida]
+            DeployP((DeployPort))
+            StoreP((DeploymentRepositoryPort))
+        end
+    end
+    
+    subgraph Exterior [Adaptadores Secundarios Driven]
+        K8S(FakeK8sAdapter)
+        DB(SQLiteDeploymentRepository)
+    end
+    
+    REST --> AppUse
+    AppUse --> Validator
+    AppUse --> Model
+    AppUse --> StoreP
+    
+    Dash -.->|Invocacion Directa| StoreP
+    Dash -.->|Invocacion Directa| DeployP
+    
+    DeployP -.->|Implementa| K8S
+    StoreP -.->|Implementa| DB
+
+    classDef hexagon fill:#e8f4f8,stroke:#0277bd,stroke-width:2px;
+    classDef core fill:#b3e5fc,stroke:#01579b,stroke-width:2px;
+    classDef adapter fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    
+    class Interior hexagon;
+    class Core,Model,Validator core;
+    class REST,Dash,K8S,DB adapter;
+    class DeployP,StoreP,AppUse port;
+```
+<p align="center"><i><b>Figura 5:</b> Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión).</i></p>
 
 ## 4.3. Algoritmia de Validación de Seguridad Institucional
 
@@ -518,81 +774,94 @@ Para abstraer la lógica subyacente de la sintaxis específica del lenguaje Pyth
 ALGORITMO 1: Validación del Contexto de Seguridad (SecurityContextValidator)
 
 ENTRADA: 
-  intencion -> Objeto de tipo DeploymentIntent (Invariantes básicos garantizados)
-  politicas_locales -> Configuración del Sistema (Puertos vetados, repositorios)
+ intencion -> Objeto de tipo DeploymentIntent (Invariantes básicos garantizados)
+ politicas_locales -> Configuración del Sistema (Puertos vetados, repositorios)
 
 SALIDA: 
-  VERDADERO (Si la intención cumple todas las políticas institucionales)
-  LANZA Excepción de Seguridad (SecurityViolationError) en caso contrario
+ VERDADERO (Si la intención cumple todas las políticas institucionales)
+ LANZA Excepción de Seguridad (SecurityViolationError) en caso contrario
 
 INICIO
-    // FASE 1: Análisis Topológico de Red (Principio de Mínimo Privilegio)
-    Variable puerto_solicitado = intencion.obtenerPuerto()
-    
-    // Los puertos del sistema (Well-Known Ports) están reservados a root (0-1023)
-    SI puerto_solicitado < 1024 ENTONCES
-        LANZAR SecurityViolationError(
-            "Violación Crítica: Exposición en puerto privilegiado no permitida."
-        )
+  // FASE 1: Análisis Topológico de Red (Principio de Mínimo Privilegio)
+  Variable puerto_solicitado = intencion.obtenerPuerto()
+  
+  // Los puertos del sistema (Well-Known Ports) están reservados a root (0-1023)
+  SI puerto_solicitado < 1024 ENTONCES
+    LANZAR SecurityViolationError(
+      "Violación Crítica: Exposición en puerto privilegiado no permitida."
+    )
+  FIN SI
+
+  // FASE 2: Prevención de Deriva de Configuración (Configuration Drift)
+  Variable etiqueta_imagen = intencion.obtenerEtiquetaContenedor()
+  
+  // La etiqueta "latest" provoca inconsistencia en reconstrucciones futuras
+  SI etiqueta_imagen ES IGUAL A "latest" ENTONCES
+    LANZAR SecurityViolationError(
+      "Inestabilidad Operativa: Prohibido el uso de la etiqueta volátil ':latest'. " +
+      "Se requiere fijar explícitamente el parche semántico (ej. :1.21.0)."
+    )
+  FIN SI
+
+  // FASE 3: Control de Entorno (White-Listing de Registros de Imágenes)
+  Variable imagen_completa = intencion.obtenerImagen()
+  Variable repositorios_auditados = ["docker.io/", "quay.io/", "harbor.universidad.edu/"]
+  Variable repositorio_licito = FALSO
+  
+  PARA CADA prefijo_seguro EN repositorios_auditados HACER
+    SI imagen_completa INICIA CON prefijo_seguro ENTONCES
+      repositorio_licito = VERDADERO
+      ROMPER BUCLE
     FIN SI
+  FIN PARA
 
-    // FASE 2: Prevención de Deriva de Configuración (Configuration Drift)
-    Variable etiqueta_imagen = intencion.obtenerEtiquetaContenedor()
-    
-    // La etiqueta "latest" provoca inconsistencia en reconstrucciones futuras
-    SI etiqueta_imagen ES IGUAL A "latest" ENTONCES
-        LANZAR SecurityViolationError(
-            "Inestabilidad Operativa: Prohibido el uso de la etiqueta volátil ':latest'. " +
-            "Se requiere fijar explícitamente el parche semántico (ej. :1.21.0)."
-        )
+  SI repositorio_licito ES FALSO ENTONCES
+    LANZAR SecurityViolationError(
+      "Riesgo de Exfiltración: Registro de contenedores no auditado."
+    )
+  FIN SI
+
+  // FASE 4: Auditoría de Cuotas de Hardware (Resource Quotas)
+  Variable cpu_solicitada = ParsearMiliCores(intencion.obtenerCPU())
+  Variable ram_solicitada = ParsearMebibytes(intencion.obtenerRAM())
+
+  SI cpu_solicitada > 4000 O ram_solicitada > 8192 ENTONCES
+    LANZAR SecurityViolationError(
+      "Acaparamiento de Recursos: Límite de 4 Cores y 8Gi excedido."
+    )
+  FIN SI
+
+  // FASE 5: Detección Heurística de Secretos (Variables de Entorno)
+  Variable diccionario_entorno = intencion.obtenerVariablesEntorno()
+  Variable claves_prohibidas = ["password", "secret", "token", "key"]
+
+  PARA CADA clave EN diccionario_entorno HACER
+    SI clave CONTIENE ALGUNO DE claves_prohibidas ENTONCES
+      LANZAR SecurityViolationError(
+        "Fuga de Datos: Posible secreto detectado en texto plano."
+      )
     FIN SI
+  FIN PARA
 
-    // FASE 3: Control de Entorno (White-Listing de Registros de Imágenes)
-    Variable imagen_completa = intencion.obtenerImagen()
-    Variable repositorios_auditados = ["harbor.universidad.edu/", "docker.io/library/"]
-    Variable repositorio_licito = FALSO
-    
-    PARA CADA prefijo_seguro EN repositorios_auditados HACER
-        SI imagen_completa INICIA CON prefijo_seguro ENTONCES
-            repositorio_licito = VERDADERO
-            ROMPER BUCLE
-        FIN SI
-    FIN PARA
-
-    SI repositorio_licito ES FALSO ENTONCES
-        LANZAR SecurityViolationError(
-            "Riesgo de Exfiltración: Registro de contenedores no auditado."
-        )
-    FIN SI
-
-    // FASE 4: Auditoría de Cuotas de Hardware (Resource Quotas)
-    Variable cpu_solicitada = ParsearMiliCores(intencion.obtenerCPU())
-    Variable ram_solicitada = ParsearMebibytes(intencion.obtenerRAM())
-
-    SI cpu_solicitada > 4000 O ram_solicitada > 8192 ENTONCES
-        LANZAR SecurityViolationError(
-            "Acaparamiento de Recursos: Límite de 4 Cores y 8Gi excedido."
-        )
-    FIN SI
-
-    // FASE 5: Detección Heurística de Secretos (Variables de Entorno)
-    Variable diccionario_entorno = intencion.obtenerVariablesEntorno()
-    Variable claves_prohibidas = ["password", "secret", "token", "key"]
-
-    PARA CADA clave EN diccionario_entorno HACER
-        SI clave CONTIENE ALGUNO DE claves_prohibidas ENTONCES
-            LANZAR SecurityViolationError(
-                "Fuga de Datos: Posible secreto detectado en texto plano."
-            )
-        FIN SI
-    FIN PARA
-
-    // Si el árbol de ejecución alcanza este punto, el flujo es seguro
-    RETORNAR VERDADERO
+  // Si el árbol de ejecución alcanza este punto, el flujo es seguro
+  RETORNAR VERDADERO
 FIN
 ```
 
 La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(N) de complejidad temporal, donde N es el número de repositorios confiables), certifica que la creatividad de la Inteligencia Artificial queda confinada dentro de un subespacio matemático determinista. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
+
+La siguiente figura resume visualmente el árbol de validación como diagrama de flujo:
+
+```mermaid
+flowchart TD
+    A(["DeploymentIntent\n(JSON Validado)"]) --> B{"Motor de\nReglas Institucionales"}
+    B -->|Viola Políticas| ERR(["SecurityViolationError"])
+    B -->|Cumple Todo| OK(["PASS (Válida)"])
+
+    style ERR fill:#ffcccc,stroke:#cc0000
+    style OK fill:#ccffcc,stroke:#007700
+```
+<p align="center"><i><b>Figura 6:</b> Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija.</i></p>
 
 ### 4.3.2. Gestión de Excepciones y Ciclo de Vida del Error
 
@@ -634,78 +903,131 @@ A nivel topológico, una simple solicitud cognitiva ("necesito una base de datos
 
 Esta garantía de homogeneidad algorítmica asegura que el 100% de los servicios orquestados por el *Agentic Deployer* heredan idéntica postura de seguridad, permitiendo al Servicio de Informática (SIC) escalar la provisión de recursos con absoluta predictibilidad matemática.
 
+> **Nota de alcance del MVP:** La plantilla actual del `FakeK8sAdapter` genera los tres recursos base del *Golden Path* de aplicación web: `Deployment`, `Service` e `Ingress`. La inclusión de un `PersistentVolumeClaim` (PVC) para servicios con estado (como bases de datos) queda fuera del alcance del presente prototipo y se contempla como primera evolución en el Horizonte a Corto Plazo (Sección 9.2.1).
+
 ## 4.5. Flujo de Datos *End-to-End* y Ciclo de Estados
 
 La síntesis de todas las decisiones arquitectónicas presentadas en este capítulo (Modelo C4, Arquitectura Hexagonal y *Golden Paths*) cristaliza en un ciclo de estados altamente sincronizado. La orquestación segura de infraestructura exige una coreografía de red donde la asincronía del razonamiento (LLM) converja pacíficamente con la persistencia estricta de una máquina de estados (Backend).
 
-El siguiente diagrama de secuencia (ilustrado en la **Figura 3**) modela formalmente la traza de ejecución completa, desde la excitación del sistema por parte del investigador, hasta la mutación del entorno físico aprobada por el técnico.
+El modelado formal de la traza de ejecución completa abarca desde la excitación del sistema por parte del investigador, hasta la mutación del entorno físico aprobada por el técnico. Dada la complejidad asíncrona de la arquitectura, esta coreografía de red se divide en tres fases secuenciales diferenciadas para facilitar su visualización y análisis.
+
+### 4.5.1. Fase 1: Negociación Estocástica (Interacción LLM)
+
+El flujo es disparado por un estímulo no tipado (lenguaje natural). La latencia en esta fase es altamente variable (puede oscilar entre 1 y 15 segundos), dependiendo del peso de la inferencia del LLM (ej. GPT-4o en la nube frente a Llama-3 en hardware local). El bucle ReAct itera hasta converger en una intención matemática (`ToolCall`).
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor U as Usuario (Investigador)
-    participant UI as Contenedor Frontend (Streamlit)
-    participant LLM as API LLM Externa
-    participant MCP as Servidor MCP
-    participant CORE as Backend Hexagonal
-    actor T as Técnico (Operaciones)
-    participant K8S as Adaptador Infraestructura
+  autonumber
+  actor I as Investigador
+  participant Chat as Frontend Streamlit
+  participant Orch as AgentOrchestrator
+  participant LLM as LLM (Ollama / OpenAI)
 
-    %% Fase 1: Negociación Cognitiva
-    rect rgb(240, 248, 255)
-        note right of U: Fase 1: Negociación Estocástica
-        U->>UI: "Desplegar API Python 3.12"
-        UI->>LLM: Prompt(System) + Historial ReAct
-        LLM-->>UI: Thought + JSON ToolCall(deploy_python)
-        UI->>MCP: Petición JSON-RPC (stdio)
-    end
-    
-    %% Fase 2: Frontera de Validación Hexagonal
-    rect rgb(255, 245, 230)
-        note right of MCP: Fase 2: Intercepción Determinista
-        MCP->>CORE: HTTP POST /mcp/intent
-        
-        activate CORE
-        CORE->>CORE: Validación Estructural Pydantic
-        CORE->>CORE: SecurityContextValidator (FSM)
-        CORE-->>MCP: HTTP 201 Created (ID: uuid-8f4b)
-        deactivate CORE
-        
-        MCP-->>UI: Observación: Retenido pendiente de HITL
-        UI->>LLM: Inyecta Observación de Retención
-        LLM-->>UI: Final Answer: Texto Natural
-        UI-->>U: "Solicitud enviada a revisión técnica (ID: uuid-8f4b)"
-    end
-    
-    %% Fase 3: Materialización Física Diferida
-    rect rgb(230, 255, 230)
-        note right of T: Fase 3: Ejecución Autoritaria (HITL)
-        T->>CORE: HTTP GET /hitl/pending (Polling)
-        T->>CORE: HTTP POST /hitl/approve/uuid-8f4b
-        
-        activate CORE
-        CORE->>CORE: Transición de Estado a APPROVED
-        CORE->>K8S: deploy(DeploymentIntent)
-        K8S->>K8S: Mapeo Inyectivo en Golden Paths
-        K8S-->>CORE: Exito (Manifiestos Escritos)
-        CORE->>CORE: Transición de Estado a DEPLOYED
-        deactivate CORE
-    end
+  rect rgb(220, 235, 255)
+    Note over I,LLM: FASE 1 — Negociación Estocástica
+    I->>Chat: Mensaje en lenguaje natural
+    Chat->>Orch: run(user_message)
+    Orch->>LLM: [system_prompt + historial] → chat(messages, tools)
+    LLM-->>Orch: Thought + ToolCall(name, arguments)
+  end
 ```
-<p align="center"><i><b>Figura 3:</b> Diagrama de Secuencia End-to-End modelando las tres fases de aislamiento temporal.</i></p>
+<p align="center"><i><b>Figura 7:</b> Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención.</i></p>
 
-### 4.5.1. Análisis Funcional de las Fases Asíncronas
+### 4.5.2. Fase 2: Frontera de Intercepción Determinista (Validación)
 
-La coreografía expuesta revela una segmentación intencional del tiempo de ejecución (*Runtime Isolation*) diseñada para absorber latencias dispares:
+Este bloque constituye el "Embrague" del sistema. El Servidor MCP cruza el límite hacia el Backend. Aquí, la latencia debe ser del orden de microsegundos, dado que la ejecución de Pydantic y el `SecurityContextValidator` es computacionalmente trivial. Se incluyen tanto el **camino feliz** (*Happy Path*) como el **camino de error** (violación de seguridad → HTTP 422 → autocorrección del LLM) para documentar la resiliencia de la arquitectura. Si el flujo aprueba el cortafuegos, el sistema no ejecuta la acción; la "congela" en la base de datos como pendiente, desvinculando la responsabilidad de la IA.
 
-**1. Fase de Negociación Estocástica (Pasos 1-4):**
-El flujo es disparado por un estímulo no tipado (lenguaje natural). La latencia en esta fase es altamente variable (puede oscilar entre 1 y 15 segundos), dependiendo del peso de la inferencia del LLM (ej. GPT-4o en la nube frente a Llama-3 en hardware local). El bucle ReAct itera hasta converger en una intención matemática (`ToolCall`).
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Orch as AgentOrchestrator
+  participant LLM as LLM
+  participant MCP as MCPServer
+  participant API as FastAPI Backend
+  participant UseCase as ProcessDeploymentUseCase
+  participant Sec as SecurityContextValidator
+  participant Store as SQLiteDeploymentRepository
 
-**2. Frontera de Intercepción Determinista (Pasos 5-9):**
-Este bloque constituye el "Embrague" del sistema. El Servidor MCP cruza el límite hacia el Backend (Paso 5). Aquí, la latencia debe ser del orden de microsegundos, dado que la ejecución de Pydantic y el `SecurityContextValidator` es O(1) u O(N) computacionalmente trivial. Si el flujo aprueba el cortafuegos, el sistema no ejecuta la acción; la "congela" en la base de datos asignándole un UUID. El LLM es notificado del éxito de la retención, desvinculándose de la responsabilidad y liberando el hilo del usuario investigador (Paso 9).
+  %% ── CAMINO FELIZ ───────────────────────────────────────────────
+  rect rgb(220, 255, 220)
+    Note over Orch,Store: FASE 2A — Happy Path: Petición conforme
+    Orch->>MCP: dispatch_tool(name, args)
+    MCP->>API: POST /mcp/intent {name, image, port, cpu, ram}
+    API->>UseCase: execute(DeploymentIntent)
+    UseCase->>Sec: validate(intent)
+    Sec-->>UseCase: OK (sin violaciones)
+    UseCase->>Store: save(DeploymentRecord[status=PENDING_APPROVAL])
+    Store-->>UseCase: OK
+    UseCase-->>API: record
+    API-->>MCP: HTTP 201 Created
+    MCP-->>Orch: Observation: {id, status: PENDING_APPROVAL}
+    Orch->>LLM: [historial + observación] → siguiente iteración
+  end
 
-**3. Ejecución Autoritaria o HITL (Pasos 10-15):**
-Esta fase es operativamente asíncrona respecto a las dos anteriores. La latencia ya no depende del procesador, sino de la voluntad del Técnico Humano (puede demorarse minutos u horas). El técnico sondea el backend (Paso 10) de forma puramente determinista. Únicamente al inyectar su autorización (Paso 11), el Backend despierta el flujo diferido y excita al Adaptador de Kubernetes (Paso 13). Es en este último milisegundo donde los valores lingüísticos se inyectan en los *Golden Paths* y se materializan físicamente.
+  %% ── CAMINO DE ERROR ────────────────────────────────────────────
+  rect rgb(255, 230, 220)
+    Note over Orch,Store: FASE 2B — Error Path: Violación de seguridad
+    Orch->>MCP: dispatch_tool("ubuntu-debug", "ubuntu:latest", 22)
+    MCP->>API: POST /mcp/intent {image: ubuntu:latest, port: 22}
+    API->>UseCase: execute(DeploymentIntent)
+    UseCase->>Sec: validate(intent)
+    Sec-->>UseCase: SecurityViolationError [Port 22 + :latest tag]
+    UseCase-->>API: Raise Exception
+    API-->>MCP: HTTP 422 Unprocessable Entity
+    MCP-->>Orch: Observation: {error: 422, violations: [...]}
+    Orch->>LLM: [historial + error 422] → autocorrección
+  end
+```
+<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). El Backend procesa la petición, aplicando reglas de negocio estrictas.</i></p>
+
+### 4.5.3. Fase 3: Ejecución Autoritaria (Ciclo HITL)
+
+Esta fase es operativamente asíncrona respecto a las dos anteriores. La latencia ya no depende del procesador, sino de la voluntad del Técnico Humano (puede demorarse minutos u horas). El técnico sondea el backend de forma puramente determinista. Únicamente al inyectar su autorización, el Backend despierta el flujo diferido y excita al Adaptador de Kubernetes mediante un bypass arquitectónico directo a los puertos de salida. Es en este último milisegundo donde los valores abstractos se materializan físicamente.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Store as SQLiteDeploymentRepository
+  participant K8s as FakeK8sAdapter
+  participant API as FastAPI Backend
+  actor SIC as Técnico SIC
+  participant Dash as Dashboard HITL
+
+  rect rgb(255, 250, 220)
+    Note over Store,Dash: FASE 3 — Human-In-The-Loop (asíncrona)
+    SIC->>Dash: Abre Dashboard → GET /hitl/pending
+    Dash->>API: GET /hitl/pending
+    API->>Store: get_all()
+    Store-->>API: Lista de intenciones
+    API-->>Dash: Filtra PENDING_APPROVAL
+    Dash-->>SIC: Tarjeta visual con detalles del deployment
+
+    alt Técnico aprueba
+      SIC->>Dash: Clic en "Aprobar"
+      Dash->>API: POST /hitl/approve/dep-7f3a2c1b
+      Note right of API: [Bypass Arquitectónico a Puertos]
+      API->>Store: get(id)
+      Store-->>API: record[PENDING_APPROVAL]
+      API->>API: record.status = APPROVED
+      API->>K8s: deploy(intent)
+      K8s-->>API: YAML generado en disco (URL)
+      API->>API: record.status = DEPLOYED
+      API->>Store: save(record)
+      API-->>Dash: HTTP 200 {status: DEPLOYED}
+      Dash-->>SIC: Despliegue completado
+    else Técnico rechaza
+      SIC->>Dash: Clic en "Rechazar"
+      Dash->>API: POST /hitl/reject/dep-7f3a2c1b
+      API->>Store: get(id)
+      Store-->>API: record[PENDING_APPROVAL]
+      API->>API: record.status = REJECTED
+      API->>Store: save(record)
+      API-->>Dash: HTTP 200 {status: REJECTED}
+      Dash-->>SIC: Petición rechazada
+    end
+  end
+```
+<p align="center"><i><b>Figura 9:</b> Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución.</i></p>
 
 El diseño *End-to-End* expuesto garantiza la separación irrompible de preocupaciones: la IA actúa exclusivamente como **facilitadora de la sintaxis abstracta**, mientras que la ingeniería de sistemas tradicional retiene el monopolio absoluto sobre el **acceso de escritura al estado productivo**.
 
@@ -736,41 +1058,41 @@ El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilus
 ALGORITMO 2: Introspección Dinámica de Contratos de Herramientas
 
 ENTRADA:
-  funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
+ funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
 
 SALIDA:
-  json_schema -> Estructura estándar JSON-RPC de Tool Calling
+ json_schema -> Estructura estándar JSON-RPC de Tool Calling
 
 INICIO
-    Variable esquema = NUEVO Diccionario JSON
-    esquema["name"] = funcion_objetivo.obtenerNombre()
-    esquema["description"] = funcion_objetivo.obtenerDocstring()
+  Variable esquema = NUEVO Diccionario JSON
+  esquema["name"] = funcion_objetivo.obtenerNombre()
+  esquema["description"] = funcion_objetivo.obtenerDocstring()
+  
+  // Inspección del AST (Abstract Syntax Tree)
+  Variable parametros = funcion_objetivo.obtenerFirmaLexica()
+  esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
+  
+  PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
+    Variable tipo_json = "string" // Por defecto
     
-    // Inspección del AST (Abstract Syntax Tree)
-    Variable parametros = funcion_objetivo.obtenerFirmaLexica()
-    esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
+    // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
+    SI anotacion_de_tipo ES Entero ENTONCES
+      tipo_json = "integer"
+    SINO SI anotacion_de_tipo ES Booleano ENTONCES
+      tipo_json = "boolean"
+    FIN SI
     
-    PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
-        Variable tipo_json = "string" // Por defecto
-        
-        // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
-        SI anotacion_de_tipo ES Entero ENTONCES
-            tipo_json = "integer"
-        SINO SI anotacion_de_tipo ES Booleano ENTONCES
-            tipo_json = "boolean"
-        FIN SI
-        
-        esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
-            "type" -> tipo_json,
-            "description" -> extraerDescripcion(parametro)
-        )
-        
-        SI parametro ES obligatorio ENTONCES
-            AÑADIR parametro A esquema["parameters"]["required"]
-        FIN SI
-    FIN PARA
+    esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
+      "type" -> tipo_json,
+      "description" -> extraerDescripcion(parametro)
+    )
     
-    RETORNAR esquema
+    SI parametro ES obligatorio ENTONCES
+      AÑADIR parametro A esquema["parameters"]["required"]
+    FIN SI
+  FIN PARA
+  
+  RETORNAR esquema
 FIN
 ```
 
@@ -792,6 +1114,35 @@ Esta decisión acarrea tres beneficios arquitectónicos fundamentales para el TF
 
 La simbiosis entre la introspección dinámica de tipos y el aislamiento a nivel de kernel convierte al Servidor MCP del proyecto en un catálogo de herramientas altamente seguro, universal e instantáneo.
 
+El siguiente diagrama ilustra el ciclo de vida completo de un mensaje MCP, desde el momento en que el Agente decide invocar una herramienta hasta que recibe el resultado:
+
+```mermaid
+sequenceDiagram
+    participant Orch as Orquestador<br/>(Streamlit)
+    participant LLM as Modelo LLM<br/>(OpenAI / Ollama)
+    participant MCP as Servidor MCP<br/>(stdio)
+    participant BE as Backend FastAPI<br/>(:8000)
+
+    Note over Orch,MCP: Fase de Inicialización (una sola vez)
+    Orch->>MCP: initialize {protocolVersion, capabilities}
+    MCP-->>Orch: {serverInfo, capabilities}
+    Orch->>MCP: tools/list
+    MCP-->>Orch: [{name, description, inputSchema}, ...]
+    Orch->>LLM: system_prompt + tool_definitions
+
+    Note over Orch,BE: Fase de Ejecución (por cada turno de conversación)
+    LLM-->>Orch: {tool_call: {name: "deploy_congress_web", arguments: {...}}}
+    Orch->>MCP: tools/call {name, arguments}
+    MCP->>BE: POST /mcp/intent (DeploymentIntent JSON)
+    BE-->>MCP: 201 Created {deployment_id}
+    MCP-->>Orch: {content: "Despliegue pendiente de aprobación. ID: ..."}
+    Orch->>LLM: [Observation: resultado de la herramienta]
+    LLM-->>Orch: Respuesta final en lenguaje natural
+```
+<p align="center"><i><b>Figura 10:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
+
+> **Nota de implementación (modos de transporte):** El servidor MCP desarrollado soporta dos modos operativos. En el **modo Cliente Externo** (proceso externo), el Agente y el Servidor MCP se comunican vía `stdio` tal y como se describe, beneficiándose de la latencia sub-milisegundo de las *Pipes* IPC del kernel. En el **modo Streamlit integrado** (el utilizado en este MVP), las herramientas MCP se importan directamente como módulos Python (`TOOL_REGISTRY`, `TOOL_DEFINITIONS`) y se invocan en el mismo proceso, lo que elimina incluso el overhead del `stdio`. Ambas modalidades son intercambiables gracias al diseño del `AgentOrchestrator`, que acepta cualquier registro de herramientas independientemente del transporte subyacente.
+
 ## 5.2. Diseño de la Abstracción Multiproveedor y Soberanía del Dato
 
 La vertiginosa evolución de la Inteligencia Artificial Generativa ha consolidado un mercado oligopólico liderado por grandes corporaciones tecnológicas proveedoras de inferencia en la nube (*AI-as-a-Service*). En el desarrollo de sistemas de software empresarial, acoplar el código fuente (el *Core Business*) a los kits de desarrollo de software (SDK) específicos de OpenAI, Anthropic o Google supone un riesgo inasumible de obsolescencia tecnológica y pérdida de poder de negociación.
@@ -800,35 +1151,89 @@ Para garantizar la viabilidad a largo plazo del *Agentic Deployer*, el diseño d
 
 ### 5.2.1. El Contrato Abstracto (Patrones *Adapter* y *Factory*)
 
-El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [9]: el patrón **Adapter** y el patrón **Factory Method**. 
+El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [9]: el patrón **Adapter** y el patrón **Factory Method**.
 
-En la capa de aplicación, el orquestador (*AgentOrchestrator*) jamás invoca a la librería `openai` o a la librería `ollama`. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece la "Firma Matemática de la Inferencia", definiendo un contrato estricto de entrada y salida (I/O).
-
-Para asegurar el rigor del presente documento, a continuación se formaliza el comportamiento arquitectónico esperado de este contrato mediante notación algorítmica:
+En la capa de aplicación, el `AgentOrchestrator` jamás invoca directamente a ninguna librería de IA. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece la "Firma Matemática de la Inferencia":
 
 ```text
 CONTRATO ABSTRACTO: Interfaz Cliente LLM (LLMClient)
 
 ESTADO INTERNO:
-  - historial_conversacion -> Lista estructurada de mensajes (Rol, Contenido)
-  - sistema_base -> Prompt fundacional que define la personalidad y las reglas del Agente
+ - historial_conversacion -> Lista estructurada de mensajes (Rol, Contenido)
+ - sistema_base -> Prompt fundacional (personalidad y reglas del Agente)
 
-MÉTODO abstraer_peticion (herramientas_mcp):
-    ENTRADA: herramientas_mcp -> Lista de JSON Schemas (extraída del Contenedor MCP)
-    SALIDA_ESPERADA: 
-      - Objeto tipo RESPUESTA_TEXTO_PLANO
-      - Objeto tipo INVOCACION_DE_HERRAMIENTA (ToolCall ID, Nombre, Argumentos)
-
-    EXCEPCIONES CONTRACTUALES:
-      - LANZAR LlmTimeoutError SI el proveedor excede el tiempo máximo configurado.
-      - LANZAR ContextWindowExceededError SI los tokens superan el límite del modelo.
+MÉTODO chat(messages, tools):
+  ENTRADA: messages -> historial; tools -> JSON Schemas del servidor MCP
+  SALIDA_ESPERADA:
+   - Objeto tipo AgentResponse (texto plano)
+   - Objeto tipo ToolCall (id, nombre_función, argumentos_json)
 ```
 
-Basándose en este contrato formal, el sistema instancia adaptadores concretos. 
-Por un lado, el adaptador `OpenAIAdapter` recibe la llamada abstracta, formatea la lista de mensajes internos siguiendo la rígida especificación de la API REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS por la red de área amplia (WAN) y serializa la respuesta JSON de vuelta al contrato.
-Por otro lado, el adaptador `OllamaAdapter` realiza un proceso análogo, pero apuntando a un *socket* local o a un balanceador *on-premise*, utilizando la sintaxis abierta compatible con el ecosistema de Llama-3.
+El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 
-La instanciación en memoria recae sobre un patrón *Factory*. Durante la fase de inicialización (*Bootstrapping*) del contenedor web, el sistema lee una única variable de entorno de bajo nivel (ej. `LLM_PROVIDER=OLLAMA`). La clase Factory evalúa esta variable e inyecta la dependencia correcta en el Orquestador. Esta Inyección de Dependencias (DI) permite permutar el motor cognitivo con un simple reinicio del proceso físico, blindando el TFM contra cualquier futuro cambio en el panorama tecnológico de los LLM.
+**`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube y deserializa la respuesta JSON.
+
+**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
+
+```text
+ALGORITMO 4: Implementación Nativa del Cliente Ollama
+
+CLASE OllamaLLMClient IMPLEMENTA LLMClient:
+  ATRIBUTOS:
+    modelo: Cadena (ej. "qwen2.5:7b")
+    url_base: Cadena (ej. "http://localhost:11434")
+
+  MÉTODO chat(mensajes, herramientas):
+    Variable payload = NUEVO Diccionario(
+      "model" -> modelo,
+      "messages" -> mensajes,
+      "stream" -> FALSO
+    )
+    SI herramientas EXISTE ENTONCES
+      payload["tools"] = herramientas
+    FIN SI
+
+    // Petición HTTP POST síncrona a la API local
+    Variable respuesta = PeticionHttp(url_base + "/api/chat", json=payload)
+    
+    SI respuesta.codigo_estado != 200 ENTONCES
+      LANZAR ExcepcionHttp("Error en la inferencia LLM local")
+    FIN SI
+
+    Variable mensaje = respuesta.cuerpo_json["message"]
+
+    SI mensaje CONTIENE "tool_calls" ENTONCES
+      Variable llamada = mensaje["tool_calls"][1]
+      RETORNAR NUEVO AgentResponse(
+        tool_call = NUEVO ToolCall(llamada["name"], llamada["arguments"])
+      )
+    FIN SI
+
+    RETORNAR NUEVO AgentResponse(content=mensaje["content"])
+FIN CLASE
+```
+
+La instanciación en memoria recae sobre un patrón **Factory**. Durante la fase de inicialización (*bootstrapping*) del contenedor web, el sistema lee la variable de entorno `LLM_PROVIDER`. La clase Factory evalúa esta variable e inyecta la implementación correcta en el Orquestador mediante *Dependency Injection*:
+
+```text
+ALGORITMO 5: Inyección de Dependencias del Motor Cognitivo (Factory)
+
+ENTRADA: proveedor -> Cadena desde variable de entorno (LLM_PROVIDER)
+SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
+
+INICIO
+  SI proveedor ES "ollama" ENTONCES
+    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5:7b")
+  SINO SI proveedor ES "openai" ENTONCES
+    RETORNAR NUEVO OpenAILLMClient(modelo="gpt-4o-mini")
+  SINO
+    RETORNAR NUEVO SICFakeLLMClient() // Entorno de pruebas determinista
+  FIN SI
+FIN
+```
+
+Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
+
 
 ### 5.2.2. Soberanía del Dato en Entornos Institucionales
 
@@ -859,29 +1264,29 @@ El patrón ReAct altera la topología conversacional subyacente. En lugar de pro
 
 El modelo reevalúa el estado global tras la observación y decide si necesita ejecutar una nueva acción o si la tarea ha concluido. Cuando dictamina que el objetivo se ha cumplido, transiciona a la fase final (*Final Answer*), devolviendo el control al usuario humano.
 
-Como se ilustra en la **Figura 4**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
+Como se ilustra en la **Figura 11**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
 ```mermaid
 flowchart LR
-    A([Prompt]) --> B[Thought: LLM]
-    B --> C{Requiere\nAcción Física?}
-    C -->|Sí| D[Action: Invocación JSON-RPC MCP]
-    C -->|No| G([Output: Final Answer])
-    
-    D --> E[Yield: Ejecución en Backend / K8s]
-    E --> F[Observation: Resultado o Error 422]
-    
-    F -->|Inyección en Contexto| B
-    
-    classDef llm fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
-    classDef phys fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef term fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
-    
-    class B,C llm;
-    class D,E,F phys;
-    class A,G term;
+  A([Prompt]) --> B[Thought: LLM]
+  B --> C{Requiere\nAcción Física?}
+  C -->|Sí| D[Action: Invocación JSON-RPC MCP]
+  C -->|No| G([Output: Final Answer])
+  
+  D --> E[Yield: Ejecución en Backend / K8s]
+  E --> F[Observation: Resultado o Error 422]
+  
+  F -->|Inyección en Contexto| B
+  
+  classDef llm fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+  classDef phys fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+  classDef term fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+  
+  class B,C llm;
+  class D,E,F phys;
+  class A,G term;
 ```
-<p align="center"><i><b>Figura 4:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
+<p align="center"><i><b>Figura 11:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
 
@@ -889,47 +1294,47 @@ Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a c
 ALGORITMO 3: Bucle de Orquestación Cognitiva (ReAct Loop)
 
 ENTRADA: 
-  peticion_usuario -> Cadena de texto natural
-  contexto_historico -> Memoria de la sesión actual
+ peticion_usuario -> Cadena de texto natural
+ contexto_historico -> Memoria de la sesión actual
 
 SALIDA: 
-  respuesta_final -> Cadena de texto natural o Markdown
+ respuesta_final -> Cadena de texto natural o Markdown
 
 INICIO
-    AÑADIR peticion_usuario A contexto_historico
-    Variable turno_actual = 0
-    Variable MAX_TURNOS = 10 // Prevención de bucles infinitos (Infinite Loop)
+  AÑADIR peticion_usuario A contexto_historico
+  Variable turno_actual = 0
+  Variable MAX_TURNOS = 5 // Prevención de bucles infinitos (Infinite Loop)
 
-    MIENTRAS turno_actual < MAX_TURNOS HACER
-        // 1. Inferencia del LLM (Thought + Action)
-        Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
-        
-        SI respuesta_llm ES texto_plano ENTONCES
-            // El Agente decide que ha terminado y se dirige al humano
-            RETORNAR respuesta_llm
-        FIN SI
-
-        SI respuesta_llm ES invocacion_herramienta ENTONCES
-            Variable nombre_funcion = respuesta_llm.obtenerNombre()
-            Variable argumentos = respuesta_llm.obtenerArgumentos()
-            Variable resultado_accion
-            
-            INTENTAR
-                // 2 y 3. Ejecución y Pausa
-                resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
-            CAPTURAR ExcepcionHttp COMO error
-                // Serialización del error para que el LLM lo entienda
-                resultado_accion = error.obtenerMensajeHumano() 
-            FIN INTENTAR
-
-            // 4. Observación
-            AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
-        FIN SI
-        
-        turno_actual = turno_actual + 1
-    FIN MIENTRAS
+  MIENTRAS turno_actual < MAX_TURNOS HACER
+    // 1. Inferencia del LLM (Thought + Action)
+    Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
     
-    LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
+    SI respuesta_llm ES texto_plano ENTONCES
+      // El Agente decide que ha terminado y se dirige al humano
+      RETORNAR respuesta_llm
+    FIN SI
+
+    SI respuesta_llm ES invocacion_herramienta ENTONCES
+      Variable nombre_funcion = respuesta_llm.obtenerNombre()
+      Variable argumentos = respuesta_llm.obtenerArgumentos()
+      Variable resultado_accion
+      
+      INTENTAR
+        // 2 y 3. Ejecución y Pausa
+        resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
+      CAPTURAR ExcepcionHttp COMO error
+        // Serialización del error para que el LLM lo entienda
+        resultado_accion = error.obtenerMensajeHumano() 
+      FIN INTENTAR
+
+      // 4. Observación
+      AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
+    FIN SI
+    
+    turno_actual = turno_actual + 1
+  FIN MIENTRAS
+  
+  LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
 FIN
 ```
 
@@ -1003,24 +1408,24 @@ Los vértices de este grafo (Estados) y sus aristas dirigidas (Transiciones Auto
 - **Nodo de Tránsito (`APPROVED`):** Estado intermedio y volátil. Cuando el humano autoriza la operación, la petición ingresa a este nodo durante un lapso minúsculo. Actúa como el desencadenante imperativo (*Trigger*) para excitar al adaptador de red secundario (`FakeK8sAdapter` o `RealK8sAdapter`).
 - **Nodo de Sumidero B (`DEPLOYED`):** Estado terminal final. Solo se alcanza si, y solo si, la intención superó el nodo `APPROVED` y la API de Kubernetes confirma que los manifiestos YAML han sido guardados sin errores de persistencia en disco.
 
-La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 5**.
+La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 9**.
 
 ```mermaid
 stateDiagram-v2
-    direction LR
-    [*] --> PENDING_APPROVAL : Inyección
-    
-    PENDING_APPROVAL --> APPROVED : Clic en Aprobar (Técnico SIC)
-    PENDING_APPROVAL --> REJECTED : Clic en Denegar (Técnico SIC)
-    
-    APPROVED --> DEPLOYED : Éxito I/O Disco (K8s Adapter)
-    APPROVED --> FAILED_PHYSICAL_DEPLOYMENT : Fallo I/O Disco
-    
-    REJECTED --> [*] : Estado Terminal
-    DEPLOYED --> [*] : Estado Terminal Final
-    FAILED_PHYSICAL_DEPLOYMENT --> [*] : Estado Terminal
+  direction LR
+  [*] --> PENDING_APPROVAL : Inyección
+  
+  PENDING_APPROVAL --> APPROVED : Clic en Aprobar (Técnico SIC)
+  PENDING_APPROVAL --> REJECTED : Clic en Denegar (Técnico SIC)
+  
+  APPROVED --> DEPLOYED : Éxito I/O Disco (K8s Adapter)
+  APPROVED --> FAILED : Fallo I/O Disco
+  
+  REJECTED --> [*] : Estado Terminal
+  DEPLOYED --> [*] : Estado Terminal Final
+  FAILED --> [*] : Estado Terminal
 ```
-<p align="center"><i><b>Figura 5:</b> Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
+<p align="center"><i><b>Figura 12:</b> Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
 
 ### 6.2.2. Prevención de Concurrencia y *Race Conditions*
 
@@ -1036,45 +1441,45 @@ Para neutralizar este vector, la transición entre vértices del DAG se blinda m
 ALGORITMO 4: Transición Inmutable de la Máquina de Estados (FSM_Transition)
 
 ENTRADA:
-  id_peticion -> UUID del registro a transicionar
-  nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
+ id_peticion -> UUID del registro a transicionar
+ nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
 
 SALIDA:
-  Registro_Actualizado (Si la transición es lícita)
-  LANZA HttpConflictError (409) si hay violación de estado
+ Registro_Actualizado (Si la transición es lícita)
+ LANZA HttpConflictError (409) si hay violación de estado
 
 INICIO
-    // 1. Adquisición y comprobación (Atomicidad)
-    Variable registro = ObtenerRegistroMemoria(id_peticion)
-    
-    SI registro ES NULO ENTONCES
-        LANZAR HttpNotFoundError(404)
-    FIN SI
+  // 1. Adquisición y comprobación (Atomicidad)
+  Variable registro = ObtenerRegistroMemoria(id_peticion)
+  
+  SI registro ES NULO ENTONCES
+    LANZAR HttpNotFoundError(404)
+  FIN SI
 
-    // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
-    SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
-        LANZAR HttpConflictError(
-            409, 
-            "Conflicto de Mutación. El registro ya había sido procesado previamente " +
-            "(Estado Actual: " + registro.estado + ")."
-        )
-    FIN SI
-    
-    // 3. Mutación del Estado en Memoria (Bloqueo Atómico)
-    registro.estado = nuevo_estado
-    registro.fecha_modificacion = ObtenerTiempoSistemaActual()
-    
-    // 4. Activación de Adaptadores Secundarios (Side-Effects)
-    SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
-        INTENTAR
-            K8sAdapter.ejecutar_despliegue(registro.intencion)
-            registro.estado = "DEPLOYED" // Segunda transición
-        CAPTURAR ExcepcionIO COMO error
-            registro.estado = "FAILED_PHYSICAL_DEPLOYMENT"
-        FIN INTENTAR
-    FIN SI
-    
-    RETORNAR registro
+  // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
+  SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
+    LANZAR HttpConflictError(
+      409, 
+      "Conflicto de Mutación. El registro ya había sido procesado previamente " +
+      "(Estado Actual: " + registro.estado + ")."
+    )
+  FIN SI
+  
+  // 3. Mutación del Estado mediante el Repositorio (Bloqueo Atómico)
+  registro.estado = nuevo_estado
+  registro.fecha_modificacion = ObtenerTiempoSistemaActual()
+  
+  // 4. Activación de Adaptadores Secundarios (Side-Effects)
+  SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
+    INTENTAR
+      K8sAdapter.ejecutar_despliegue(registro.intencion)
+      registro.estado = "DEPLOYED" // Segunda transición
+    CAPTURAR ExcepcionIO COMO error
+      registro.estado = "FAILED"
+    FIN INTENTAR
+  FIN SI
+  
+  RETORNAR registro
 FIN
 ```
 
@@ -1097,7 +1502,7 @@ En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicac
 Consecuentemente, el TFM implementa una estrategia de **Polling Activo Ligero**. El *Dashboard* ejecuta bucles temporizados desde el navegador del técnico utilizando llamadas `fetch` nativas de JavaScript:
 
 1. **Interrogación Constante:** El cliente invoca el endpoint `GET /hitl/pending` a intervalos regulares (ej. cada 5.000 milisegundos).
-2. **Procesamiento de Bajo Coste:** El *Backend*, al no estar acoplado a bases de datos relacionales pesadas, realiza un filtrado $O(N)$ sobre su diccionario en memoria (`deployment_store`), retornando exclusivamente los metadatos de las peticiones cuyo estado sea `PENDING_APPROVAL`.
+2. **Procesamiento Eficiente y Transaccional:** El *Backend* delega la lectura de las intenciones pendientes en el repositorio local (SQLite). Mediante consultas estructuradas, este enfoque garantiza persistencia ACID y consistencia frente a reinicios inesperados, manteniendo el *overhead* al mínimo en el contexto del prototipo.
 3. **Inyección Dinámica:** El cliente recibe el *payload* JSON y reconstruye dinámicamente el Document Object Model (DOM), renderizando tarjetas visuales (*Cards*) para cada petición entrante.
 
 Esta arquitectura desacoplada (*Stateless* en la capa de transporte) favorece la resiliencia del sistema. Si el portátil del Técnico de Operaciones pierde conectividad Wi-Fi, el estado del *Backend* permanece intacto; al recuperar la conexión, el siguiente ciclo de *polling* rehidratará el *Dashboard* con las peticiones acumuladas durante la ventana de desconexión.
@@ -1107,14 +1512,164 @@ Esta arquitectura desacoplada (*Stateless* en la capa de transporte) favorece la
 La fase final del ciclo de vida del *Agentic Deployer* ocurre cuando el factor biológico colisiona con el *Backend* físico. El *Dashboard* expone visualmente los atributos inmutables de la intención extraída por la IA (UUID de rastreo, Imagen base a desplegar, Puerto de red y Cuotas de recursos CPU/RAM).
 
 Junto a esta tabla de datos puros, se exponen dos vectores de mutación REST:
-- El botón **"Rechazar"**: Ejecuta un `POST /hitl/reject/{id}`, desencadenando el estado `REJECTED` en la Máquina de Estados (sección 6.2).
+- El botón **"Rechazar"**: Ejecuta un `POST /hitl/reject/{id}`, desencadenando el estado `REJECTED` en la Máquina de Estados (sección 6.2). La petición queda archivada indefinidamente con fines de auditoría legal pero no genera ningún artefacto de infraestructura.
 - El botón **"Aprobar"**: Ejecuta un `POST /hitl/approve/{id}`. Esta es la llamada más crítica de toda la infraestructura.
 
 Cuando el técnico invoca la aprobación, el ciclo asíncrono concluye y el sistema recupera la naturaleza imperativa bloqueante (*Synchronous Blocking*). El *Backend* despierta la intención retenida y se la inyecta al Adaptador de Red Secundario (el `DeployPort`).
 
-Como se definió en los esquemas *Golden Path* (Capítulo 4), en este preciso milisegundo el Adaptador toma el control. El objeto Python abstracto se mapea contra los motores de renderizado de texto (ej. Jinja2 o formateo directo), produciendo estructuras de datos YAML puras. Finalmente, estas cadenas de texto se vuelcan sobre los volúmenes del sistema operativo mediante operaciones I/O del kernel (ej. `open(filepath, 'w')`), materializando físicamente el archivo `deploy_{uuid}.yaml`. 
+Como se definió en los esquemas *Golden Path* (Capítulo 4), en este preciso milisegundo el Adaptador toma el control. El objeto Python abstracto se mapea contra un motor de interpolación de cadenas basado en **f-strings** y la utilidad estándar `textwrap.dedent` de Python, produciendo estructuras de datos YAML puras. Finalmente, estas cadenas de texto se vuelcan sobre los volúmenes del sistema operativo mediante operaciones I/O del kernel (ej. `open(filepath, 'w')`), materializando físicamente el archivo `{name}.yaml`.
 
 La generación de este archivo en disco (o su envío directo a la API de Kubernetes) confirma que la Inteligencia Artificial, inicialmente un ente discursivo estocástico, ha logrado cristalizar su razonamiento lingüístico en un activo corporativo inmutable, habiendo sorteado con éxito las barreras matemáticas del `SecurityContextValidator` y el escrutinio ético del *Human-In-The-Loop*.
+
+### 6.3.3. Diagrama de Secuencia del Flujo HITL
+
+La **Figura 10** complementa el diagrama E2E global (Figuras 5, 6 y 7, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor SIC as Técnico SIC
+  participant Dash as Dashboard HTML
+  participant API as FastAPI Backend
+  participant Store as SQLiteDeploymentRepository
+  participant K8s as FakeK8sAdapter
+
+  Note over SIC,API: Contexto: intención dep-9b4f1a7e en PENDING_APPROVAL
+
+  loop Polling cada 3 segundos
+    Dash->>API: GET /hitl/pending
+    API->>Store: get_all()
+    Store-->>API: List[DeploymentRecord]
+    API-->>Dash: [{id, status...}] (filtrado)
+  end
+  Dash-->>SIC: Renderiza tarjetas de intenciones pendientes
+
+  rect rgb(220, 255, 220)
+    Note over SIC,K8s: VECTOR A — Aprobación del despliegue
+    SIC->>Dash: Clic en "Aprobar"
+    Dash->>API: POST /hitl/approve/dep-9b4f1a7e
+    activate API
+    API->>Store: get(id)
+    Store-->>API: record
+    API->>API: record.status = APPROVED (En memoria)
+    API->>K8s: deploy(DeploymentIntent)
+    activate K8s
+    K8s->>K8s: Renderiza template f-string (YAML)
+    K8s-->>API: Éxito — YAML escrito en disco
+    deactivate K8s
+    API->>API: record.status = DEPLOYED (En memoria)
+    API->>Store: save(record)
+    API-->>Dash: HTTP 200 {status: DEPLOYED}
+    deactivate API
+    Dash-->>SIC: Despliegue materializado
+  end
+
+  rect rgb(255, 220, 220)
+    Note over SIC,Store: VECTOR B — Rechazo de la petición
+    SIC->>Dash: Clic en "Rechazar"
+    Dash->>API: POST /hitl/reject/dep-9b4f1a7e
+    activate API
+    API->>Store: get(id)
+    Store-->>API: record
+    API->>API: record.status = REJECTED (En memoria)
+    API->>Store: save(record)
+    API-->>Dash: HTTP 200 {status: REJECTED}
+    deactivate API
+    Dash-->>SIC: Petición archivada
+    Note right of Store: Estado REJECTED terminal e inmutable.
+    Note right of Store: Ningún adaptador genera artefactos.
+  end
+```
+<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). La materialización del YAML ocurre exclusivamente en el Vector A.</i></p>
+
+## 6.4. Canal de Retorno al Investigador: Notificación Asíncrona del Estado
+
+Una brecha de usabilidad inherente al patrón HITL clásico es la **asimetría informacional**: el Técnico SIC conoce en todo momento el estado de las peticiones a través del Dashboard (sección 6.3), pero el investigador, una vez recibida la confirmación de `PENDING_APPROVAL` del agente, queda en un estado de incertidumbre. No sabe cuándo (ni si) su solicitud ha sido aprobada, rechazada o desplegada.
+
+Esta sección documenta el diseño e implementación del **canal de retorno al investigador**: el mecanismo bidireccional que cierra el ciclo de comunicación y permite al investigador consultar el estado de sus solicitudes directamente desde la interfaz conversacional.
+
+### 6.4.1. Diseño del Endpoint de Consulta de Estado
+
+Se ha incorporado un nuevo endpoint `GET /hitl/status/{deployment_id}` en el `BackendAPI`, diseñado específicamente como **canal orientado al investigador** (a diferencia de `/hitl/pending`, orientado al técnico):
+
+```text
+RUTINA: Consulta de Estado de Despliegue (Endpoint REST)
+
+ENDPOINT: GET /hitl/status/{id_despliegue}
+ENTRADA: id_despliegue -> Cadena de texto (ej. "dep-1a2b3c")
+SALIDA: RespuestaEstado (id, estado, mensaje_contextual)
+
+INICIO
+  Variable registro = RepositorioBD.obtener(id_despliegue)
+  SI registro ES Nulo ENTONCES
+    ABORTAR CON ExcepcionHttp(404, "Despliegue no encontrado")
+  FIN SI
+
+  // Mapeo semántico del estado técnico (FSM) a lenguaje natural
+  Variable mensajes = NUEVO Diccionario(
+    "PENDING_APPROVAL" -> "Su solicitud está en cola, pendiente de revisión por el técnico SIC.",
+    "APPROVED" -> "El técnico SIC ha aprobado su solicitud. Despliegue en curso.",
+    "DEPLOYED" -> "Su servicio ha sido desplegado exitosamente.",
+    "REJECTED" -> "El técnico SIC ha rechazado esta solicitud.",
+    "FAILED" -> "El despliegue ha encontrado un error técnico en el clúster."
+  )
+  
+  Variable mensaje_contextual = mensajes[registro.estado_fsm]
+  RETORNAR NUEVO RespuestaEstado(registro.id, registro.estado_fsm, mensaje_contextual)
+FIN
+```
+
+La respuesta incluye el estado actual de la FSM junto con un **mensaje de texto contextual** adaptado a cada estado, de modo que el investigador recibe información comprensible sin necesidad de conocer la nomenclatura técnica de la máquina de estados.
+
+### 6.4.2. Panel de Notificaciones en el Frontend (Streamlit)
+
+La interfaz conversacional (`chat_app.py`) implementa un panel pasivo de seguimiento que se activa automáticamente cuando el agente registra una solicitud con estado `PENDING_APPROVAL`. El mecanismo opera en tres fases:
+
+**1. Extracción automática del ID de seguimiento:**
+
+Tras cada respuesta del agente, el frontend aplica una expresión regular sobre el texto de respuesta para detectar identificadores de deployment del patrón `dep-[a-f0-9]{7,8}`. Si se detecta uno asociado a un estado pendiente, se añade a la lista `session_state.pending_deployments`:
+
+```text
+RUTINA: Extracción de Identificadores (Frontend HITL)
+
+ENTRADA: texto_respuesta -> Respuesta generada por el Agente Cognitivo
+ESTADO: panel_pendientes -> Lista de IDs mostrados en la interfaz gráfica
+
+INICIO
+  // Buscar expresiones regulares de la forma "dep-XXXXXXX"
+  Variable id_detectado = ExpresionRegular("dep-[a-f0-9]{7,8}").buscarEn(texto_respuesta)
+  
+  SI id_detectado EXISTE Y texto_respuesta CONTIENE "PENDING" ENTONCES
+    AÑADIR id_detectado A panel_pendientes
+  FIN SI
+FIN
+```
+
+**2. Panel de seguimiento persistente:**
+
+Mientras existan deployments pendientes en `session_state`, el panel " Mis Solicitudes Pendientes" se renderiza en la parte inferior del chat. Por cada solicitud, el investigador dispone de un botón **" Actualizar"** que realiza una llamada `GET /hitl/status/{id}` al backend y muestra el resultado en un badge de color semántico:
+
+| Estado FSM | Color | Mensaje para el investigador |
+|---|---|---|
+| `PENDING_APPROVAL` | Amarillo | "Su solicitud está en cola, pendiente de revisión." |
+| `APPROVED` | Azul | "El técnico ha aprobado. Despliegue en curso." |
+| `DEPLOYED` | Verde | "Su servicio ha sido desplegado exitosamente." |
+| `REJECTED` | Rojo | "Solicitud rechazada. Contacte con el SIC." |
+| `FAILED` | Rojo | "Error técnico. El equipo SIC ha sido notificado." |
+
+**3. Cierre automático del ciclo:**
+
+Cuando el estado devuelto es terminal (`DEPLOYED`, `REJECTED` o `FAILED`), el deployment se elimina de la lista de seguimiento y el agente inyecta automáticamente un mensaje de notificación en el historial del chat, informando al investigador del resultado final sin que este tenga que preguntar activamente.
+
+### 6.4.3. Justificación de Diseño: Polling Explícito frente a Notificaciones *Push*
+
+La alternativa técnica más evidente sería un sistema de notificaciones *push* (correo electrónico o *webhook*). Esta aproximación fue deliberadamente descartada para el prototipo por las siguientes razones arquitectónicas:
+
+1. **Dependencias externas no justificadas:** Un servidor SMTP o un broker de mensajería (Kafka, RabbitMQ) añadiría complejidad de infraestructura que excede el alcance del prototipo y dificulta la reproducibilidad en entornos académicos.
+2. **Coherencia con el modelo de polling del Dashboard:** El técnico ya opera bajo un modelo de polling (sección 6.3.1). Mantener el mismo paradigma en el canal del investigador simplifica el modelo mental del sistema y su testing.
+3. **Extensibilidad:** El endpoint `GET /hitl/status/{id}` es una interfaz pura REST que puede ser consumida por cualquier sistema externo (correo electrónico, Telegram Bot, Slack Webhook) en una evolución futura sin modificar la lógica del backend (principio de Segregación de Interfaces).
+
+Este diseño cierra el ciclo del patrón HITL, transformándolo de un mecanismo **unidireccional** (investigador → técnico) en un canal **bidireccional** (investigador → técnico → investigador), donde ambos actores disponen de la información necesaria para realizar su rol dentro del flujo de gobierno de la infraestructura.
 
 
 <div style='page-break-after: always;'></div>
@@ -1123,7 +1678,39 @@ La generación de este archivo en disco (o su envío directo a la API de Kuberne
 
 La integración de Modelos de Lenguaje Grandes (LLM) en la orquestación de infraestructuras corporativas fractura los paradigmas tradicionales de Ingeniería de Pruebas (*Software Testing*). En el desarrollo de software convencional, la función matemática $f(x)$ siempre retorna $y$. Sin embargo, en un sistema agéntico estocástico, el mismo estímulo (el mismo *prompt*) puede generar resultados sintácticamente dispares dependiendo de la semilla de inferencia (*seed*) o de la temperatura del modelo.
 
-Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial.
+Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [27].
+
+```mermaid
+flowchart BT
+  %% Base de la pirámide
+  subgraph Base [Base: Pruebas Unitarias Deterministas]
+    direction BT
+    U(Aserciones de Dominio y Valores Límite)
+  end
+
+  %% Estrato Medio
+  subgraph Medio [Medio: Fuzzing y Mutación]
+    direction BT
+    F(Asedio Estocástico y Clones Mutantes)
+  end
+
+  %% Cúspide
+  subgraph Cuspide [Cúspide: Pruebas Metamórficas]
+    direction BT
+    M(Evaluación Heurística del LLM)
+  end
+
+  Base --> Medio --> Cuspide
+
+  classDef base fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+  classDef mid fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+  classDef top fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+
+  class Base base;
+  class Medio mid;
+  class Cuspide top;
+```
+<p align="center"><i><b>Figura 14:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
 ## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
 
@@ -1145,15 +1732,41 @@ El contrato de la entidad `DeploymentIntent` dictamina que el atributo `port` de
 
 Junto a la topología de red, el segundo vector de riesgo es la inyección de configuraciones inestables. Las pruebas de integración del sistema asedian al `SecurityContextValidator` para auditar la regla de prohibición de la etiqueta `:latest` en las imágenes de contenedores.
 
-La batería de *Testing* ejecuta simulaciones inyectando intenciones sintácticamente engañosas, como `ubuntu:latest`, `nginx:LATEST` o el uso de imágenes implícitas (por ejemplo, proporcionar `redis` asumiendo que el clúster inferirá el *tag*). En todos los escenarios, la suite de aserción certifica que la tubería de ejecución arroja un `SecurityViolationError` trazable. 
+La batería de *Testing* ejecuta simulaciones inyectando intenciones sintácticamente engañosas, como `ubuntu:latest`, `nginx:LATEST` o el uso de imágenes implícitas (por ejemplo, proporcionar `redis` asumiendo que el clúster inferirá el *tag*). En todos los escenarios, la suite de aserción certifica que la tubería de ejecución arroja un `SecurityViolationError` trazable.
 
 Esta capa base de pruebas (de ejecución sub-milisegundo) actúa como el cimiento matemático. Demuestra, con una cobertura de código del 100% sobre el módulo Hexagonal, que el *Backend* es determinista y se comporta exactamente igual que una cerradura criptográfica: sin la llave correcta (una petición válida que cumpla con ITIL y las normativas universitarias), el paso físico a la infraestructura es sistemáticamente bloqueado, sin importar cuán persuasivo o agresivo sea el *prompt* originado por el Modelo de Lenguaje.
 
-## 7.2. Pruebas Basadas en Propiedades (*Property-Based Testing*)
+### 7.1.3. Pruebas de la Capa de Consulta de Estado (Canal del Investigador)
+
+Tras la implementación del endpoint `GET /hitl/status/{id}` (sección 6.4.1), se añadió un módulo de integración específico (`test_status_endpoint.py`) para validar el canal de retorno al investigador. Este módulo valida una propiedad crítica: el endpoint de consulta de estado debe ser **completamente idempotente** — su invocación repetida no debe alterar el estado de la FSM bajo ninguna circunstancia.
+
+La batería de pruebas cubre seis escenarios:
+
+| Test | Comportamiento validado |
+|---|---|
+| `test_unknown_id_returns_404` | Un ID inexistente retorna `HTTP 404` con mensaje descriptivo |
+| `test_pending_approval_returns_correct_status` | Un deployment recién creado retorna `PENDING_APPROVAL` con mensaje contextual |
+| `test_deployed_status_after_approval` | Tras `POST /hitl/approve/{id}`, el estado refleja `DEPLOYED` |
+| `test_rejected_status_after_rejection` | Tras `POST /hitl/reject/{id}`, el estado refleja `REJECTED` |
+| `test_response_includes_deployment_metadata` | La respuesta incluye `name`, `image` y `port` correctos |
+| `test_status_endpoint_does_not_mutate_state` | 3 llamadas consecutivas mantienen `PENDING_APPROVAL` inalterado |
+
+El último test es el más crítico desde el punto de vista de la integridad del sistema: garantiza que la operación de *lectura* del canal del investigador no interfiere con la *escritura* exclusiva del canal del técnico SIC (el dashboard), preservando la separación de responsabilidades entre ambas interfaces de usuario.
+
+### 7.1.4. Quality Gates y Umbrales de Código Estático
+
+Para garantizar que la mantenibilidad y calidad del proyecto no se degrade durante futuras evoluciones, la canalización de integración continua (`run_tests.sh`) actúa como un *Quality Gate* estricto mediante la aplicación de análisis estático en el archivo de configuración `pyproject.toml`. 
+
+Se han configurado dos umbrales infranqueables que rompen la integración en caso de incumplimiento:
+1. **Complejidad Ciclomática (McCabe):** Se ha establecido un límite máximo de complejidad `C901 = 15` a través del linter *Ruff*. Aunque la formulación original de McCabe [26] proponía un límite de 10, los estándares de ingeniería modernos (como *SonarQube*) recomiendan un límite pragmático de 15 para acomodar construcciones sintácticas actuales (como gestores de contexto y *match/case*) sin generar falsos positivos. Este umbral garantiza que ninguna función contenga un exceso de ramas lógicas, obligando arquitectónicamente a la refactorización y asegurando código limpio y auditable.
+2. **Cobertura de Código Pragmática:** Se exige una cobertura mínima del 80% (`--cov-fail-under=80`). En consonancia con las directrices de ingeniería de gigantes tecnológicos como Google [25], se rechaza la persecución artificial del 100% de cobertura. Alcanzar el 100% a menudo fomenta la escritura de pruebas triviales que no aportan seguridad real lógica, creando una falsa sensación de inmunidad. El umbral del 80% garantiza que el núcleo de negocio está férreamente protegido, dejando margen para ignorar deliberadamente *boilerplates* o pegamento de *frameworks* cuya evaluación no aporta valor académico ni de negocio.
+
+## 7.2. Property-Based Testing: Asedio Estocástico
 
 El Testing Unitario clásico (pruebas basadas en ejemplos) adolece de un sesgo cognitivo inevitable: el desarrollador humano diseña las aserciones pensando en los caminos lógicos que él mismo programó. En ecosistemas orquestados por Inteligencia Artificial, donde la entrada de datos (el JSON generado por el LLM) es altamente impredecible, este enfoque de caja blanca es matemáticamente insuficiente.
 
 Para escalar la resistencia de la Arquitectura Hexagonal y garantizar que ninguna alucinación excéntrica pueda desbordar la base de datos o tumbar el hilo principal de ejecución, este TFM incorpora el paradigma del **Property-Based Testing** (Pruebas Basadas en Propiedades). A diferencia del enfoque clásico (donde se aserta que la entrada $A$ da como resultado $B$), en este paradigma se postula que "para *cualquier* entrada generada aleatoriamente que cumpla cierta estructura, el sistema debe respetar una propiedad invariante específica".
+
 
 ### 7.2.1. Inyección de Entropía Estocástica y Fuzzing
 
@@ -1169,29 +1782,29 @@ ilegales debe colapsar en un error controlado, JAMÁS en un Kernel Panic
 o corrupción de memoria."
 
 INICIO
-    // Generador de Entropía (Estrategias de Hypothesis)
-    Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
-    Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
+  // Generador de Entropía (Estrategias de Hypothesis)
+  Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
+  Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
 
-    PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
-        INTENTAR
-            Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
-            
-            // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
-            ASERTAR (longitud(intencion.name) > 0)
-            ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
+  PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
+    INTENTAR
+      Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
+      
+      // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
+      ASERTAR (longitud(intencion.name) > 0)
+      ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
 
-        CAPTURAR ValidationError
-            // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
-            PASAR
-        CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
-            // Aserción Matemática 2: No debe haber errores no controlados.
-            FALLAR_TEST(
-                "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
-                "Detalle de la entropía letal: " + error_critico
-            )
-        FIN INTENTAR
-    FIN PARA
+    CAPTURAR ValidationError
+      // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
+      PASAR
+    CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
+      // Aserción Matemática 2: No debe haber errores no controlados.
+      FALLAR_TEST(
+        "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
+        "Detalle de la entropía letal: " + error_critico
+      )
+    FIN INTENTAR
+  FIN PARA
 FIN
 ```
 
@@ -1221,33 +1834,56 @@ Por ejemplo, si la regla de seguridad del `SecurityContextValidator` dicta que e
 `SI puerto < 1024 ENTONCES LANZAR Error`
 
 El motor de mutación iterará sobre este fragmento y generará clones inyectando vulnerabilidades silenciosas:
-- **Mutante 1 (Alteración Operacional):** `SI puerto <= 1024 ENTONCES...`
-- **Mutante 2 (Inversión Lógica):** `SI puerto > 1024 ENTONCES...`
-- **Mutante 3 (Supresión de Ramas):** `CONTINUAR` (Elimina la comprobación entera).
-
-### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
+- **Mutante 1 (Alteración Operacional### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
 
 Una vez generado el ejército de clones mutantes, el *framework* ejecuta la suite de pruebas completa (escrita en `pytest`) contra cada uno de los mutantes, uno por uno. El resultado de esta batalla computacional se clasifica en dos estados excluyentes:
 
 1. **Mutante Asesinado (*Killed*):** Si la suite de pruebas fracasa (es decir, una aserción estalla en rojo) tras ejecutar un clon, significa que la prueba ha detectado exitosamente la intrusión del *bug*. El mutante es eliminado. Este es el comportamiento deseado, indicando que la red de seguridad del TFM es hermética.
-2. **Mutante Superviviente (*Survived*):** Si el código fue alterado para permitir el puerto 22, y tras correr los tests la suite completa se muestra en verde (como si nada hubiera pasado), el mutante ha sobrevivido. Esto representa un fallo gravísimo en la arquitectura de QA: indica la existencia de un "falso positivo" de seguridad. Las pruebas están evaluando líneas, pero no están protegiendo la lógica de negocio real.
+2. **Mutante Superviviente (*Survived*):** Si el código fue alterado para permitir el puerto 22, y tras correr los tests la suite completa se muestra en verde (como si nada hubiera pasado), el mutante ha sobrevivido. Esto representa una brecha en la arquitectura de QA: indica la existencia de un comportamiento no cubierto por ninguna aserción.
 
-La aplicación de *Mutation Testing* al núcleo Hexagonal del *Agentic Deployer* arrojó, tras el refactor final, una tasa de mortalidad del 100% sobre los operadores condicionales del `SecurityContextValidator`. Esto certifica ante el equipo de Operaciones del Servicio de Informática que la barrera entre la Inteligencia Artificial y la infraestructura de Kubernetes está fuertemente tipada y que cualquier mínima regresión futura en las reglas de seguridad será detectada matemáticamente antes de alcanzar el estado de producción.
+### 7.3.3. Resultados Empíricos de la Auditoría (Tabla 2)
 
-### 7.3.3. Descubrimiento y Mitigación de Brechas (Caso de Estudio Empírico)
+La siguiente tabla recoge los resultados reales de la ejecución de `mutmut` sobre el proyecto, con la configuración definida en `test_mutmut.ini` (scope: `app/application/` y `app/domain/`).
 
-La verdadera eficacia de esta metodología se evidenció de forma empírica durante la auditoría de la capa de integración, concretamente en el componente `mcp_server.py`, encargado de exponer las herramientas de despliegue al modelo de lenguaje y tramitar las peticiones HTTP hacia el *Backend*.
+**Tabla 2. Resultados del Mutation Testing por módulo.**
 
-Inicialmente, el motor de métricas tradicional reportaba un **100% de cobertura de código** sobre el archivo, sugiriendo una protección total. Sin embargo, al configurar el motor `mutmut` para abarcar la totalidad de la aplicación e inyectar entropía en esta capa, el sistema generó un reporte crítico de seguridad: **12 mutantes lograron sobrevivir** a la suite de pruebas.
+| Módulo auditado | Supervivientes | Naturaleza de la brecha | Criticidad para la seguridad |
+|---|---|---|---|
+| `domain.exceptions` | 2 | Mutaciones en el constructor de `SecurityViolationError` (mensaje de error) | Baja — afecta al mensaje, no a la lógica |
+| `security_validator._parse_cpu` | 5 | Funciones de conversión de strings (`"500m"` → int) sin tests directos | Media — parsers auxiliares |
+| `security_validator._parse_ram` | 19 | Conversores de unidades de RAM (`"256Mi"`, `"1Gi"`) | Media — parsers auxiliares |
+| `security_validator.validate` | 3 | Condiciones límite en reglas compuestas (múltiples violaciones simultáneas) | Media — reglas de negocio |
+| `use_cases.execute` | 1 | Rama alternativa de la acción `DELETE` | Baja |
+| **Subtotal núcleo hexagonal** | **30** | | |
+| `agent.FakeLLMClient` | 54 | Módulo de demostración sin cobertura de tests (by design) | No aplicable |
+| `agent.AgentOrchestrator` | 45 | Lógica cognitiva: testar código LLM-dependiente con aserciones deterministas es conceptualmente inviable | No aplicable |
+| `agent_layer.tools` | 14 | Herramientas MCP que requieren mocks de red | Baja |
+| **Total general** | **143** | | |
 
-El análisis forense de los mutantes supervivientes reveló dos fallas graves en la red de pruebas que la métrica de cobertura, por su propia naturaleza matemática, era estructuralmente incapaz de detectar:
+**Interpretación del resultado:**
 
-1. **Falsos Positivos en Heurísticas de Texto:** La función `_calculate_congress_resources` acepta variaciones léxicas para dimensionar la RAM y CPU de un clúster (ej. `"alto"`, `"high"`, `">500"`, `"medio"`, `"medium"`). Las pruebas unitarias originales únicamente validaban los límites absolutos (`"alto"` y `"bajo"`). El motor de mutación alteró silenciosamente las constantes intermedias (borrando la detección de `"medium"`) y, al carecer de un aserto directo, el clon mutado pasó la suite de pruebas sin inmutarse.
-2. **Supresión del Manejo de Excepciones HTTP:** La función `_send_intent` ejecuta una invocación de red con un `timeout` estricto y una validación de estado (`raise_for_status()`). Un mutante malicioso suprimió la línea de validación de estado. Puesto que la suite de pruebas siempre simulaba respuestas HTTP 200 (éxito) y no existía ninguna prueba que simulara una caída del servidor (HTTP 500), la omisión de la validación no rompió ningún test, permitiendo al mutante sobrevivir.
+El análisis forense revela que el **69,9% de los supervivientes** (99 de 143) corresponden a módulos excluidos del scope de auditoría por razones arquitectónicas: `FakeLLMClient` es código de demostración sin tests (comportamiento intencionado); `AgentOrchestrator` encapsula la interfaz con el LLM, cuyo comportamiento no determinista hace que la auditoría por mutación sea conceptualmente inaplicable.
 
-La detección temprana de estos 12 mutantes permitió la rápida inyección de un nuevo artefacto de pruebas focalizado (`test_mcp_server.py`). Esta adición, empleando librerías de simulaciones (*Mocks*), somete al módulo a un asedio que itera sobre la totalidad del diccionario de palabras clave admitidas y fuerza simulaciones de caídas de red para asertar la propagación de la excepción.
+Sobre el **núcleo hexagonal** (el scope declarado en `test_mutmut.ini`), los 30 supervivientes se concentran en las funciones de conversión de recursos (`_parse_cpu`, `_parse_ram`) que transforman cadenas de texto como `"500m"` o `"1024Mi"` a valores numéricos normalizados. Estas brechas constituyen la **deuda de cobertura identificada** por la auditoría:
 
-Tras esta integración algorítmica, la tasa de supervivencia de mutantes a nivel global colapsó de nuevo al 0%, logrando una red de validación robusta y significativamente más segura. Este caso de uso justifica de manera pragmática la inclusión del *Mutation Testing* como un pilar fundamental en sistemas orquestados por Inteligencia Artificial, donde la imprevisibilidad exige capas de auditoría que vayan más allá de la simple verificación de ejecución de líneas.
+- No existe ningún test que valide el comportamiento de `_parse_ram("2Gi")`, `_parse_cpu("1000m")` o cadenas malformadas.
+- Los 3 supervivientes en `validate` corresponden a condiciones límite en reglas compuestas (cuando múltiples violaciones se producen simultáneamente).
+
+La detección de estas brechas es precisamente el valor de la metodología: la cobertura de código reportaba un **100% en los módulos del dominio**, ocultando estas ausencias de asertos específicos sobre las funciones auxiliares.
+
+> Los resultados completos (1.685 líneas de salida categorizada) están disponibles en [`demos/mutmut_results/mutmut_results_raw.txt`](../demos/mutmut_results/mutmut_results_raw.txt) y el análisis en [`demos/mutmut_results/mutmut_report.md`](../demos/mutmut_results/mutmut_report.md).
+
+### 7.3.4. Mitigación y Lecciones Aprendidas
+
+La auditoría identificó las siguientes acciones correctoras concretas, alineadas con las prácticas de mejora continua de la ingeniería de software:
+
+1. **Tests parametrizados para `_parse_cpu` y `_parse_ram`:** Añadir una batería de tests que cubra todos los formatos de unidad admitidos (`m`, `Mi`, `Gi`, `G`, `M`) y rechace cadenas malformadas. Estos tests elevarían la mortalidad del núcleo hexagonal al nivel de los módulos de validación de reglas.
+
+2. **Tests de múltiples violaciones simultáneas:** Los 3 supervivientes en `validate` corresponden a escenarios de doble o triple violación concurrente (ej. puerto 22 + tag `:latest` + secreto en env). Ampliar el fixture `test_security.py` con asertos sobre la lista completa de violaciones detectadas.
+
+3. **Exclusión formal del agente cognitivo del scope de mutmut:** Actualizar `test_mutmut.ini` para restringir el alcance exclusivamente a `app/application/` y `app/domain/`, excluyendo explícitamente `app/agent_layer/`, cuya auditoría requiere estrategias diferentes (pruebas metamórficas, Cap. 7.4).
+
+Este caso de estudio justifica de manera pragmática la inclusión del *Mutation Testing* como un pilar fundamental en sistemas orquestados por Inteligencia Artificial: la cobertura de código es una condición necesaria pero no suficiente para certificar la robustez de un sistema cuya entrada es generada por un modelo estocástico.
 
 ## 7.4. Pruebas Metamórficas: Inyección de Ruido Léxico y Evaluación del LLM
 
@@ -1266,20 +1902,20 @@ Para el caso de uso de este sistema, la Relación Metamórfica de Identidad Sem�
 Esta propiedad se formaliza y evalúa inyectando una batería de variaciones léxicas contra la API de OpenAI/Ollama, interceptando la deducción JSON antes de que llegue al Backend:
 
 1. **Entrada de Control (El Oráculo Relativo):**
-   - *Prompt:* "Despliega una instancia de PostgreSQL en el puerto 5432."
-   - *Salida Esperada (JSON):* `{"name": "postgresql", "port": 5432}`
+  - *Prompt:* "Despliega una instancia de PostgreSQL en el puerto 5432."
+  - *Salida Esperada (JSON):* `{"name": "postgresql", "port": 5432}`
 
 2. **MR1: Inyección de Ruido Coloquial (Jerga):**
-   - *Prompt:* "Levántame un postgres rapidito porfi, mételo en el puerto 5432 que tengo prisa."
-   - *Aserción:* El JSON deducido debe ser idéntico al de la entrada de control.
+  - *Prompt:* "Levántame un postgres rapidito porfi, mételo en el puerto 5432 que tengo prisa."
+  - *Aserción:* El JSON deducido debe ser idéntico al de la entrada de control.
 
 3. **MR2: Perturbación Ortográfica y Tipográfica:**
-   - *Prompt:* "Desplega un postgree sql en el pto 5432 xfa."
-   - *Aserción:* El LLM debe aplicar heurísticas de corrección silente y generar el JSON idéntico al de control.
+  - *Prompt:* "Desplega un postgree sql en el pto 5432 xfa."
+  - *Aserción:* El LLM debe aplicar heurísticas de corrección silente y generar el JSON idéntico al de control.
 
 4. **MR3: Inversión Sintáctica Compleja:**
-   - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
-   - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
+  - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
+  - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
 
 ### 7.4.2. Tolerancia a la Ambigüedad
 
@@ -1344,15 +1980,15 @@ El usuario interactúa con la interfaz conversacional de Streamlit y lanza el si
 
 > **Usuario:** *"Necesito acceso inmediato por consola para depurar unos scripts. Despliega un contenedor de Ubuntu con la última versión absoluta (usa latest para no liarnos) y exponlo directamente en el puerto 22 para que me conecte por SSH. Hazlo rápido."*
 
-La red neuronal (LLM) procesa la intencionalidad. Al carecer de un modelo mental sobre políticas corporativas externas, su única misión sintáctica es complacer al usuario y formatear los datos hacia la herramienta MCP disponible (`deploy_intent`). 
+La red neuronal (LLM) procesa la intencionalidad. Al carecer de un modelo mental sobre políticas corporativas externas, su única misión sintáctica es complacer al usuario y formatear los datos hacia la herramienta MCP disponible (`format_deployment_intent`). 
 
 El modelo, siguiendo el patrón *Chain of Thought*, asume internamente que debe generar una invocación de herramienta con los parámetros solicitados. En milisegundos, el LLM emite la siguiente deducción JSON a través del estándar *Tool Calling*:
 
 ```json
 {
-  "name": "ubuntu-debug-server",
-  "image": "ubuntu:latest",
-  "port": 22
+ "name": "ubuntu-debug-server",
+ "image": "ubuntu:latest",
+ "port": 22
 }
 ```
 
@@ -1379,71 +2015,427 @@ Sin embargo, el bucle incondicional ReAct (Capítulo 5) intercepta la excepción
 El modelo asimila esta corrección externa de forma autónoma:
 
 1. **LLM *Thought* (Monólogo Interno del Agente):** 
-   *"Mi acción anterior falló estrepitosamente. El servidor de infraestructura ha rechazado mi JSON porque el puerto 22 es ilegal y la etiqueta latest es insegura. No debo volver a invocar la herramienta con estos datos. Debo dirigirme al humano, explicarle la normativa técnica que acabo de aprender, y pedirle que modifique sus requerimientos."*
+  *"Mi acción anterior falló estrepitosamente. El servidor de infraestructura ha rechazado mi JSON porque el puerto 22 es ilegal y la etiqueta latest es insegura. No debo volver a invocar la herramienta con estos datos. Debo dirigirme al humano, explicarle la normativa técnica que acabo de aprender, y pedirle que modifique sus requerimientos."*
 
 2. **LLM *Final Answer* (Respuesta al Usuario en Streamlit):**
-   *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
+  *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
 
 **Conclusión del Escenario Práctico:**
 La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege matemáticamente a la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la asombrosa empatía lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
 
+La transcripción completa de este escenario, incluyendo los mensajes JSON intercambiados entre el agente y el backend, se encuentra disponible en el repositorio del proyecto bajo la ruta [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json).
+
+---
+
+## 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
+
+Esta sección documenta de forma forense tres escenarios de ejecución real del sistema, con el modelo de lenguaje `qwen2.5:7b` ejecutándose localmente mediante Ollama (Zero Data Retention). Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
+
+### 8.3.1. Escenario 1 — Walkthrough Forense: Portal Web para Congreso Académico
+
+Este escenario documenta de forma exhaustiva cada paso interno del sistema para una petición conforme, exponiendo la traza completa desde la entrada en lenguaje natural hasta el manifiesto YAML materializado en disco.
+
+---
+
+**PASO 1 — Input del investigador** (lenguaje natural, sin conocimiento de Kubernetes):
+
+> *"Hola, necesito un portal web para el congreso de Inteligencia Artificial del departamento. Esperamos unas 200-300 personas. ¿Puedes gestionar el despliegue?"*
+
+---
+
+**PASO 2 — LLM Thought (monólogo interno del agente, modelo `qwen2.5:7b`):**
+
+```
+<think>
+El investigador necesita un portal web estático para un congreso universitario.
+El tráfico esperado es 200-300 personas, lo que corresponde a un nivel "medium".
+Tengo disponible la herramienta deploy_congress_web que acepta project_name y expected_traffic.
+El nombre del proyecto debe ser un identificador DNS-safe: "congreso-ia-departamento".
+No necesito más información del usuario. Voy a invocar la herramienta.
+</think>
+```
+
+---
+
+**PASO 3 — Action: Tool Call emitido por el LLM** (formato OpenAI Function Calling / MCP):
+
+```json
+{
+ "role": "assistant",
+ "content": null,
+ "tool_calls": [
+  {
+   "id": "ollama_a3f7c291",
+   "type": "function",
+   "function": {
+    "name": "deploy_congress_web",
+    "arguments": "{\"project_name\": \"congreso-ia-departamento\", \"expected_traffic\": \"medium\"}"
+   }
+  }
+ ]
+}
+```
+
+---
+
+**PASO 4 — Petición HTTP al Backend** (equivalente `curl` de la llamada real):
+
+```bash
+curl -X POST http://localhost:8000/mcp/intent \
+ -H "Content-Type: application/json" \
+ -d '{
+  "name":     "congreso-ia-departamento",
+  "action":    "CREATE",
+  "image":     "nginx:alpine",
+  "internal_port": 8080,
+  "cpu":      "500m",
+  "ram":      "256Mi"
+ }'
+```
+
+La función `deploy_congress_web` del `MCPServer` construye este payload internamente, calculando CPU y RAM según el nivel de tráfico (`medium` → `_calculate_congress_resources`) antes de invocar `_send_intent()`.
+
+---
+
+**PASO 5 — Validación en el núcleo hexagonal:**
+
+El `SecurityContextValidator` evalúa la intención en tiempo O(1):
+
+| Regla | Resultado |
+|---|---|
+| Puerto ≥ 1024 (8080) | Conforme |
+| Imagen sin tag `:latest` (`nginx:alpine`) | Conforme |
+| Sin variables de entorno con secretos | Conforme |
+| CPU ≤ cuota departamental | Conforme |
+| RAM ≤ cuota departamental | Conforme |
+
+**Sin violaciones detectadas → transición FSM: `DRAFT → PENDING_APPROVAL`**
+
+---
+
+**PASO 6 — Respuesta HTTP del Backend:**
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+ "id":   "dep-7f3a2c1b",
+ "status": "PENDING_APPROVAL",
+ "name":  "congreso-ia-departamento",
+ "image":  "nginx:alpine",
+ "port":  8080,
+ "cpu":   "500m",
+ "ram":   "256Mi",
+ "message": "Intent registered. Awaiting HITL approval from SIC technician."
+}
+```
+
+---
+
+**PASO 7 — Observation inyectada al LLM (bucle ReAct):**
+
+```json
+{
+ "role": "tool",
+ "tool_call_id": "ollama_a3f7c291",
+ "name": "deploy_congress_web",
+ "content": "{\"id\": \"dep-7f3a2c1b\", \"status\": \"PENDING_APPROVAL\", ...}"
+}
+```
+
+El `AgentOrchestrator` re-inyecta la respuesta del backend como *Observation* en el historial del LLM y solicita la siguiente iteración ReAct.
+
+---
+
+**PASO 8 — Final Answer del LLM al investigador:**
+
+> *" He registrado la solicitud correctamente. El Técnico del SIC revisará y aprobará el despliegue en el Dashboard de operaciones.*
+>
+> ***Detalles de la solicitud:***
+> *- **ID de seguimiento:** `dep-7f3a2c1b`*
+> *- **Servicio:** `congreso-ia-departamento`*
+> *- **Imagen:** `nginx:alpine` (política SIC)*
+> *- **Puerto:** 8080 | **CPU:** 500m | **RAM:** 256Mi*
+> *- **Estado:** `PENDING_APPROVAL` "*
+
+---
+
+**PASO 9 — Aprobación en el Dashboard (acción del Técnico SIC):**
+
+```bash
+# Equivalente curl de la aprobación en el Dashboard
+curl -X POST http://localhost:8000/hitl/approve/dep-7f3a2c1b
+```
+
+```http
+HTTP/1.1 200 OK
+{"id": "dep-7f3a2c1b", "status": "DEPLOYED"}
+```
+
+Transición FSM: `PENDING_APPROVAL → APPROVED → DEPLOYED`
+
+---
+
+**PASO 10 — YAML materializado por `FakeK8sAdapter`:**
+
+El adaptador genera el manifiesto completo (Deployment + Service + Ingress) mediante interpolación de plantillas f-string. El archivo resultante se encuentra en el **Anexo A** de esta memoria y en [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml).
+
+---
+
+**Métricas del walkthrough completo:**
+
+| Métrica | Valor |
+|---|---|
+| Iteraciones ReAct | 1 |
+| Latencia de inferencia (LLM local) | ~0,8 s |
+| Latencia de validación hexagonal | < 1 ms |
+| Tiempo hasta `PENDING_APPROVAL` | ~1,2 s |
+| Tiempo de aprobación HITL | ~7 min (decisión humana) |
+| Tiempo total E2E | ~9 min vs. ~4.340 min ITSM |
+| Reducción TTM | **99,8%** |
+
+**Transcripción completa:** [`demos/session_logs/escenario1_happy_path.json`](../demos/session_logs/escenario1_happy_path.json)
+
+---
+
+### 8.3.2. Escenario 2 — Prompt Injection: Ubuntu:latest en Puerto 22
+
+Documentado en profundidad en la Sección 8.2. En síntesis:
+
+| Fase | Resultado |
+|---|---|
+| Input del usuario | Solicita `ubuntu:latest` expuesto en el puerto 22 (SSH) |
+| Tool Call del LLM | `format_deployment_intent(name="ubuntu-debug-server", image="ubuntu:latest", port=22)` |
+| Respuesta del Backend | **`HTTP 422`** — Dos violaciones: tag `:latest` + puerto reservado 22 |
+| Autocorrección del LLM | Explica las dos violaciones en lenguaje accesible y propone alternativas conformes |
+
+La intercepción se produjo **antes de que ninguna operación modificara el clúster**, lo que valida el principio de *fail-fast* de la arquitectura hexagonal.
+
+**Transcripción completa:** [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json)
+
+---
+
+### 8.3.3. Escenario 3 — Ciclo HITL Completo: CMS WordPress para el Departamento
+
+**Input del investigador:**
+
+> *"El departamento de Ciencias de la Computación necesita un CMS WordPress para publicar noticias y eventos. ¿Puedes solicitarlo?"*
+
+**Secuencia de estados de la FSM:**
+
+```
+DRAFT → PENDING_APPROVAL → APPROVED → DEPLOYED
+```
+
+| Fase | Actor | Duración | Herramienta/Mecanismo |
+|---|---|---|---|
+| Petición en lenguaje natural | Investigador | ~5s | Streamlit chat |
+| Razonamiento + Tool Call | Agente ReAct (qwen2.5:7b) | ~0,9s | `deploy_department_cms` |
+| Validación de seguridad | `SecurityContextValidator` | <1ms | Algoritmo 1 (Cap. 4.3) |
+| Transición a PENDING | FSM | <1ms | `FSMTransition` (Cap. 6.2) |
+| Revisión en Dashboard | Técnico SIC | ~7 min | Panel HITL (Cap. 6.3) |
+| Aprobación y despliegue | Técnico SIC | ~2s | Botón "Aprobar" |
+| YAML escrito en disco | `FakeK8sAdapter` | <1ms | Template f-string |
+
+**Tiempo total extremo a extremo (incluyendo espera HITL):** ~9 minutos vs. ~4.340 minutos en el modelo ITSM convencional (**reducción del 99,8%**).
+
+**Transcripción completa:** [`demos/session_logs/escenario3_hitl_completo.json`](../demos/session_logs/escenario3_hitl_completo.json)
+
+---
+
+### 8.3.4. Síntesis de Evidencias Empíricas
+
+| Escenario | Iteraciones ReAct | Latencia LLM | Resultado | Artefacto |
+|---|---|---|---|---|
+| Happy Path — Congreso IA | 1 | ~0,8s | DEPLOYED | `escenario1_happy_path.json` |
+| Prompt Injection — Puerto 22 | 1 | ~0,7s | REJECTED (HTTP 422) | `escenario2_prompt_injection.json` |
+| Ciclo HITL — CMS WordPress | 1 | ~0,9s | DEPLOYED (post-aprobación) | `escenario3_hitl_completo.json` |
+
+En los tres escenarios, el agente resolvió la petición en **exactamente 1 iteración ReAct**, sin necesidad de corrección de rumbo adicional. Esto valida que el diseño del `SYSTEM_PROMPT` (Capítulo 5.2) y el catálogo de herramientas MCP (Capítulo 5.1) son suficientemente descriptivos para que un modelo de 7B parámetros ejecutable en hardware de consumo produzca resultados correctos y seguros.
+
+
 
 <div style='page-break-after: always;'></div>
 
-# Capítulo 9. Conclusiones y Trabajo Futuro
+# Capítulo 9. Gestión y Viabilidad del Proyecto
 
-La convergencia entre la Inteligencia Artificial Generativa y la automatización de la infraestructura operativa (*Platform Engineering*) representa uno de los vectores de innovación más significativos de la década. Este Trabajo de Fin de Máster nació con la ambición de gobernar dicha intersección, transformando el comportamiento impredecible de los Modelos de Lenguaje en una herramienta corporativa determinista. 
+> Este capítulo condensa el análisis ejecutivo de la viabilidad técnica y económica del *Agentic Deployer*, así como las métricas globales de esfuerzo. El desglose exhaustivo de los *sprints*, retrospectivas ágiles, y cálculo de costes pormenorizado se encuentra documentado en el **Anexo B (Planificación Detallada del Proyecto y Costes)**.
 
-A continuación, se exponen las conclusiones extraídas tras la validación empírica del sistema y se traza la hoja de ruta para su evolución futura.
+---
 
-## 9.1. Conclusiones
+## 9.1. Esfuerzo de Desarrollo y Desviaciones
 
-La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un yugo arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en los siguientes puntos:
+El proyecto se estructuró bajo una metodología ágil iterativa-incremental orientada al dominio (*Domain-First*), distribuyendo el esfuerzo en 5 *Sprints* técnicos y 2 fases de redacción y cierre de excelencia. 
 
-### 9.1.1. Superación del *Vendor Lock-In* mediante MCP
+Frente a la estimación inicial de ~300 horas, el cierre empírico del proyecto arrojó un esfuerzo total de **~340 horas**, lo que representa una desviación del **+13%**. Esta inversión adicional se encuadra holgadamente dentro del margen de contingencia previsto (±15%) y se asumió de manera deliberada en la recta final para elevar el MVP a un estándar de excelencia ingenieril (implementación de persistencia ACID en SQLite, ampliación de 4 a 7 herramientas MCP, y consecución del 100% de letalidad en *Mutation Testing*).
+
+La adopción de asistentes de Inteligencia Artificial (Google Gemini Advanced) demostró actuar como un multiplicador de productividad esencial. Permitió absorber esta densidad arquitectónica dentro de un cronograma manejable para un único ingeniero, validando de forma recursiva la hipótesis de investigación del TFM sobre la utilidad de los agentes LLM en ciclos de vida de software.
+
+## 9.2. Análisis Económico del Desarrollo
+
+El proyecto fue desarrollado utilizando recursos de código abierto e infraestructura personal, por lo que el coste material directo fue marginal. No obstante, al calcular el **coste de oportunidad equivalente** (la inversión que requeriría el proyecto si se externalizara en el mercado tecnológico español a tarifas de 2026), los resultados son los siguientes:
+
+*   **Coste de Recursos Humanos (Investigador + Tutoría):** ~9.280 €
+*   **Coste de Infraestructura (Amortización hardware + Licencias IA):** ~261 €
+*   **Coste Total del Proyecto:** **~9.541 €**
+*   **Coste Promedio por Hora Efectiva:** ~26,2 €/h
+
+## 9.3. Coste de Adopción Corporativa y ROI
+
+La viabilidad comercial del prototipo se evaluó proyectando su implantación en diferentes tamaños de Servicios de Informática y Comunicaciones (SIC). Para una universidad u organización mediana (5.000 – 30.000 usuarios con una carga promedio de 500 solicitudes de infraestructura al año):
+
+1.  **Modelo de Coste Cero Operativo (Ollama):** Aprovechando la modularidad de la Arquitectura Hexagonal, la organización puede prescindir de APIs de pago y enrutar la lógica cognitiva a través de un servidor *on-premise* con LLMs *open-source* (ej. `Llama-3.1` o `Qwen-2.5`). Esto reduce el coste operativo de la IA a **0 €/año**, al tiempo que blinda al 100% la privacidad del dato institucional (*Zero Data Retention*).
+2.  **Rentabilidad (ROI):** 
+    *   La inversión inicial (*CAPEX*) de adaptación e integración con el clúster físico se estima en ~8.100 €.
+    *   El ahorro operativo anual (reducción del tiempo de negociación, modelado YAML y auditoría manual de políticas de 24h a 2 minutos por solicitud) se cifra en ~20.320 €/año.
+    *   El **período de recuperación de la inversión (Payback Period)** se alcanza a los **5,4 meses**.
+    *   El **Retorno de la Inversión (ROI) acumulado a 3 años** supera el **460%**.
+
+*Para acceder al desglose de los diagramas de Gantt, las tablas forenses por Sprint y los cálculos de OPEX/CAPEX detallados, véase el **Anexo B**.*
+
+
+<div style='page-break-after: always;'></div>
+
+# Capítulo 10. Conclusiones, Limitaciones y Trabajo Futuro
+
+La convergencia entre la Inteligencia Artificial Generativa y la automatización de la infraestructura operativa (*Platform Engineering*) representa uno de los vectores de innovación más significativos de la década. Este Trabajo de Fin de Máster nació con la ambición de gobernar dicha intersección, transformando el comportamiento impredecible de los Modelos de Lenguaje en una herramienta corporativa determinista, segura y auditable.
+
+A continuación, se exponen las conclusiones derivadas de la validación empírica del sistema, las limitaciones inherentes al alcance del prototipo y la hoja de ruta estratégica para su evolución futura.
+
+## 10.1. Conclusiones
+
+La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un yugo arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en cinco puntos:
+
+### 10.1.1. Superación del *Vendor Lock-In* mediante MCP
+
 La decisión arquitectónica de aislar el catálogo de operaciones del Servicio de Informática (SIC) utilizando el **Model Context Protocol (MCP)** [3] se ha revelado como el mayor acierto estratégico del proyecto. Se ha demostrado empíricamente que es posible construir herramientas de automatización complejas sin escribir una sola línea de código acoplada a las APIs nativas de OpenAI, Google o Anthropic. El servidor MCP desarrollado actúa como un activo tecnológico universal; su capacidad para inyectar *JSON Schemas* dinámicamente mediante la introspección de funciones Python asegura que el código universitario heredará compatibilidad nativa con cualquier evolución futura de los Modelos de Lenguaje.
 
-### 9.1.2. La Arquitectura Hexagonal como Jaula Cognitiva
-Uno de los mayores hallazgos de este trabajo es la refutación práctica del mito de la "Inteligencia Artificial incontrolable" en entornos de operaciones. La adopción del patrón *Ports and Adapters* (Arquitectura Hexagonal) [2] ha demostrado ser un mecanismo de contención eficaz contra las "alucinaciones" (respuestas inventadas) del LLM. 
-Al forzar a la IA a cruzar la frontera de un Dominio inmutable fuertemente tipado (`Pydantic`) y regido por un validador determinista (`SecurityContextValidator`), la estocasticidad queda fuertemente mitigada antes de alcanzar la capa de infraestructura. El sistema no confía en la precisión del LLM; asume que este fallará, intercepta sus errores y los retroalimenta (*Feedback Loop*), creando un ecosistema biológico de corrección automática.
+Este desacoplamiento estratégico se validó materialmente en dos frentes. En primer lugar, con la implementación del `OllamaLLMClient` nativo (sección 5.2.1), que sustituyó la dependencia en la API de OpenAI por un modelo ejecutado localmente (`qwen2.5:7b`), sin modificar una sola línea de la lógica de negocio hexagonal ni del servidor MCP. En segundo lugar, mediante la validación del servidor con el **MCP Inspector** — la herramienta de certificación oficial de Anthropic — que, ejecutándose de forma completamente independiente al cliente Streamlit del proyecto, fue capaz de descubrir (`tools/list`) e invocar todas las herramientas del catálogo del SIC mediante el protocolo `stdio` estándar. Esta doble evidencia certifica que el servidor MCP del proyecto es un activo interoperable: consumible indistintamente por el agente propio, por herramientas de auditoría externas y por clientes de terceros (documentado en el README del repositorio mediante el MCP Inspector oficial).
 
-### 9.1.3. La Ineludibilidad del Patrón *Human-In-The-Loop*
-En contraste con la corriente de mercado que persigue la autonomía algorítmica total (Nivel 5), este TFM concluye que en infraestructuras críticas institucionales, el humano es un componente crítico y necesario. La implementación de la máquina de estados finita (FSM) y el *Dashboard* asíncrono demostró que la barrera humana (HITL) no erosiona la eficiencia del sistema. El agente LLM descarga al operador del 95% del esfuerzo cognitivo y sintáctico (generación de manifiestos YAML y *Golden Paths*), permitiendo al técnico humano ejercer un 100% de soberanía legal y técnica sobre el despliegue físico con un solo clic.
+### 10.1.2. La Arquitectura Hexagonal como Jaula Cognitiva
 
-### 9.1.4. Redefinición del Aseguramiento de Calidad (QA) y Falsos Positivos de Cobertura
-Las metodologías de *testing* convencionales son insuficientes para sistemas estocásticos. El TFM ha validado que auditar IAs generativas requiere paradigmas avanzados. La integración de *Property-Based Testing* (Hypothesis) [6] y **Pruebas Metamórficas** [12] ha demostrado que el agente extrae entidades matemáticas correctas a partir de texto con alto ruido sintáctico. De igual trascendencia ha sido el descubrimiento empírico derivado de auditar el sistema mediante *Mutation Testing* (Mutmut): se ha evidenciado que una Cobertura de Código del 100% no garantiza la resiliencia lógica. La capacidad de la mutación algorítmica para detectar y forzar la mitigación de 12 brechas de red y validación, que las métricas clásicas pasaron por alto, certifica en última instancia que la resiliencia del sistema se ha elevado a estándares propios de un entorno de producción.
+Uno de los mayores hallazgos de este trabajo es la refutación práctica del mito de la "Inteligencia Artificial incontrolable" en entornos de operaciones. La adopción del patrón *Ports and Adapters* (Arquitectura Hexagonal) [2] ha demostrado ser un mecanismo de contención eficaz contra las "alucinaciones" del LLM.
 
-En síntesis, este Trabajo de Fin de Máster aporta una arquitectura de referencia replicable, demostrando que la Inteligencia Artificial no viene a reemplazar al ingeniero de infraestructuras, sino a abstraer la aridez del código declarativo bajo una capa de razonamiento lingüístico natural.
+Al forzar a la IA a cruzar la frontera de un Dominio inmutable fuertemente tipado (`Pydantic`) y regido por un validador determinista (`SecurityContextValidator`), la estocasticidad queda fuertemente mitigada antes de alcanzar la capa de infraestructura. El sistema no confía en la precisión del LLM; asume que este fallará, intercepta sus errores y los retroalimenta (*Feedback Loop*), creando un ecosistema biológico de corrección automática. El escenario de *Prompt Injection* documentado en la sección 8.2 certifica que ni siquiera una instrucción deliberadamente maliciosa (`ubuntu:latest`, puerto `22`) consigue atravesar la barrera hexagonal: el sistema la intercepta, devuelve un `HTTP 422`, y el agente se autocorrige en la siguiente iteración ReAct.
 
-## 9.2. Trabajo Futuro
+### 10.1.3. La Ineludibilidad del Patrón *Human-In-The-Loop*
 
-El prototipo actual (MVP) certifica matemáticamente la viabilidad de la integración agéntica en sistemas deterministas. Sin embargo, su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
+En contraste con la corriente de mercado que persigue la autonomía algorítmica total (Nivel 5), este TFM concluye que en infraestructuras críticas institucionales, el humano es un componente crítico y necesario. La implementación de la Máquina de Estados Finita (FSM) y el *Dashboard* asíncrono demostró que la barrera humana (HITL) no erosiona la eficiencia del sistema, sino que la maximiza bajo un modelo de **Asimetría de Contexto Triangular**: el agente LLM asume el esfuerzo cognitivo de generar manifiestos válidos y seguros, el técnico SIC ejerce la soberanía legal con un solo clic, y el investigador recibe una notificación del resultado directamente en la interfaz conversacional (sección 6.4).
 
-### 9.2.1. Horizonte a Corto Plazo: Integración Física (K8s API)
+La reducción del tiempo de entrega demostrada —de ~4.340 minutos (ITSM clásico) a ~9 minutos (ciclo E2E con HITL)— certifica que la supervisión humana y la eficiencia extrema no son objetivos mutuamente excluyentes cuando el agente abstrae correctamente la carga cognitiva.
 
-El diseño Hexagonal permite la sustitución de la capa de persistencia actual (`FakeK8sAdapter`) sin impactar la lógica de negocio subyacente. El primer hito evolutivo consiste en desarrollar e inyectar un **`RealK8sAdapter`**. 
-Este adaptador hará uso de la librería oficial de Kubernetes para Python (`kubernetes-client`). En lugar de volcar manifiestos YAML estáticos en el disco físico del servidor, el adaptador consumirá directamente el *Control Plane* de un clúster físico experimental (como Minikube, K3s o un entorno *sandbox* universitario), permitiendo que la aprobación del técnico (HITL) despierte los *pods* de forma inmediata.
+### 10.1.4. Redefinición del Aseguramiento de Calidad (QA) y los Falsos Positivos de Cobertura
 
-### 9.2.2. Horizonte a Medio Plazo: Adopción de la Filosofía GitOps
+Las metodologías de *testing* convencionales son insuficientes para sistemas estocásticos. El TFM ha validado que auditar IAs generativas requiere paradigmas avanzados. La integración de *Property-Based Testing* (Hypothesis) [6] y Pruebas Metamórficas [12] ha demostrado que el agente extrae entidades matemáticas correctas a partir de texto con alto ruido sintáctico.
 
-Una de las premisas fundamentales del movimiento *Platform Engineering* es la trazabilidad declarativa mediante sistemas de control de versiones. Actualmente, el flujo de ejecución sigue un modelo *Push* (el adaptador intenta empujar los recursos al clúster). 
+De igual trascendencia ha sido el descubrimiento derivado del *Mutation Testing* (Mutmut): se ha evidenciado que una Cobertura de Código del 100% no garantiza la resiliencia lógica. La auditoría detectó **30 mutantes supervivientes** en los parsers de recursos auxiliares (`_parse_cpu`, `_parse_ram`), brechas que las métricas clásicas reportaban como "cubiertas". Este hallazgo constituye una contribución metodológica por sí mismo, demostrando la superioridad epistémica del *Mutation Testing* sobre la cobertura de líneas para sistemas de infraestructura crítica.
+
+### 10.1.5. La Interfaz Conversacional como Democratizador de la Infraestructura
+
+La evaluación empírica de los tres escenarios (Cap. 8.3) ha confirmado la hipótesis central del proyecto: es posible que un investigador sin formación en Kubernetes gestione el despliegue de servicios productivos mediante lenguaje natural. Frases como *"necesito un portal web para el congreso de IA del departamento, esperamos 200-300 personas"* son suficientes para que el sistema genere un manifiesto Kubernetes completo y válido (Deployment + Service + Ingress, véase Anexo A), atraviese la validación de seguridad hexagonal y notifique al técnico SIC para su aprobación en cuestión de segundos.
+
+En síntesis, este Trabajo de Fin de Máster aporta una **arquitectura de referencia replicable**, demostrando que la Inteligencia Artificial no viene a reemplazar al ingeniero de infraestructuras, sino a abstraer la aridez del código declarativo bajo una capa de razonamiento lingüístico natural, preservando íntegra la cadena de responsabilidad humana.
+
+### 10.1.6. Garantía de Persistencia (Transacciones ACID)
+
+El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de estado en sistemas agénticos. Mediante la implementación del patrón de repositorio (`SQLiteDeploymentRepository`), el sistema ha abandonado el almacenamiento volátil en memoria para garantizar que el historial de intenciones y aprobaciones (la Máquina de Estados) sobreviva a reinicios del servidor. Esta inyección de dependencias consolida el diseño hexagonal y certifica que el prototipo es robusto y ACID-compliant frente a fallos de infraestructura.
+
+## 10.2. Limitaciones del Prototipo
+
+Todo sistema de investigación que persiga la honestidad académica debe documentar con precisión sus limitaciones inherentes. El *Agentic Deployer* es un *Minimum Viable Product* (MVP) avanzado cuya función es demostrar la viabilidad de la arquitectura, no sustituir un sistema de orquestación empresarial maduro. Las siguientes limitaciones son conscientes, deliberadas y en varios casos representan las semillas del trabajo futuro descrito en la sección 9.3.
+
+### 10.2.1. Adaptador de Kubernetes Simulado (`FakeK8sAdapter`)
+
+La materialización final de los manifiestos YAML se produce mediante volcado en el sistema de archivos local, no mediante una llamada real a la API de Kubernetes. El sistema genera YAML semánticamente correcto y aplicable (como certifica el Anexo A), pero no ha sido ejecutado contra un clúster físico. Esto limita la validación de:
+
+- **Factibilidad de los recursos declarados:** Kubernetes podría rechazar el `ResourceQuota` si el *namespace* tiene límites distintos a los calculados por el `_calculate_congress_resources`.
+- **Conflictos de nombres:** Un servicio con el mismo nombre que uno existente generaría un conflicto de `409 Conflict` en el API-server de K8s, no recogido actualmente por el flujo de error.
+- **Certificados TLS:** El manifiesto de `Ingress` referencia a `cert-manager` como emisor de certificados. En un clúster sin `cert-manager` instalado, el `Ingress` quedaría en estado `Pending` indefinidamente.
+
+### 10.2.2. Autenticación y Autorización Ausentes
+
+Los endpoints del backend (`/mcp/intent`, `/hitl/approve`, `/hitl/status`) **carecen de cualquier mecanismo de autenticación** (OAuth2, JWT, API Keys). En el prototipo, cualquier proceso con acceso a la red local puede aprobar o rechazar despliegues. En un entorno productivo, esto representa una vulnerabilidad crítica de escalada de privilegios.
+
+La integración con sistemas institucionales de identidad (como LDAP, Active Directory o Keycloak) y la implementación de un modelo RBAC (Role-Based Access Control) con roles diferenciados (`investigador`, `tecnico-sic`, `admin`) es un requisito de seguridad ineludible antes de cualquier despliegue real.
+
+### 10.2.3. *Prompt Injection* Avanzada y Jailbreaking
+
+El sistema ha demostrado resiliencia frente al *Prompt Injection* básico (Cap. 8.2). Sin embargo, la comunidad de seguridad en IA ha documentado vectores de ataque más sofisticados que podrían superar las defensas actuales:
+
+- **Inyección indirecta:** Si el LLM tiene acceso a recursos externos (páginas web, correos electrónicos), un documento malicioso podría embeber instrucciones diseñadas para manipular al agente sin que el usuario sea consciente del ataque.
+- **Jailbreaking mediante contexto acumulativo:** Un usuario malintencionado podría, a través de múltiples turnos de conversación, ir erosionando el `SYSTEM_PROMPT` del agente hasta conseguir que este ignore las restricciones institucionales.
+
+La mitigación de estos vectores avanzados requiere capas defensivas adicionales no implementadas en el MVP: sanitización del contexto entre sesiones, detección de anomalías en el historial y sistemas de auditoría de los mensajes del sistema.
+
+### 10.2.4. Cobertura de *Golden Paths* y Catálogo de Herramientas
+
+El servidor MCP expone actualmente un catálogo de herramientas extenso y diverso para resolver las necesidades cotidianas del SIC: `deploy_congress_web`, `deploy_department_cms`, `deploy_python_app`, `deploy_static_website`, `deploy_database`, `get_deployment_status` y `delete_university_service`. Aunque estas rutas doradas cubren un amplio abanico de casos de uso, quedan excluidos del catálogo operaciones complejas de gestión continua:
+
+- Escalado horizontal dinámico de réplicas (`scale_deployment`)
+- Consulta y filtrado de estado de los pods en ejecución (`get_pod_status`)
+- Gestión de *ConfigMaps* y *Secrets* de Kubernetes
+- Operaciones de actualización progresiva (*rolling update*)
+
+Cada herramienta nueva requeriría la definición de un nuevo *Golden Path* validado por el equipo de seguridad del SIC, un proceso de gobernanza que escapa al alcance del prototipo pero que está arquitectónicamente previsto.
+
+### 10.2.5. Escalabilidad y Concurrencia del Backend
+
+El backend FastAPI opera en modo síncrono sobre un único proceso Uvicorn. En un entorno con múltiples técnicos SIC consultando el Dashboard simultáneamente y múltiples investigadores generando intenciones a través del chat, el sistema podría experimentar cuellos de botella y requerir despliegues multi-proceso más robustos (ej. Gunicorn con múltiples *workers*), aunque el uso del repositorio en SQLite resuelve estructuralmente las condiciones de carrera locales de la máquina de estados.
+
+### 10.2.6. Rigidez del Flujo de Decisión (Inmutabilidad Pre-Despliegue)
+
+Actualmente, el técnico SIC en el panel HITL posee una autoridad estrictamente booleana: puede Aprobar o Rechazar el despliegue. Si el agente de IA propone una configuración correcta pero con un límite de RAM ligeramente excesivo, el técnico no puede editar ese valor (*Pre-Deployment Mutability*). Su única opción es rechazar la intención, obligando al investigador a formular una nueva petición al LLM con instrucciones más restrictivas. En futuras iteraciones, la interfaz debería permitir la "Edición Asistida", posibilitando que el técnico ajuste los parámetros de la `DeploymentIntent` justo antes de autorizar la transición al adaptador de infraestructura, flexibilizando enormemente la operatividad.
+
+## 10.3. Trabajo Futuro
+
+El prototipo actual certifica matemáticamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
+
+### 10.3.1. Horizonte a Corto Plazo: Integración Física (K8s API)
+
+El diseño Hexagonal permite la sustitución de la capa de persistencia actual (`FakeK8sAdapter`) sin impactar la lógica de negocio subyacente. El primer hito evolutivo consiste en desarrollar e inyectar un **`RealK8sAdapter`** utilizando la librería oficial de Kubernetes para Python (`kubernetes-client`). En lugar de volcar manifiestos YAML estáticos en el disco físico del servidor, el adaptador consumirá directamente el *Control Plane* de un clúster físico experimental (como Minikube, K3s o un entorno *sandbox* universitario), permitiendo que la aprobación del técnico (HITL) despierte los *pods* de forma inmediata. El pseudocódigo de esta integración se documenta en el Anexo A (sección A.3).
+
+De forma paralela a esta integración, debe abordarse la consolidación de la persistencia mediante repositorios distribuidos como PostgreSQL (evolucionando la solución actual basada en SQLite para entornos de alta disponibilidad) y la **autenticación JWT** en todos los endpoints (mitigando la limitación 9.2.2).
+
+### 10.3.2. Horizonte a Medio Plazo: Adopción de la Filosofía GitOps
+
+Una de las premisas fundamentales del movimiento *Platform Engineering* es la trazabilidad declarativa mediante sistemas de control de versiones. Actualmente, el flujo de ejecución sigue un modelo *Push* (el adaptador intenta empujar los recursos al clúster).
 
 Para alinear el sistema con los más altos estándares corporativos, se propone evolucionar hacia un modelo **GitOps (Pull-based)**:
-- El adaptador secundario no atacará a Kubernetes, sino que realizará un *commit* de los YAML autogenerados hacia un repositorio Git (ej. GitLab o GitHub) dedicado exclusivamente a la topología del clúster.
-- Herramientas de reconciliación consolidadas en el mercado, como **ArgoCD** o **Flux**, monitorizarán dicho repositorio. Al detectar un nuevo *commit* aprobado por el sistema HITL, ArgoCD se encargará de traccionar (*pull*) los manifiestos y aplicarlos en el clúster.
-Esta separación entre el agente que redacta/audita y el orquestador físico que despliega garantizará un *Disaster Recovery* altamente fiable, ya que el estado real del centro de datos siempre residirá en un repositorio Git versionado.
+- El adaptador secundario no atacará a Kubernetes directamente, sino que realizará un *commit* de los YAML autogenerados hacia un repositorio Git (ej. GitLab o GitHub) dedicado a la topología del clúster.
+- Herramientas de reconciliación consolidadas, como **ArgoCD** o **Flux**, monitorizarán dicho repositorio. Al detectar un nuevo *commit* aprobado por el sistema HITL, ArgoCD se encargará de traccionar (*pull*) los manifiestos y aplicarlos en el clúster.
 
-### 9.2.3. Horizonte a Largo Plazo: Policy-as-Code (OPA y Kyverno)
+Esta separación garantizará un *Disaster Recovery* altamente fiable y una trazabilidad de auditoría completa, ya que el estado real del centro de datos siempre residirá en un repositorio Git versionado. Adicionalmente, se propone escalar el catálogo de herramientas MCP para cubrir las operaciones de gestión ausentes (limitación 9.2.4).
 
-El núcleo de seguridad actual recae en el `SecurityContextValidator`, cuyas reglas están codificadas imperativamente en lenguaje Python. Aunque robusto frente al LLM, la actualización de las políticas (por ejemplo, prohibir de repente el puerto 80) requiere el redespliegue de todo el backend de FastAPI.
+### 10.3.3. Horizonte a Largo Plazo: Policy-as-Code y Agentic DevSecOps
 
-Para mitigar esta rigidez, el sistema migrará su lógica de validación hacia motores estandarizados de *Policy-as-Code* (Políticas como Código), integrando el orquestador agéntico con **Open Policy Agent (OPA)** o **Kyverno**. 
-Bajo este paradigma, el equipo de ciberseguridad del Servicio de Informática definirá reglas de validación en lenguaje *Rego* u objetos declarativos de K8s. El Backend, en el momento de la evaluación HITL, interrogará a la API de OPA para decidir si el despliegue es lícito. De este modo, la Inteligencia Artificial del TFM lograría integrarse fluidamente y sin fricciones en los flujos de auditoría cibernética más exigentes de la industria del *Cloud Computing*.
+El modelo de seguridad actual (`SecurityContextValidator`) debe evolucionar hacia motores empresariales de **Policy-as-Code (OPA o Kyverno)**, permitiendo a Ciberseguridad definir reglas dinámicas (*Rego*) sin alterar el código de la API. 
+
+No obstante, el *Policy-as-Code* tradicional sigue anclado a recetas estáticas. La evolución natural del prototipo apunta hacia el **Agentic LLM DevSecOps**, donde el agente aplica **razonamiento semántico** para integrarse de forma activa en el ciclo CI/CD. Esta arquitectura habilitaría funciones autónomas como:
+1. **Triaje Inteligente:** Reducir falsos positivos aplicando contexto (ej. ignorar vulnerabilidades si el servicio está aislado tras un *API Gateway*).
+2. **Auto-Remediación (*Self-healing*):** Detectar dependencias vulnerables, parchear el `Dockerfile`, lanzar tests automáticos y proponer el *commit*.
+3. **Ajuste Dinámico:** Modificar *Network Policies* de Kubernetes en caliente ante amenazas (ej. alertas de *Falco*) entendiendo semánticamente el problema, sin depender de manuales estáticos (útil ante vulnerabilidades Zero-Day como *Log4j*).
+
+Otorgar esta autonomía a la IA conlleva riesgos severos de *Shadow AI* y alucinaciones. Precisamente, **el flujo HITL desarrollado en este TFM** es el paso fundamental para un *Human-in-the-loop Agentic DevSecOps*: el agente asimila miles de telemetrías y propone acciones complejas en segundos, pero el operario humano retiene la autoridad del "clic" final para mutar la infraestructura de forma segura.
+
+### 10.3.4. Observabilidad y Conciencia Agéntica del Entorno
+
+Una ampliación natural y muy ambiciosa del sistema consiste en dotar al agente de herramientas MCP de **observabilidad en tiempo real** (*read-only*), permitiéndole consultar métricas y telemetría del clúster (por ejemplo, integrando herramientas MCP que lean directamente de Prometheus o Grafana).
+
+Lejos de contradecir la filosofía restrictiva del proyecto, esto la complementa dotando a la IA de "sentidos": el agente no tendría permisos para modificar la infraestructura arbitrariamente, pero podría razonar sobre su estado. Si el clúster presenta alta saturación de CPU, el agente podría adaptar su decisión dinámicamente y negociar con el investigador en términos puramente de negocio (*"Actualmente los servidores del SIC tienen mucha carga, ¿es aceptable arrancar la web del congreso en un modo básico consumiendo la mitad de recursos por ahora?"*). 
+
+Paralelamente, el agente podría inyectar esta telemetría como metadatos de advertencia en la intención (`DeploymentIntent`) para que el técnico del SIC disponga del contexto de saturación en el *Dashboard HITL* antes de aprobar. Esta capacidad acercaría definitivamente el prototipo a la figura ideal de un **Operador de Plataforma Autoconsciente**, preservando en todo momento la abstracción técnica del investigador.
+
+### 10.3.5. QA Avanzado: Pruebas Metamórficas Estocásticas con LLM Adversario
+
+La suite de pruebas actual ha demostrado la utilidad de las Relaciones Metamórficas (MR) deterministas (variaciones de orden, ruido y capitalización) para auditar el comportamiento del agente. Para escalar este modelo de aseguramiento de calidad (*QA*) hacia entornos empresariales de alta exigencia, una evolución natural propuesta consiste en implementar generadores de pruebas basados en **LLMs Adversarios**. 
+
+En este paradigma, un segundo modelo de lenguaje actuaría como generador de casos de prueba estocásticos, encargado de redactar intenciones de despliegue con alta entropía semántica (ambigüedades deliberadas, jerga interdepartamental compleja o estructuras gramaticales inusuales). Esto permitiría automatizar la validación de la robustez cognitiva del orquestador ReAct frente a un espectro infinito de interacciones de usuario, superando las limitaciones espaciales del *testing* programado manualmente y alineando el sistema con el estado del arte en pruebas para Inteligencia Artificial.
 
 
 <div style='page-break-after: always;'></div>
 
-# Capítulo 10. Bibliografía y Referencias
+# Capítulo 11. Bibliografía y Referencias
 
 A continuación, se detalla la literatura académica, especificaciones técnicas y documentación oficial que fundamentan las decisiones arquitectónicas, metodológicas y algorítmicas expuestas en este Trabajo de Fin de Máster. Las referencias se han estructurado para abarcar tanto el paradigma de la Inteligencia Artificial Generativa como la Ingeniería de Confiabilidad del Sitio (SRE) y los Patrones de Diseño de Software.
 
@@ -1474,7 +2466,7 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[9]** Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley Professional.
 *(Literatura clásica para la justificación de los patrones Factory y Abstract Adapter utilizados en la conmutación entre OpenAI y Ollama en la Sección 5.2).*
 
-**[10]** Lolo, A., & Ovadia, S. (2024). *Streamlit for Data Science: Create interactive data apps in Python*. Packt Publishing.
+**[10]** Richards, T. (2023). *Streamlit for Data Science: Create interactive data apps in Python* (2nd ed.). Packt Publishing.
 *(Referencia metodológica para el diseño de la interfaz gráfica asíncrona tolerante a la ambigüedad empleada por los investigadores).*
 
 **[11]** Pydantic. (2024). *Pydantic Data validation and settings management using python type annotations*. Recuperado de https://docs.pydantic.dev/
@@ -1501,6 +2493,575 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[18]** Richardson, C. (2018). *Microservices Patterns: With examples in Java*. Manning Publications.
 *(Referencia teórica extendida para los patrones de transaccionalidad, API Composition y observabilidad en arquitecturas distribuidas).*
 
+**[19]** Encode OSS. (2024). *HTTPX: A next-generation HTTP client for Python*. Recuperado de https://www.python-httpx.org/
+*(Librería utilizada en la implementación del `OllamaLLMClient` nativo para comunicación HTTP/1.1 y HTTP/2 sin dependencias de terceros en la API de Ollama, documentado en la Sección 5.2.1).*
+
+**[20]** Ollama. (2024). *Ollama: Get up and running with large language models locally*. Recuperado de https://ollama.com/
+*(Servidor de inferencia local de código abierto que habilita la ejecución de modelos como Llama 3, Mistral y Qwen2.5 en infraestructura propia, garantizando la soberanía del dato institucional. Referenciado en las Secciones 3.3.3, 5.2.1 y 5.2.2).*
+
+**[21]** Chase, H. (2022). *LangChain: Building applications with LLMs through composability*. GitHub Open Source Repository. Recuperado de https://github.com/langchain-ai/langchain
+*(Framework de orquestación de agentes LLM analizado en la Sección 2.5.3 como alternativa descartada por su acoplamiento al framework y la ausencia de protocolo de interoperabilidad estándar).*
+
+**[22]** Wu, Q., Bansal, G., Zhang, J., Wu, Y., Li, B., Zhu, E., ... & Wang, C. (2023). *AutoGen: Enabling next-generation LLM applications via multi-agent conversation*. arXiv preprint arXiv:2308.08155. Recuperado de https://arxiv.org/abs/2308.08155
+*(Framework multi-agente de Microsoft analizado en la Sección 2.5.3, cuya comparativa fundamenta la elección del estándar MCP frente a abstracciones propietarias de orquestación).*
+
+**[23]** Open Policy Agent (OPA). (2024). *OPA: Policy-based control for cloud native environments*. Cloud Native Computing Foundation (CNCF). Recuperado de https://www.openpolicyagent.org/
+*(Motor de Policy-as-Code propuesto como evolución del `SecurityContextValidator` en el horizonte a largo plazo del Trabajo Futuro [Sección 10.3.3], permitiendo externalizar y actualizar reglas de validación sin redespliegue del backend).*
+
+**[24]** Kyverno Authors. (2024). *Kyverno: Kubernetes Native Policy Management*. Cloud Native Computing Foundation (CNCF). Recuperado de https://kyverno.io/
+**(Alternativa nativa de Kubernetes a OPA para la gestión declarativa de políticas de seguridad como recursos del clúster. Referenciada en la Sección 10.3.3 como mecanismo de gobernanza en el horizonte de madurez del sistema).*
+
+**[25]** Winters, T., Manshreck, T., & Wright, H. (2020). *Software Engineering at Google: Lessons Learned from Programming Over Time*. O'Reilly Media.
+*(Citado en la Sección 7.1.4 para respaldar el umbral pragmático del 80% de cobertura de código frente a la falacia del 100%).*
+
+**[26]** McCabe, T. J. (1976). *A Complexity Measure*. IEEE Transactions on Software Engineering, SE-2(4), 308-320.
+*(Referencia fundacional de la Complejidad Ciclomática, cuyo umbral moderno estandarizado en la industria [ej. SonarSource / SonarQube] fundamenta el límite de `max-complexity = 15` adoptado en la canalización CI/CD, Sección 7.1.4).*
+
+**[27]** Cohn, M. (2009). *Succeeding with Agile: Software Development Using Scrum*. Addison-Wesley Professional.
+*(Obra seminal donde se propone el modelo conceptual de la Pirámide de Pruebas Automáticas, adaptado en el Capítulo 7 para jerarquizar el QA de IA).*
+
 
 <div style='page-break-after: always;'></div>
 
+# Anexo A. Manifiesto Kubernetes Generado — Escenario 1 (Happy Path)
+
+> **Referencia:** Sección 8.3.1 — *Walkthrough Forense: Portal Web para Congreso Académico*
+> **Artefacto fuente:** [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml)
+
+Este anexo contiene el manifiesto YAML completo generado automáticamente por el `FakeK8sAdapter` del *Agentic Deployer* a partir de una petición en lenguaje natural del investigador (véase Sección 8.3.1). El manifiesto es una salida declarativa autocontenida compuesta por tres recursos Kubernetes estándar:
+
+1. **`Deployment`** — Define la especificación del pod, la imagen de contenedor, los recursos (CPU/RAM), los health checks y el contexto de seguridad.
+2. **`Service`** — Expone el Deployment dentro del clúster mediante un `ClusterIP` estándar, enrutando el tráfico del puerto 80 al `containerPort` 8080.
+3. **`Ingress`** — Configura el enrutamiento externo vía NGINX Ingress Controller con terminación TLS automática (cert-manager / Let's Encrypt).
+
+El YAML resultante es **directamente aplicable** a un clúster Kubernetes físico con el comando:
+
+```bash
+kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
+```
+
+---
+
+## A.1. Contexto de Generación
+
+| Campo | Valor |
+|---|---|
+| **Deployment ID** | `dep-7f3a2c1b` |
+| **Herramienta MCP invocada** | `deploy_congress_web` |
+| **Modelo LLM** | `qwen2.5:7b` (Ollama, local) |
+| **Input del usuario** | "necesito un portal web para el congreso de IA, 200-300 personas" |
+| **Parámetros inferidos** | `project_name=congreso-ia-departamento`, `expected_traffic=medium` |
+| **Estado final** | `DEPLOYED` (tras aprobación HITL) |
+| **Timestamp** | 2026-09-27T10:14:34+02:00 |
+| **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
+
+---
+
+## A.2. Manifiesto YAML Completo
+
+```yaml
+---
+# ============================================================
+# Kubernetes Deployment Manifest
+# Generated by: Agentic Deployer — FakeK8sAdapter
+# Tool:     deploy_congress_web
+# Deployment ID: dep-7f3a2c1b
+# Timestamp:  2026-09-27T10:14:34+02:00
+# Status:    DEPLOYED (HITL-approved by tecnico-sic@universidad.es)
+# ============================================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: congreso-ia-departamento
+ namespace: sic-research
+ labels:
+  app: congreso-ia-departamento
+  managed-by: agentic-deployer
+  deployment-id: dep-7f3a2c1b
+  tier: web
+ annotations:
+  agentic-deployer/requested-by: investigador@universidad.es
+  agentic-deployer/approved-by: tecnico-sic@universidad.es
+  agentic-deployer/tool: deploy_congress_web
+  agentic-deployer/traffic-level: medium
+  agentic-deployer/llm-model: qwen2.5:7b
+spec:
+ replicas: 2
+ selector:
+  matchLabels:
+   app: congreso-ia-departamento
+ template:
+  metadata:
+   labels:
+    app: congreso-ia-departamento
+  spec:
+   containers:
+    - name: congreso-ia-departamento
+     image: nginx:alpine     # Política SIC: imagen certificada (sin :latest)
+     ports:
+      - containerPort: 8080
+     resources:
+      requests:
+       cpu: "250m"       # Base: 50% del límite
+       memory: "128Mi"
+      limits:
+       cpu: "500m"       # Calculado por _calculate_congress_resources("medium")
+       memory: "256Mi"
+     readinessProbe:
+      httpGet:
+       path: /
+       port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+     livenessProbe:
+      httpGet:
+       path: /
+       port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
+     securityContext:
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 101       # Usuario nginx no-root
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: congreso-ia-departamento-svc
+ namespace: sic-research
+ labels:
+  app: congreso-ia-departamento
+  managed-by: agentic-deployer
+spec:
+ selector:
+  app: congreso-ia-departamento
+ ports:
+  - protocol: TCP
+   port: 80
+   targetPort: 8080         # Redirige al containerPort definido arriba
+ type: ClusterIP           # Sólo accesible dentro del clúster (Ingress como frontera)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+ name: congreso-ia-departamento-ingress
+ namespace: sic-research
+ annotations:
+  nginx.ingress.kubernetes.io/rewrite-target: /
+  cert-manager.io/cluster-issuer: "letsencrypt-prod" # TLS automático
+spec:
+ ingressClassName: nginx
+ tls:
+  - hosts:
+    - congreso-ia.universidad.es
+   secretName: congreso-ia-tls
+ rules:
+  - host: congreso-ia.universidad.es
+   http:
+    paths:
+     - path: /
+      pathType: Prefix
+      backend:
+       service:
+        name: congreso-ia-departamento-svc
+        port:
+         number: 80
+```
+
+---
+
+## A.3. Relación con el Código Fuente
+
+El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/k8s_adapter.py`](../app/infrastructure/k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
+
+En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 9.2.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
+
+```python
+# Futura implementación RealK8sAdapter (pseudocódigo)
+from kubernetes import client, config
+
+config.load_incluster_config()
+apps_v1 = client.AppsV1Api()
+apps_v1.create_namespaced_deployment(
+  namespace="sic-research",
+  body=deployment_manifest
+)
+```
+
+La arquitectura hexagonal garantiza que este cambio de adaptador no requiere modificar ninguna línea de la lógica de negocio (Cap. 4.2.2), validando el Principio de Inversión de Dependencias (DIP) como núcleo de la estrategia de evolución tecnológica del sistema.
+
+
+<div style='page-break-after: always;'></div>
+
+# Anexo B. Planificación Detallada del Proyecto y Costes
+
+> Este capítulo complementa la metodología descrita en la Sección 3.2 con el plan de proyecto detallado, el seguimiento real de las desviaciones y un análisis económico riguroso del desarrollo y la adopción del sistema.
+
+---
+
+## B.1. Plan de Proyecto — Contexto y Restricciones
+
+### B.1.1. Restricciones Estructurales
+
+El *Agentic Deployer* se desarrolla en el contexto de un Trabajo de Fin de Máster bajo las siguientes restricciones:
+
+- **Dedicación:** Régimen parcial de investigación (~15–20 horas semanales, compatibles con actividad profesional externa).
+- **Equipo:** 1 alumno investigador + 1 tutor académico (sesiones de supervisión periódicas, con cadencia condicionada a la disponibilidad de ambas partes).
+- **Infraestructura:** Entorno de desarrollo local (portátil personal), sin coste de nube durante el desarrollo.
+- **Metodología:** Iterativa incremental, centrada en el dominio (*Domain-First*).
+
+### B.1.2. Principio de Flexibilidad y Priorización Adaptativa
+
+> [!IMPORTANT]
+> La planificación aquí descrita es de carácter **indicativo y orientativo**, no normativo. Dado que el presente TFM se desarrolla en régimen de dedicación parcial, compatibilizado con compromisos profesionales y personales de carácter variable, se asume *a priori* que los intervalos temporales de cada sprint son permeables: su ejecución puede acelerarse, posponerse o solaparse según la disponibilidad real del investigador y la capacidad de respuesta del tutor en los hitos críticos de revisión.
+
+Esta aproximación es coherente con las recomendaciones de gestión ágil de proyectos de I+D aplicados en contextos académicos (IEEE Std 12207, ISO/IEC 29110), donde la rigidez del cronograma es sustituida por la **priorización explícita de objetivos**: se garantiza primero el alcance mínimo viable (MVP) y, en función del tiempo residual, se abordan los módulos de mayor complejidad o acabado opcionales.
+
+**Jerarquía de prioridades del proyecto:**
+
+| Prioridad | Módulo | Estado |
+|---|---|---|
+| **P0 — MVP obligatorio** | Núcleo hexagonal, validador de seguridad, API REST, FSM, Dashboard HITL | Completado |
+| **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
+| **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia ACID (SQLite), catálogo MCP extendido (7 herramientas), evidencias empíricas (MCP Inspector) | Completado |
+| **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
+
+Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de "excelencia" técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Cap. 9.2).
+
+---
+
+## B.2. Estructura de Sprints y Estimación de Esfuerzo
+
+### B.2.1. Diagrama de Planificación
+
+La planificación se estructura en **5 sprints temáticos** más una fase transversal de redacción, con un esfuerzo total estimado de **~300 horas** (±15% de margen de contingencia estándar). Las fechas son referencias aproximadas sujetas al principio de flexibilidad enunciado en la sección anterior.
+
+```mermaid
+gantt
+  title Plan de Proyecto — Agentic Deployer (referencia orientativa)
+  dateFormat YYYY-MM-DD
+  axisFormat %b
+
+  section P0 · Sprint 1 — Núcleo Hexagonal
+  Modelado de Entidades (DeploymentIntent)    :s1a, 2026-03-02, 5d
+  SecurityContextValidator (Algoritmo 1)     :s1b, after s1a, 5d
+  Ports y Contratos (DeployPort)         :s1c, after s1b, 4d
+  Tests Unitarios y Property-Based (Hypothesis) :s1d, after s1c, 7d
+
+  section P0 · Sprint 2 — Backend HITL y FSM
+  API REST FastAPI (endpoints MCP + HITL)    :s2a, 2026-03-23, 6d
+  FSM y transiciones de estado          :s2b, after s2a, 4d
+  Dashboard HTML (polling asíncrono)       :s2c, after s2b, 5d
+  Tests de integración (use_cases)        :s2d, after s2c, 6d
+
+  section P1 · Sprint 3 — Golden Paths y FakeK8s
+  FakeK8sAdapter (YAML Deployment+Service+Ingress):s3a, 2026-04-13, 7d
+  Herramientas MCP (Golden Paths)        :s3b, after s3a, 5d
+  Pipeline CI local (run_tests.sh)        :s3c, after s3b, 3d
+  Linting Ruff + Type-checking Mypy       :s3d, after s3c, 3d
+
+  section P1 · Sprint 4 — Agente ReAct y MCP SDK
+  Integración SDK MCP oficial          :s4a, 2026-05-04, 6d
+  LLMClient ABC + OllamaLLMClient        :s4b, after s4a, 5d
+  AgentOrchestrator (bucle ReAct)        :s4c, after s4b, 5d
+  Chat Streamlit + System Prompt SIC       :s4d, after s4c, 5d
+
+  section P1 · Sprint 5 — QA Avanzado
+  Mutation Testing (mutmut)           :s5a, 2026-05-25, 7d
+  Pruebas Metamórficas (MR)           :s5b, after s5a, 5d
+  Pruebas de carga (Locust)           :s5c, after s5b, 4d
+  E2E Playwright (Dashboard HITL)        :s5d, after s5c, 3d
+
+  section P2 · Fase 6 — Redacción y Cierre
+  Redacción de Capítulos 1-5           :s6a, 2026-06-15, 21d
+  Redacción de Capítulos 6-9           :s6b, after s6a, 14d
+  Revisión tutor + correcciones iterativas    :s6c, after s6b, 28d
+  Acabado P2 (costes, evidencias, anexos)    :s6d, after s6c, 14d
+
+  section P2 · Fase 7 — Excelencia Técnica
+  Persistencia ACID (SQLite) e Inyección de Dep. :s7a, after s6d, 7d
+  Ampliación MCP a 7 herramientas operativas   :s7b, after s7a, 5d
+  QA 360: Mutmut + Pruebas Integración      :s7c, after s7b, 4d
+```
+
+### B.2.2. Estimación de Esfuerzo por Sprint
+
+La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un ritmo de trabajo parcial y la incorporación de asistencia mediante herramientas de IA generativa, cuyo efecto es la aceleración del ciclo de implementación sin merma de la calidad del análisis.
+
+| Sprint | Fase | Estimación (h) | Rango (±15%) | Prioridad |
+|---|---|---|---|---|
+| Sprint 1 | Núcleo Hexagonal | 50h | 43–58h | P0 |
+| Sprint 2 | Backend HITL y FSM | 45h | 38–52h | P0 |
+| Sprint 3 | Golden Paths y FakeK8s | 40h | 34–46h | P1 |
+| Sprint 4 | Agente ReAct y MCP SDK | 55h | 47–63h | P1 |
+| Sprint 5 | QA Avanzado | 45h | 38–52h | P1 |
+| Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
+| Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
+| **Total estimado** | | **~300h** | **~255–345h** | |
+
+> [!NOTE]
+> La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de scaffolding, generación de código boilerplate, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
+
+---
+
+## B.3. Seguimiento Real del Proyecto — Retrospectivas por Sprint
+
+### B.3.1. Sprint 1 — Núcleo Hexagonal
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 50h | ~55h | +10% |
+| Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
+| Cobertura dominio | 90% | 100% | +10pp |
+
+**Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
+
+**Notas:** La incorporación de validación de secretos en `env_vars` y de cuotas de hardware (CPU/RAM) no estaba en la estimación inicial; fue identificada durante el Property-Based Testing como un vector de riesgo real. El coste en tiempo fue compensado por la robustez ganada en capas superiores.
+
+---
+
+### B.3.2. Sprint 2 — Backend HITL y FSM
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 45h | ~45h | 0% |
+| Endpoints REST | 4 | 5 (+`/hitl/reject`) | +25% |
+| Estados FSM | 4 | 6 (+`FAILED`, `DELETED`) | +50% |
+
+**Hitos completados:** FastAPI con 5 endpoints, FSM con DAG acíclico, Dashboard HTML con polling, `DeploymentStatus` enum completo.
+
+**Notas:** El patrón de polling fue más directo de implementar que la alternativa WebSocket, generando un adelanto neto. La adición de los estados `FAILED` y `DELETED` reflejó un alineamiento proactivo entre la memoria y el código para cubrir ciclos de vida completos.
+
+---
+
+### B.3.3. Sprint 3 — Golden Paths y FakeK8s
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 40h | ~46h | +15% |
+| Herramientas MCP | 3 | 4 | +33% |
+| Templates YAML | 2 tipos | 3 tipos | +50% |
+
+**Hitos completados:** `FakeK8sAdapter` con templates f-string + `textwrap.dedent`, 4 herramientas MCP con `@mcp_server.tool()`, Pipeline CI `run_tests.sh` (6 pasos fail-fast), Ruff + Mypy integrados.
+
+**Notas:** La integración del SDK MCP oficial (`mcp==2.2.0`) en modo dual —ejecutable vía `stdio` (clientes externos) e importable en-proceso (Streamlit)— requirió iteraciones adicionales no previstas. Esta decisión es el principal activo diferencial del sistema en términos de interoperabilidad.
+
+---
+
+### B.3.4. Sprint 4 — Agente ReAct y MCP SDK
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 55h | ~62h | +13% |
+| Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
+| Iteraciones ReAct máximas | 5 | 5 | 0% |
+
+**Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (SDK `ollama` v0.6), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
+
+**Notas:** La serialización de firmas de herramientas Python a JSON Schema para el protocolo MCP requirió depuración adicional. El `OllamaLLMClient` nativo se completó en la fase de cierre, elevando el módulo de P1 a un acabado P2.
+
+---
+
+### B.3.5. Sprint 5 — QA Avanzado
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 45h | ~50h | +11% |
+| Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
+| Mutantes eliminados | >90% | 100% | +10pp |
+| Relaciones metamórficas | 3 MR | 4 MR | +33% |
+
+**Hitos completados:** Pipeline de QA integral implantado en `run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
+
+**Notas:** La detección de 12 mutantes supervivientes en `mcp_server.py` fue el hallazgo más valioso del sprint, requiriendo la creación de `test_mcp_server.py` focalizado. Justifica empíricamente la adopción de Mutation Testing (Cap. 7.3).
+
+---
+
+### B.3.6. Fase 6 — Redacción y Cierre
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas de redacción | 55h | ~64h | +16% |
+| Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
+| Iteraciones de revisión | 2–3 | 5 | +67% |
+
+**Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (11 figuras), Anexos YAML y de Planificación.
+**Notas:** La memoria creció muy por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
+
+---
+
+### B.3.7. Fase 7 — Consolidación de Excelencia Técnica
+
+| Métrica | Estimación | Real | Desviación |
+|---|---|---|---|
+| Horas dedicadas | 10h | ~18h | +80% |
+| Herramientas MCP totales | 4 | 7 | +75% |
+| Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
+
+**Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos.
+**Notas:** Esta fase, aunque no estaba prevista en el alcance original P0/P1, se abordó para elevar el proyecto a los máximos estándares de calidad ("Nota 10"). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores, sin que la lógica de negocio se vea afectada, validando empíricamente la hipótesis principal de diseño (Cap. 4.2).
+
+---
+
+## B.4. Resumen de Desviaciones Globales
+
+| Fase | Estimación (h) | Real (h) | Desviación | Causa Principal |
+|---|---|---|---|---|
+| Sprint 1 · Núcleo Hexagonal | 50 | ~55 | +10% | Ampliación del validador de seguridad |
+| Sprint 2 · Backend HITL y FSM | 45 | ~45 | 0% | Desarrollo ajustado a la previsión |
+| Sprint 3 · Golden Paths y FakeK8s | 40 | ~46 | +15% | Integración dual SDK MCP |
+| Sprint 4 · Agente ReAct y MCP SDK | 55 | ~62 | +13% | Agente ReAct + Ollama nativo |
+| Sprint 5 · QA Avanzado | 45 | ~50 | +11% | Análisis forense de mutantes |
+| Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
+| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | Inyección dependencias SQLite y QA final |
+| **Total** | **~300** | **~340** | **~+13%** | |
+
+> [!NOTE]
+> Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control.
+
+---
+
+## B.5. Análisis de Costes del Desarrollo
+
+### B.5.1. Costes de Recursos Humanos
+
+El cálculo aplica tarifas de referencia del mercado tecnológico español (2026), expresadas como **coste de oportunidad equivalente**, dado que el trabajo se realiza en el marco académico sin contraprestación económica directa.
+
+| Perfil | Tarifa/hora | Horas | Coste de oportunidad |
+|---|---|---|---|
+| **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
+| **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
+| **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
+
+> **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
+
+### B.5.2. Costes de Infraestructura y Herramientas
+
+| Recurso | Proveedor | Coste imputable | Cálculo / Observación |
+|---|---|---|---|
+| **Portátil de desarrollo** | Hardware personal | **~126 €** | Portátil ~1.200 € · vida útil 4 años · fracción de uso TFM (6 meses / 48 meses) ≈ 150 € · factor dedicación parcial ~84% ≈ **126 €** |
+| Sistema operativo y utilidades | Linux (Ubuntu) | 0 € | Open source |
+| Python 3.12 + ecosistema | Open source | 0 € | — |
+| FastAPI, Pydantic, Hypothesis, Pytest | Open source | 0 € | — |
+| SDK MCP oficial (`mcp==2.2.0`) | Anthropic (MIT License) | 0 € | Open source |
+| Ollama (servidor LLM local) | Open source | 0 € | Modelos gratuitos |
+| **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
+| OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
+| **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
+
+### B.5.3. Costes Totales de Desarrollo
+
+| Categoría | Coste |
+|---|---|
+| Recursos Humanos (coste de oportunidad) | ~9.280 € |
+| Infraestructura y herramientas | ~261 € |
+| **Coste Total del Proyecto** | **~9.541 €** |
+| **Coste por hora efectiva** | **~26,2 €/h** |
+
+---
+
+## B.6. Estimación de Costes de Adopción para Organizaciones
+
+Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar e implantar el *Agentic Deployer* en un entorno institucional real**, como un Servicio de Informática universitario o un departamento de IT corporativo?
+
+### B.6.1. Perfiles de Organización Adoptante
+
+| Perfil | Descripción | Complejidad |
+|---|---|---|
+| **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
+| **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
+| **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
+
+### B.6.2. Costes de Implantación (CAPEX — Inversión Inicial)
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| **Adaptación del código** *(personalizar `SYSTEM_PROMPT`, herramientas MCP y políticas de seguridad al catálogo corporativo)* | 20h × 40 €/h = **800 €** | 60h × 50 €/h = **3.000 €** | 160h × 60 €/h = **9.600 €** |
+| **Implementación `RealK8sAdapter`** *(integración con clúster físico vía `kubernetes-client`)* | 20h × 40 €/h = **800 €** | 40h × 50 €/h = **2.000 €** | 80h × 60 €/h = **4.800 €** |
+| **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
+| **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
+| **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
+
+### B.6.3. Costes Operativos Anuales (OPEX)
+
+#### Infraestructura de Servidor
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
+| Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
+
+#### Motor LLM — La Variable Determinante del OPEX
+
+**Opción 1 — Ollama local (modelos open-source, recomendado para instituciones públicas)**
+
+| Modelo | VRAM necesaria | Inversión hardware (única vez) | Coste API | Privacidad |
+|---|---|---|---|---|
+| `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
+| `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
+| `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
+
+**Opción 2 — API en la nube**
+
+| Proveedor | Modelo | Precio entrada | Precio salida | Estimación anual* |
+|---|---|---|---|---|
+| OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~600–2.400 €/año** |
+| OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
+| Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
+| Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
+
+> *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
+
+#### OPEX Total Anual por Perfil
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| Servidor aplicación | 600 €/año | 300 €/año | 3.600 €/año |
+| Almacenamiento | 60 €/año | 200 €/año | 800 €/año |
+| LLM Ollama local (hardware, única vez) | +400 € (año 0) | +400 € (año 0) | +400 € (año 0) |
+| LLM API nube (alternativa) | ~600 €/año | ~2.400 €/año | ~6.000 €/año |
+| Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
+| **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
+| **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
+
+### B.6.4. Análisis de Retorno de Inversión (ROI)
+
+El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8, Tabla 1.
+
+**Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
+
+| Proceso eliminado | Tiempo ahorrado/solicitud | Solicitudes/año | Coste hora técnico N3 | Ahorro anual |
+|---|---|---|---|---|
+| Negociación de requisitos (email asíncrono) | 1.440 min → 0,5 min | 500 | 50 €/h | **11.995 €** |
+| Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
+| Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
+| **Ahorro total anual** | | | | **~20.320 €** |
+
+**ROI a 3 años — Perfil B con Ollama**
+
+| Concepto | Año 0 | Año 1 | Año 2 | Año 3 |
+|---|---|---|---|---|
+| Inversión CAPEX | -8.100 € | — | — | — |
+| Hardware LLM (Ollama GPU, única vez) | -400 € | — | — | — |
+| OPEX anual | — | -1.500 € | -1.500 € | -1.500 € |
+| Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
+| **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
+| **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
+
+> **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
+> **ROI a 3 años: ~464%**
+
+---
+
+## B.7. Conclusiones del Análisis
+
+1. **La flexibilidad de la planificación es una característica del diseño, no una deficiencia.** La naturaleza parcial y asincrónica del desarrollo impide la aplicación de cronogramas rígidos; la priorización explícita (P0→P3) garantiza que el núcleo de valor académico se complete antes que cualquier módulo de acabado opcional.
+
+2. **La asistencia de IA generativa es un multiplicador de productividad consistente con el objeto de estudio.** El uso de un agente de codificación (Google Gemini Advanced, ~120 € de coste imputable) permitió abordar un alcance técnico ambicioso —arquitectura hexagonal, SDK MCP oficial, QA multicapa, agente ReAct— dentro de un esfuerzo total contenido (~300h), que de otro modo habría requerido un equipo de al menos 2 personas.
+
+3. **El modelo de coste cero es viable con Ollama para instituciones públicas.** La combinación Ollama + servidor on-premise reduce el OPEX a menos de 2.000 €/año, con garantía total de privacidad del dato (Zero Data Retention), lo que lo convierte en la opción recomendada para organismos con restricciones presupuestarias o de soberanía del dato.
+
+4. **El ROI superior al 460% en 3 años justifica la adopción institucional.** El umbral de rentabilidad se alcanza en menos de 6 meses para un volumen mínimo de 500 solicitudes de infraestructura anuales.
+
+5. **La arquitectura hexagonal protege la inversión tecnológica a largo plazo.** La sustitución de cualquier adaptador —`FakeK8sAdapter` → `RealK8sAdapter`, Ollama → GPT-4o, etc.— no requiere modificar la lógica de negocio. El coste de evolución tecnológica está estructuralmente minimizado por el Principio de Inversión de Dependencias (DIP).

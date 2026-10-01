@@ -2,7 +2,39 @@
 
 La integración de Modelos de Lenguaje Grandes (LLM) en la orquestación de infraestructuras corporativas fractura los paradigmas tradicionales de Ingeniería de Pruebas (*Software Testing*). En el desarrollo de software convencional, la función matemática $f(x)$ siempre retorna $y$. Sin embargo, en un sistema agéntico estocástico, el mismo estímulo (el mismo *prompt*) puede generar resultados sintácticamente dispares dependiendo de la semilla de inferencia (*seed*) o de la temperatura del modelo.
 
-Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial.
+Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [27].
+
+```mermaid
+flowchart BT
+  %% Base de la pirámide
+  subgraph Base [Base: Pruebas Unitarias Deterministas]
+    direction BT
+    U(Aserciones de Dominio y Valores Límite)
+  end
+
+  %% Estrato Medio
+  subgraph Medio [Medio: Fuzzing y Mutación]
+    direction BT
+    F(Asedio Estocástico y Clones Mutantes)
+  end
+
+  %% Cúspide
+  subgraph Cuspide [Cúspide: Pruebas Metamórficas]
+    direction BT
+    M(Evaluación Heurística del LLM)
+  end
+
+  Base --> Medio --> Cuspide
+
+  classDef base fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+  classDef mid fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+  classDef top fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+
+  class Base base;
+  class Medio mid;
+  class Cuspide top;
+```
+<p align="center"><i><b>Figura 14:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
 ## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
 
@@ -24,15 +56,41 @@ El contrato de la entidad `DeploymentIntent` dictamina que el atributo `port` de
 
 Junto a la topología de red, el segundo vector de riesgo es la inyección de configuraciones inestables. Las pruebas de integración del sistema asedian al `SecurityContextValidator` para auditar la regla de prohibición de la etiqueta `:latest` en las imágenes de contenedores.
 
-La batería de *Testing* ejecuta simulaciones inyectando intenciones sintácticamente engañosas, como `ubuntu:latest`, `nginx:LATEST` o el uso de imágenes implícitas (por ejemplo, proporcionar `redis` asumiendo que el clúster inferirá el *tag*). En todos los escenarios, la suite de aserción certifica que la tubería de ejecución arroja un `SecurityViolationError` trazable. 
+La batería de *Testing* ejecuta simulaciones inyectando intenciones sintácticamente engañosas, como `ubuntu:latest`, `nginx:LATEST` o el uso de imágenes implícitas (por ejemplo, proporcionar `redis` asumiendo que el clúster inferirá el *tag*). En todos los escenarios, la suite de aserción certifica que la tubería de ejecución arroja un `SecurityViolationError` trazable.
 
 Esta capa base de pruebas (de ejecución sub-milisegundo) actúa como el cimiento matemático. Demuestra, con una cobertura de código del 100% sobre el módulo Hexagonal, que el *Backend* es determinista y se comporta exactamente igual que una cerradura criptográfica: sin la llave correcta (una petición válida que cumpla con ITIL y las normativas universitarias), el paso físico a la infraestructura es sistemáticamente bloqueado, sin importar cuán persuasivo o agresivo sea el *prompt* originado por el Modelo de Lenguaje.
 
-## 7.2. Pruebas Basadas en Propiedades (*Property-Based Testing*)
+### 7.1.3. Pruebas de la Capa de Consulta de Estado (Canal del Investigador)
+
+Tras la implementación del endpoint `GET /hitl/status/{id}` (sección 6.4.1), se añadió un módulo de integración específico (`test_status_endpoint.py`) para validar el canal de retorno al investigador. Este módulo valida una propiedad crítica: el endpoint de consulta de estado debe ser **completamente idempotente** — su invocación repetida no debe alterar el estado de la FSM bajo ninguna circunstancia.
+
+La batería de pruebas cubre seis escenarios:
+
+| Test | Comportamiento validado |
+|---|---|
+| `test_unknown_id_returns_404` | Un ID inexistente retorna `HTTP 404` con mensaje descriptivo |
+| `test_pending_approval_returns_correct_status` | Un deployment recién creado retorna `PENDING_APPROVAL` con mensaje contextual |
+| `test_deployed_status_after_approval` | Tras `POST /hitl/approve/{id}`, el estado refleja `DEPLOYED` |
+| `test_rejected_status_after_rejection` | Tras `POST /hitl/reject/{id}`, el estado refleja `REJECTED` |
+| `test_response_includes_deployment_metadata` | La respuesta incluye `name`, `image` y `port` correctos |
+| `test_status_endpoint_does_not_mutate_state` | 3 llamadas consecutivas mantienen `PENDING_APPROVAL` inalterado |
+
+El último test es el más crítico desde el punto de vista de la integridad del sistema: garantiza que la operación de *lectura* del canal del investigador no interfiere con la *escritura* exclusiva del canal del técnico SIC (el dashboard), preservando la separación de responsabilidades entre ambas interfaces de usuario.
+
+### 7.1.4. Quality Gates y Umbrales de Código Estático
+
+Para garantizar que la mantenibilidad y calidad del proyecto no se degrade durante futuras evoluciones, la canalización de integración continua (`run_tests.sh`) actúa como un *Quality Gate* estricto mediante la aplicación de análisis estático en el archivo de configuración `pyproject.toml`. 
+
+Se han configurado dos umbrales infranqueables que rompen la integración en caso de incumplimiento:
+1. **Complejidad Ciclomática (McCabe):** Se ha establecido un límite máximo de complejidad `C901 = 15` a través del linter *Ruff*. Aunque la formulación original de McCabe [26] proponía un límite de 10, los estándares de ingeniería modernos (como *SonarQube*) recomiendan un límite pragmático de 15 para acomodar construcciones sintácticas actuales (como gestores de contexto y *match/case*) sin generar falsos positivos. Este umbral garantiza que ninguna función contenga un exceso de ramas lógicas, obligando arquitectónicamente a la refactorización y asegurando código limpio y auditable.
+2. **Cobertura de Código Pragmática:** Se exige una cobertura mínima del 80% (`--cov-fail-under=80`). En consonancia con las directrices de ingeniería de gigantes tecnológicos como Google [25], se rechaza la persecución artificial del 100% de cobertura. Alcanzar el 100% a menudo fomenta la escritura de pruebas triviales que no aportan seguridad real lógica, creando una falsa sensación de inmunidad. El umbral del 80% garantiza que el núcleo de negocio está férreamente protegido, dejando margen para ignorar deliberadamente *boilerplates* o pegamento de *frameworks* cuya evaluación no aporta valor académico ni de negocio.
+
+## 7.2. Property-Based Testing: Asedio Estocástico
 
 El Testing Unitario clásico (pruebas basadas en ejemplos) adolece de un sesgo cognitivo inevitable: el desarrollador humano diseña las aserciones pensando en los caminos lógicos que él mismo programó. En ecosistemas orquestados por Inteligencia Artificial, donde la entrada de datos (el JSON generado por el LLM) es altamente impredecible, este enfoque de caja blanca es matemáticamente insuficiente.
 
 Para escalar la resistencia de la Arquitectura Hexagonal y garantizar que ninguna alucinación excéntrica pueda desbordar la base de datos o tumbar el hilo principal de ejecución, este TFM incorpora el paradigma del **Property-Based Testing** (Pruebas Basadas en Propiedades). A diferencia del enfoque clásico (donde se aserta que la entrada $A$ da como resultado $B$), en este paradigma se postula que "para *cualquier* entrada generada aleatoriamente que cumpla cierta estructura, el sistema debe respetar una propiedad invariante específica".
+
 
 ### 7.2.1. Inyección de Entropía Estocástica y Fuzzing
 
@@ -48,29 +106,29 @@ ilegales debe colapsar en un error controlado, JAMÁS en un Kernel Panic
 o corrupción de memoria."
 
 INICIO
-    // Generador de Entropía (Estrategias de Hypothesis)
-    Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
-    Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
+  // Generador de Entropía (Estrategias de Hypothesis)
+  Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
+  Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
 
-    PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
-        INTENTAR
-            Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
-            
-            // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
-            ASERTAR (longitud(intencion.name) > 0)
-            ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
+  PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
+    INTENTAR
+      Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
+      
+      // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
+      ASERTAR (longitud(intencion.name) > 0)
+      ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
 
-        CAPTURAR ValidationError
-            // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
-            PASAR
-        CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
-            // Aserción Matemática 2: No debe haber errores no controlados.
-            FALLAR_TEST(
-                "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
-                "Detalle de la entropía letal: " + error_critico
-            )
-        FIN INTENTAR
-    FIN PARA
+    CAPTURAR ValidationError
+      // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
+      PASAR
+    CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
+      // Aserción Matemática 2: No debe haber errores no controlados.
+      FALLAR_TEST(
+        "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
+        "Detalle de la entropía letal: " + error_critico
+      )
+    FIN INTENTAR
+  FIN PARA
 FIN
 ```
 
@@ -100,33 +158,56 @@ Por ejemplo, si la regla de seguridad del `SecurityContextValidator` dicta que e
 `SI puerto < 1024 ENTONCES LANZAR Error`
 
 El motor de mutación iterará sobre este fragmento y generará clones inyectando vulnerabilidades silenciosas:
-- **Mutante 1 (Alteración Operacional):** `SI puerto <= 1024 ENTONCES...`
-- **Mutante 2 (Inversión Lógica):** `SI puerto > 1024 ENTONCES...`
-- **Mutante 3 (Supresión de Ramas):** `CONTINUAR` (Elimina la comprobación entera).
-
-### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
+- **Mutante 1 (Alteración Operacional### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
 
 Una vez generado el ejército de clones mutantes, el *framework* ejecuta la suite de pruebas completa (escrita en `pytest`) contra cada uno de los mutantes, uno por uno. El resultado de esta batalla computacional se clasifica en dos estados excluyentes:
 
 1. **Mutante Asesinado (*Killed*):** Si la suite de pruebas fracasa (es decir, una aserción estalla en rojo) tras ejecutar un clon, significa que la prueba ha detectado exitosamente la intrusión del *bug*. El mutante es eliminado. Este es el comportamiento deseado, indicando que la red de seguridad del TFM es hermética.
-2. **Mutante Superviviente (*Survived*):** Si el código fue alterado para permitir el puerto 22, y tras correr los tests la suite completa se muestra en verde (como si nada hubiera pasado), el mutante ha sobrevivido. Esto representa un fallo gravísimo en la arquitectura de QA: indica la existencia de un "falso positivo" de seguridad. Las pruebas están evaluando líneas, pero no están protegiendo la lógica de negocio real.
+2. **Mutante Superviviente (*Survived*):** Si el código fue alterado para permitir el puerto 22, y tras correr los tests la suite completa se muestra en verde (como si nada hubiera pasado), el mutante ha sobrevivido. Esto representa una brecha en la arquitectura de QA: indica la existencia de un comportamiento no cubierto por ninguna aserción.
 
-La aplicación de *Mutation Testing* al núcleo Hexagonal del *Agentic Deployer* arrojó, tras el refactor final, una tasa de mortalidad del 100% sobre los operadores condicionales del `SecurityContextValidator`. Esto certifica ante el equipo de Operaciones del Servicio de Informática que la barrera entre la Inteligencia Artificial y la infraestructura de Kubernetes está fuertemente tipada y que cualquier mínima regresión futura en las reglas de seguridad será detectada matemáticamente antes de alcanzar el estado de producción.
+### 7.3.3. Resultados Empíricos de la Auditoría (Tabla 2)
 
-### 7.3.3. Descubrimiento y Mitigación de Brechas (Caso de Estudio Empírico)
+La siguiente tabla recoge los resultados reales de la ejecución de `mutmut` sobre el proyecto, con la configuración definida en `test_mutmut.ini` (scope: `app/application/` y `app/domain/`).
 
-La verdadera eficacia de esta metodología se evidenció de forma empírica durante la auditoría de la capa de integración, concretamente en el componente `mcp_server.py`, encargado de exponer las herramientas de despliegue al modelo de lenguaje y tramitar las peticiones HTTP hacia el *Backend*.
+**Tabla 2. Resultados del Mutation Testing por módulo.**
 
-Inicialmente, el motor de métricas tradicional reportaba un **100% de cobertura de código** sobre el archivo, sugiriendo una protección total. Sin embargo, al configurar el motor `mutmut` para abarcar la totalidad de la aplicación e inyectar entropía en esta capa, el sistema generó un reporte crítico de seguridad: **12 mutantes lograron sobrevivir** a la suite de pruebas.
+| Módulo auditado | Supervivientes | Naturaleza de la brecha | Criticidad para la seguridad |
+|---|---|---|---|
+| `domain.exceptions` | 2 | Mutaciones en el constructor de `SecurityViolationError` (mensaje de error) | Baja — afecta al mensaje, no a la lógica |
+| `security_validator._parse_cpu` | 5 | Funciones de conversión de strings (`"500m"` → int) sin tests directos | Media — parsers auxiliares |
+| `security_validator._parse_ram` | 19 | Conversores de unidades de RAM (`"256Mi"`, `"1Gi"`) | Media — parsers auxiliares |
+| `security_validator.validate` | 3 | Condiciones límite en reglas compuestas (múltiples violaciones simultáneas) | Media — reglas de negocio |
+| `use_cases.execute` | 1 | Rama alternativa de la acción `DELETE` | Baja |
+| **Subtotal núcleo hexagonal** | **30** | | |
+| `agent.FakeLLMClient` | 54 | Módulo de demostración sin cobertura de tests (by design) | No aplicable |
+| `agent.AgentOrchestrator` | 45 | Lógica cognitiva: testar código LLM-dependiente con aserciones deterministas es conceptualmente inviable | No aplicable |
+| `agent_layer.tools` | 14 | Herramientas MCP que requieren mocks de red | Baja |
+| **Total general** | **143** | | |
 
-El análisis forense de los mutantes supervivientes reveló dos fallas graves en la red de pruebas que la métrica de cobertura, por su propia naturaleza matemática, era estructuralmente incapaz de detectar:
+**Interpretación del resultado:**
 
-1. **Falsos Positivos en Heurísticas de Texto:** La función `_calculate_congress_resources` acepta variaciones léxicas para dimensionar la RAM y CPU de un clúster (ej. `"alto"`, `"high"`, `">500"`, `"medio"`, `"medium"`). Las pruebas unitarias originales únicamente validaban los límites absolutos (`"alto"` y `"bajo"`). El motor de mutación alteró silenciosamente las constantes intermedias (borrando la detección de `"medium"`) y, al carecer de un aserto directo, el clon mutado pasó la suite de pruebas sin inmutarse.
-2. **Supresión del Manejo de Excepciones HTTP:** La función `_send_intent` ejecuta una invocación de red con un `timeout` estricto y una validación de estado (`raise_for_status()`). Un mutante malicioso suprimió la línea de validación de estado. Puesto que la suite de pruebas siempre simulaba respuestas HTTP 200 (éxito) y no existía ninguna prueba que simulara una caída del servidor (HTTP 500), la omisión de la validación no rompió ningún test, permitiendo al mutante sobrevivir.
+El análisis forense revela que el **69,9% de los supervivientes** (99 de 143) corresponden a módulos excluidos del scope de auditoría por razones arquitectónicas: `FakeLLMClient` es código de demostración sin tests (comportamiento intencionado); `AgentOrchestrator` encapsula la interfaz con el LLM, cuyo comportamiento no determinista hace que la auditoría por mutación sea conceptualmente inaplicable.
 
-La detección temprana de estos 12 mutantes permitió la rápida inyección de un nuevo artefacto de pruebas focalizado (`test_mcp_server.py`). Esta adición, empleando librerías de simulaciones (*Mocks*), somete al módulo a un asedio que itera sobre la totalidad del diccionario de palabras clave admitidas y fuerza simulaciones de caídas de red para asertar la propagación de la excepción.
+Sobre el **núcleo hexagonal** (el scope declarado en `test_mutmut.ini`), los 30 supervivientes se concentran en las funciones de conversión de recursos (`_parse_cpu`, `_parse_ram`) que transforman cadenas de texto como `"500m"` o `"1024Mi"` a valores numéricos normalizados. Estas brechas constituyen la **deuda de cobertura identificada** por la auditoría:
 
-Tras esta integración algorítmica, la tasa de supervivencia de mutantes a nivel global colapsó de nuevo al 0%, logrando una red de validación robusta y significativamente más segura. Este caso de uso justifica de manera pragmática la inclusión del *Mutation Testing* como un pilar fundamental en sistemas orquestados por Inteligencia Artificial, donde la imprevisibilidad exige capas de auditoría que vayan más allá de la simple verificación de ejecución de líneas.
+- No existe ningún test que valide el comportamiento de `_parse_ram("2Gi")`, `_parse_cpu("1000m")` o cadenas malformadas.
+- Los 3 supervivientes en `validate` corresponden a condiciones límite en reglas compuestas (cuando múltiples violaciones se producen simultáneamente).
+
+La detección de estas brechas es precisamente el valor de la metodología: la cobertura de código reportaba un **100% en los módulos del dominio**, ocultando estas ausencias de asertos específicos sobre las funciones auxiliares.
+
+> Los resultados completos (1.685 líneas de salida categorizada) están disponibles en [`demos/mutmut_results/mutmut_results_raw.txt`](../demos/mutmut_results/mutmut_results_raw.txt) y el análisis en [`demos/mutmut_results/mutmut_report.md`](../demos/mutmut_results/mutmut_report.md).
+
+### 7.3.4. Mitigación y Lecciones Aprendidas
+
+La auditoría identificó las siguientes acciones correctoras concretas, alineadas con las prácticas de mejora continua de la ingeniería de software:
+
+1. **Tests parametrizados para `_parse_cpu` y `_parse_ram`:** Añadir una batería de tests que cubra todos los formatos de unidad admitidos (`m`, `Mi`, `Gi`, `G`, `M`) y rechace cadenas malformadas. Estos tests elevarían la mortalidad del núcleo hexagonal al nivel de los módulos de validación de reglas.
+
+2. **Tests de múltiples violaciones simultáneas:** Los 3 supervivientes en `validate` corresponden a escenarios de doble o triple violación concurrente (ej. puerto 22 + tag `:latest` + secreto en env). Ampliar el fixture `test_security.py` con asertos sobre la lista completa de violaciones detectadas.
+
+3. **Exclusión formal del agente cognitivo del scope de mutmut:** Actualizar `test_mutmut.ini` para restringir el alcance exclusivamente a `app/application/` y `app/domain/`, excluyendo explícitamente `app/agent_layer/`, cuya auditoría requiere estrategias diferentes (pruebas metamórficas, Cap. 7.4).
+
+Este caso de estudio justifica de manera pragmática la inclusión del *Mutation Testing* como un pilar fundamental en sistemas orquestados por Inteligencia Artificial: la cobertura de código es una condición necesaria pero no suficiente para certificar la robustez de un sistema cuya entrada es generada por un modelo estocástico.
 
 ## 7.4. Pruebas Metamórficas: Inyección de Ruido Léxico y Evaluación del LLM
 
@@ -145,20 +226,20 @@ Para el caso de uso de este sistema, la Relación Metamórfica de Identidad Sem�
 Esta propiedad se formaliza y evalúa inyectando una batería de variaciones léxicas contra la API de OpenAI/Ollama, interceptando la deducción JSON antes de que llegue al Backend:
 
 1. **Entrada de Control (El Oráculo Relativo):**
-   - *Prompt:* "Despliega una instancia de PostgreSQL en el puerto 5432."
-   - *Salida Esperada (JSON):* `{"name": "postgresql", "port": 5432}`
+  - *Prompt:* "Despliega una instancia de PostgreSQL en el puerto 5432."
+  - *Salida Esperada (JSON):* `{"name": "postgresql", "port": 5432}`
 
 2. **MR1: Inyección de Ruido Coloquial (Jerga):**
-   - *Prompt:* "Levántame un postgres rapidito porfi, mételo en el puerto 5432 que tengo prisa."
-   - *Aserción:* El JSON deducido debe ser idéntico al de la entrada de control.
+  - *Prompt:* "Levántame un postgres rapidito porfi, mételo en el puerto 5432 que tengo prisa."
+  - *Aserción:* El JSON deducido debe ser idéntico al de la entrada de control.
 
 3. **MR2: Perturbación Ortográfica y Tipográfica:**
-   - *Prompt:* "Desplega un postgree sql en el pto 5432 xfa."
-   - *Aserción:* El LLM debe aplicar heurísticas de corrección silente y generar el JSON idéntico al de control.
+  - *Prompt:* "Desplega un postgree sql en el pto 5432 xfa."
+  - *Aserción:* El LLM debe aplicar heurísticas de corrección silente y generar el JSON idéntico al de control.
 
 4. **MR3: Inversión Sintáctica Compleja:**
-   - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
-   - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
+  - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
+  - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
 
 ### 7.4.2. Tolerancia a la Ambigüedad
 

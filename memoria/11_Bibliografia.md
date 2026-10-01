@@ -1,4 +1,4 @@
-# Capítulo 10. Bibliografía y Referencias
+# Capítulo 11. Bibliografía y Referencias
 
 A continuación, se detalla la literatura académica, especificaciones técnicas y documentación oficial que fundamentan las decisiones arquitectónicas, metodológicas y algorítmicas expuestas en este Trabajo de Fin de Máster. Las referencias se han estructurado para abarcar tanto el paradigma de la Inteligencia Artificial Generativa como la Ingeniería de Confiabilidad del Sitio (SRE) y los Patrones de Diseño de Software.
 
@@ -29,7 +29,7 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[9]** Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley Professional.
 *(Literatura clásica para la justificación de los patrones Factory y Abstract Adapter utilizados en la conmutación entre OpenAI y Ollama en la Sección 5.2).*
 
-**[10]** Lolo, A., & Ovadia, S. (2024). *Streamlit for Data Science: Create interactive data apps in Python*. Packt Publishing.
+**[10]** Richards, T. (2023). *Streamlit for Data Science: Create interactive data apps in Python* (2nd ed.). Packt Publishing.
 *(Referencia metodológica para el diseño de la interfaz gráfica asíncrona tolerante a la ambigüedad empleada por los investigadores).*
 
 **[11]** Pydantic. (2024). *Pydantic Data validation and settings management using python type annotations*. Recuperado de https://docs.pydantic.dev/
@@ -55,3 +55,30 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 
 **[18]** Richardson, C. (2018). *Microservices Patterns: With examples in Java*. Manning Publications.
 *(Referencia teórica extendida para los patrones de transaccionalidad, API Composition y observabilidad en arquitecturas distribuidas).*
+
+**[19]** Encode OSS. (2024). *HTTPX: A next-generation HTTP client for Python*. Recuperado de https://www.python-httpx.org/
+*(Librería utilizada en la implementación del `OllamaLLMClient` nativo para comunicación HTTP/1.1 y HTTP/2 sin dependencias de terceros en la API de Ollama, documentado en la Sección 5.2.1).*
+
+**[20]** Ollama. (2024). *Ollama: Get up and running with large language models locally*. Recuperado de https://ollama.com/
+*(Servidor de inferencia local de código abierto que habilita la ejecución de modelos como Llama 3, Mistral y Qwen2.5 en infraestructura propia, garantizando la soberanía del dato institucional. Referenciado en las Secciones 3.3.3, 5.2.1 y 5.2.2).*
+
+**[21]** Chase, H. (2022). *LangChain: Building applications with LLMs through composability*. GitHub Open Source Repository. Recuperado de https://github.com/langchain-ai/langchain
+*(Framework de orquestación de agentes LLM analizado en la Sección 2.5.3 como alternativa descartada por su acoplamiento al framework y la ausencia de protocolo de interoperabilidad estándar).*
+
+**[22]** Wu, Q., Bansal, G., Zhang, J., Wu, Y., Li, B., Zhu, E., ... & Wang, C. (2023). *AutoGen: Enabling next-generation LLM applications via multi-agent conversation*. arXiv preprint arXiv:2308.08155. Recuperado de https://arxiv.org/abs/2308.08155
+*(Framework multi-agente de Microsoft analizado en la Sección 2.5.3, cuya comparativa fundamenta la elección del estándar MCP frente a abstracciones propietarias de orquestación).*
+
+**[23]** Open Policy Agent (OPA). (2024). *OPA: Policy-based control for cloud native environments*. Cloud Native Computing Foundation (CNCF). Recuperado de https://www.openpolicyagent.org/
+*(Motor de Policy-as-Code propuesto como evolución del `SecurityContextValidator` en el horizonte a largo plazo del Trabajo Futuro [Sección 10.3.3], permitiendo externalizar y actualizar reglas de validación sin redespliegue del backend).*
+
+**[24]** Kyverno Authors. (2024). *Kyverno: Kubernetes Native Policy Management*. Cloud Native Computing Foundation (CNCF). Recuperado de https://kyverno.io/
+**(Alternativa nativa de Kubernetes a OPA para la gestión declarativa de políticas de seguridad como recursos del clúster. Referenciada en la Sección 10.3.3 como mecanismo de gobernanza en el horizonte de madurez del sistema).*
+
+**[25]** Winters, T., Manshreck, T., & Wright, H. (2020). *Software Engineering at Google: Lessons Learned from Programming Over Time*. O'Reilly Media.
+*(Citado en la Sección 7.1.4 para respaldar el umbral pragmático del 80% de cobertura de código frente a la falacia del 100%).*
+
+**[26]** McCabe, T. J. (1976). *A Complexity Measure*. IEEE Transactions on Software Engineering, SE-2(4), 308-320.
+*(Referencia fundacional de la Complejidad Ciclomática, cuyo umbral moderno estandarizado en la industria [ej. SonarSource / SonarQube] fundamenta el límite de `max-complexity = 15` adoptado en la canalización CI/CD, Sección 7.1.4).*
+
+**[27]** Cohn, M. (2009). *Succeeding with Agile: Software Development Using Scrum*. Addison-Wesley Professional.
+*(Obra seminal donde se propone el modelo conceptual de la Pirámide de Pruebas Automáticas, adaptado en el Capítulo 7 para jerarquizar el QA de IA).*

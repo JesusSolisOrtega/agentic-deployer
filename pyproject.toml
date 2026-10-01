@@ -44,7 +44,7 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 precision = 1
-fail_under = 0
+fail_under = 80
 exclude_lines = [
     "pragma: no cover",
     "if __name__",
@@ -70,6 +70,7 @@ select = [
     "B",    # bugbear (errores comunes)
     "SIM",  # simplify (simplificaciones de código)
     "RUF",  # reglas propias de ruff
+    "C901", # mccabe (complejidad ciclomática)
 ]
 ignore = [
     "E501",   # line too long — lo controla line-length
@@ -77,6 +78,9 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
 
 
 # ---------------------------------------------------------------------------

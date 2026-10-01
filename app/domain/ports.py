@@ -9,7 +9,25 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from app.domain.models import DeploymentIntent
+from app.domain.models import DeploymentIntent, DeploymentRecord
+
+
+class DeploymentRepositoryPort(ABC):
+    """
+    Port for the deployment storage layer.
+    """
+
+    @abstractmethod
+    def save(self, record: DeploymentRecord) -> None:
+        ...
+
+    @abstractmethod
+    def get(self, id: str) -> DeploymentRecord | None:
+        ...
+
+    @abstractmethod
+    def get_all(self) -> list[DeploymentRecord]:
+        ...
 
 
 class DeployPort(ABC):

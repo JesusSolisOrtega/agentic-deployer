@@ -48,3 +48,5 @@ Thumbs.db
 # Pero conservar el README y el compilado final del TFM
 !/README.md
 !/TFM_Completo.md
+memoria/diagrams_cache/
+TFM_Completo.pdf

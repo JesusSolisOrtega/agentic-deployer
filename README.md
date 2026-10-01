@@ -40,11 +40,30 @@ uvicorn app.infrastructure.main:app --reload --port 8000
 - **Panel de Aprobación (HITL):** [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
 
 ### 2. Levantar el Agente LLM (Chat UI)
-En una terminal separada, levanta la interfaz conversacional para que el Investigador solicite infraestructura en lenguaje natural. 
-*(Nota: Requiere tener exportada la variable `OPENAI_API_KEY` o configurar Ollama localmente).*
+
+El sistema soporta **tres modos de proveedor LLM** seleccionables vía variable de entorno:
+
+**Modo recomendado — Ollama (gratuito, local, Zero Data Retention):**
 ```bash
-streamlit run app/agent_layer/chat_app.py
+# 1. Instalar Ollama: https://ollama.com
+ollama serve                        # Iniciar servidor (otra terminal)
+ollama pull qwen2.5:7b              # Descargar modelo (~4.7 GB)
+
+# 2. Lanzar el chat con Ollama
+LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5:7b streamlit run app/agent_layer/chat_app.py
 ```
+
+**Modo OpenAI:**
+```bash
+OPENAI_API_KEY=sk-... LLM_PROVIDER=openai streamlit run app/agent_layer/chat_app.py
+```
+
+**Modo Demo (sin IA, para pruebas rápidas):**
+```bash
+streamlit run app/agent_layer/chat_app.py   # LLM_PROVIDER=fake por defecto
+```
+
+> Ver [`.env.example`](.env.example) para la lista completa de variables de configuración.
 
 ## 🧪 Aseguramiento de Calidad Avanzado (QA)
 
@@ -58,17 +77,42 @@ Para garantizar la estabilidad del sistema frente al ruido inyectado por la IA, 
 
 ### Ejecución de la Suite de Pruebas
 
+Para mayor comodidad y rigor, el proyecto incluye un script de *pipeline* continuo (`run_tests.sh`) que ejecuta de forma desatendida y secuencial todas las capas de calidad: linters, análisis de tipos, pruebas de interfaz (E2E), pruebas estocásticas y de propiedades, inyección de mutantes lógicos (mutmut) y pruebas de carga (Locust).
+
 ```bash
-# Ejecutar toda la batería estática, de propiedades y metamórfica:
-python -m pytest app/tests/ -v
+# Otorgar permisos y ejecutar el pipeline completo (recomendado):
+chmod +x run_tests.sh
+./run_tests.sh
+```
 
-# Ejecutar las pruebas E2E de interfaz (requiere que FastAPI esté corriendo en el puerto 8000):
-python -m pytest tests/test_ui.py -v
-
-# Ejecutar auditoría de Mutantes en todo el sistema:
-mutmut run
+Alternativamente, se pueden ejecutar bloques aislados:
+```bash
+python -m pytest app/tests/ -v      # Dominio y PBT
+python -m pytest tests/test_ui.py -v # E2E Interfaz (requiere FastAPI activo)
+mutmut run                          # Auditoría de mutantes
 ```
 
 ## 📄 Memoria del Proyecto
 
 Toda la fundamentación teórica, diagramas arquitectónicos, decisiones de diseño y análisis de resultados se encuentran documentados en los archivos Markdown dentro del directorio `/memoria`. Se proveen scripts (como `combinar_tfm_y_toc.py`) para compilar un documento único listo para su exportación a PDF.
+
+## 🔌 Integración con Clientes MCP Externos
+
+Una de las propiedades clave del *Agentic Deployer* es que su servidor MCP es **agnóstico al cliente**. Al implementar el estándar [Model Context Protocol](https://github.com/modelcontextprotocol/specification) sobre transporte `stdio`, cualquier cliente compatible puede descubrir e invocar las herramientas del Servicio de Informática sin modificar una sola línea del servidor.
+
+### Validación Oficial con MCP Inspector
+
+El [MCP Inspector](https://github.com/modelcontextprotocol/inspector) es la herramienta oficial de Anthropic para validar servidores MCP. Permite explorar el catálogo de herramientas e invocarlas visualmente desde el navegador:
+
+```bash
+# Sin instalación permanente (requiere Node.js)
+npx @modelcontextprotocol/inspector \
+  .venv/bin/python app/agent_layer/mcp_server.py
+```
+
+Al ejecutarlo, se abre `http://localhost:5173` con:
+- Lista de todas las herramientas expuestas (`tools/list`)
+- Formulario para invocar `deploy_congress_web`, `deploy_python_app`, etc.
+- Respuesta JSON en tiempo real
+
+

@@ -16,14 +16,17 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import uuid
 
+import requests
 import streamlit as st
 
 from app.agent_layer.agent import (
     AgentOrchestrator,
     AgentResponse,
     LLMClient,
+    OllamaLLMClient,
     OpenAILLMClient,
     ToolCall,
 )
@@ -216,12 +219,17 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "history" not in st.session_state:
     st.session_state.history = [{"role": "system", "content": SYSTEM_PROMPT}]
+# pending_deployments: list of {id, name} for deployments awaiting HITL decision
+if "pending_deployments" not in st.session_state:
+    st.session_state.pending_deployments = []
 if "agent" not in st.session_state:
     provider = os.getenv("LLM_PROVIDER", "fake").lower()
 
     llm: LLMClient
     if provider == "ollama":
-        llm = OpenAILLMClient(model="llama3.1", base_url="http://localhost:11434/v1", api_key="ollama")
+        model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+        host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        llm = OllamaLLMClient(model=model, host=host)
     elif provider == "openai":
         llm = OpenAILLMClient(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY", ""))
     else:
@@ -234,8 +242,14 @@ if "agent" not in st.session_state:
     )
 
 # -- Header --
-st.markdown("### 🏛️ Asistente del SIC -- Universidad")
-st.caption("Servicio de Informatica y Comunicaciones")
+provider_label = {
+    "ollama": f"🤖 Ollama · {os.getenv('OLLAMA_MODEL', 'qwen2.5:7b')}",
+    "openai": "🌐 OpenAI · GPT-4o-mini",
+    "fake": "🔧 Modo Demo (sin IA real)",
+}.get(os.getenv("LLM_PROVIDER", "fake").lower(), "🔧 Modo Demo")
+
+st.markdown("### 🏛️ Asistente del SIC — Universidad")
+st.caption(f"Servicio de Informática y Comunicaciones · {provider_label}")
 
 # -- Suggestion buttons --
 cols = st.columns(3)
@@ -280,4 +294,85 @@ if user_input:
                 )
         st.markdown(response_text)
 
+    # -- Extract deployment ID from response and track it --
+    _id_match = re.search(r"dep-[a-f0-9]{7,8}", response_text)
+    if _id_match and "PENDING" in response_text.upper():
+        _dep_id = _id_match.group(0)
+        _already_tracked = any(d["id"] == _dep_id for d in st.session_state.pending_deployments)
+        if not _already_tracked:
+            st.session_state.pending_deployments.append({"id": _dep_id, "name": _dep_id})
+
     st.session_state.messages.append({"role": "assistant", "content": response_text})
+
+
+# ---------------------------------------------------------------------------
+# Researcher notification panel — HITL status feedback
+# ---------------------------------------------------------------------------
+
+_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+
+_STATUS_ICONS = {
+    "PENDING_APPROVAL": "⏳",
+    "APPROVED": "🔄",
+    "DEPLOYED": "✅",
+    "REJECTED": "❌",
+    "FAILED": "🚨",
+}
+_STATUS_COLORS = {
+    "PENDING_APPROVAL": "#f0ad4e",
+    "APPROVED": "#5bc0de",
+    "DEPLOYED": "#5cb85c",
+    "REJECTED": "#d9534f",
+    "FAILED": "#d9534f",
+}
+
+if st.session_state.pending_deployments:
+    st.divider()
+    st.markdown("#### 📬 Mis Solicitudes Pendientes")
+    st.caption("Pulsa '🔄 Actualizar' para consultar si el técnico del SIC ha tomado una decisión.")
+
+    _resolved = []
+    for _dep in st.session_state.pending_deployments:
+        with st.container():
+            _col1, _col2 = st.columns([4, 1])
+            with _col1:
+                st.markdown(f"**ID:** `{_dep['id']}`")
+            with _col2:
+                if st.button("🔄 Actualizar", key=f"status_{_dep['id']}"):
+                    try:
+                        _resp = requests.get(
+                            f"{_BACKEND_URL}/hitl/status/{_dep['id']}",
+                            timeout=5,
+                        )
+                        if _resp.status_code == 200:
+                            _data = _resp.json()
+                            _s = _data["status"]
+                            _icon = _STATUS_ICONS.get(_s, "❓")
+                            _color = _STATUS_COLORS.get(_s, "#aaa")
+                            _msg = _data["message"]
+                            st.markdown(
+                                f"<div style='padding:8px;border-radius:6px;"
+                                f"border-left:4px solid {_color};background:#1e2130'>"
+                                f"<b>{_icon} {_s}</b><br><small>{_msg}</small></div>",
+                                unsafe_allow_html=True,
+                            )
+                            # Remove from pending list if terminal state
+                            if _s in ("DEPLOYED", "REJECTED", "FAILED"):
+                                _resolved.append(_dep["id"])
+                                _notification = {
+                                    "DEPLOYED": f"✅ Tu servicio `{_dep['id']}` ha sido **desplegado exitosamente**.",
+                                    "REJECTED": f"❌ Tu solicitud `{_dep['id']}` fue **rechazada** por el técnico. Contacta con el SIC.",
+                                    "FAILED": f"🚨 El despliegue `{_dep['id']}` encontró un error técnico. El equipo SIC ha sido notificado.",
+                                }[_s]
+                                st.session_state.messages.append(
+                                    {"role": "assistant", "content": _notification}
+                                )
+                        else:
+                            st.warning(f"No se encontró el deployment `{_dep['id']}`")
+                    except requests.exceptions.ConnectionError:
+                        st.error("No se puede conectar con el backend del SIC. ¿Está en marcha?")
+
+    # Remove resolved deployments from tracking list
+    st.session_state.pending_deployments = [
+        d for d in st.session_state.pending_deployments if d["id"] not in _resolved
+    ]

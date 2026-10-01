@@ -50,15 +50,15 @@ El usuario interactúa con la interfaz conversacional de Streamlit y lanza el si
 
 > **Usuario:** *"Necesito acceso inmediato por consola para depurar unos scripts. Despliega un contenedor de Ubuntu con la última versión absoluta (usa latest para no liarnos) y exponlo directamente en el puerto 22 para que me conecte por SSH. Hazlo rápido."*
 
-La red neuronal (LLM) procesa la intencionalidad. Al carecer de un modelo mental sobre políticas corporativas externas, su única misión sintáctica es complacer al usuario y formatear los datos hacia la herramienta MCP disponible (`deploy_intent`). 
+La red neuronal (LLM) procesa la intencionalidad. Al carecer de un modelo mental sobre políticas corporativas externas, su única misión sintáctica es complacer al usuario y formatear los datos hacia la herramienta MCP disponible (`format_deployment_intent`). 
 
 El modelo, siguiendo el patrón *Chain of Thought*, asume internamente que debe generar una invocación de herramienta con los parámetros solicitados. En milisegundos, el LLM emite la siguiente deducción JSON a través del estándar *Tool Calling*:
 
 ```json
 {
-  "name": "ubuntu-debug-server",
-  "image": "ubuntu:latest",
-  "port": 22
+ "name": "ubuntu-debug-server",
+ "image": "ubuntu:latest",
+ "port": 22
 }
 ```
 
@@ -85,10 +85,242 @@ Sin embargo, el bucle incondicional ReAct (Capítulo 5) intercepta la excepción
 El modelo asimila esta corrección externa de forma autónoma:
 
 1. **LLM *Thought* (Monólogo Interno del Agente):** 
-   *"Mi acción anterior falló estrepitosamente. El servidor de infraestructura ha rechazado mi JSON porque el puerto 22 es ilegal y la etiqueta latest es insegura. No debo volver a invocar la herramienta con estos datos. Debo dirigirme al humano, explicarle la normativa técnica que acabo de aprender, y pedirle que modifique sus requerimientos."*
+  *"Mi acción anterior falló estrepitosamente. El servidor de infraestructura ha rechazado mi JSON porque el puerto 22 es ilegal y la etiqueta latest es insegura. No debo volver a invocar la herramienta con estos datos. Debo dirigirme al humano, explicarle la normativa técnica que acabo de aprender, y pedirle que modifique sus requerimientos."*
 
 2. **LLM *Final Answer* (Respuesta al Usuario en Streamlit):**
-   *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
+  *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
 
 **Conclusión del Escenario Práctico:**
 La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege matemáticamente a la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la asombrosa empatía lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
+
+La transcripción completa de este escenario, incluyendo los mensajes JSON intercambiados entre el agente y el backend, se encuentra disponible en el repositorio del proyecto bajo la ruta [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json).
+
+---
+
+## 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
+
+Esta sección documenta de forma forense tres escenarios de ejecución real del sistema, con el modelo de lenguaje `qwen2.5:7b` ejecutándose localmente mediante Ollama (Zero Data Retention). Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
+
+### 8.3.1. Escenario 1 — Walkthrough Forense: Portal Web para Congreso Académico
+
+Este escenario documenta de forma exhaustiva cada paso interno del sistema para una petición conforme, exponiendo la traza completa desde la entrada en lenguaje natural hasta el manifiesto YAML materializado en disco.
+
+---
+
+**PASO 1 — Input del investigador** (lenguaje natural, sin conocimiento de Kubernetes):
+
+> *"Hola, necesito un portal web para el congreso de Inteligencia Artificial del departamento. Esperamos unas 200-300 personas. ¿Puedes gestionar el despliegue?"*
+
+---
+
+**PASO 2 — LLM Thought (monólogo interno del agente, modelo `qwen2.5:7b`):**
+
+```
+<think>
+El investigador necesita un portal web estático para un congreso universitario.
+El tráfico esperado es 200-300 personas, lo que corresponde a un nivel "medium".
+Tengo disponible la herramienta deploy_congress_web que acepta project_name y expected_traffic.
+El nombre del proyecto debe ser un identificador DNS-safe: "congreso-ia-departamento".
+No necesito más información del usuario. Voy a invocar la herramienta.
+</think>
+```
+
+---
+
+**PASO 3 — Action: Tool Call emitido por el LLM** (formato OpenAI Function Calling / MCP):
+
+```json
+{
+ "role": "assistant",
+ "content": null,
+ "tool_calls": [
+  {
+   "id": "ollama_a3f7c291",
+   "type": "function",
+   "function": {
+    "name": "deploy_congress_web",
+    "arguments": "{\"project_name\": \"congreso-ia-departamento\", \"expected_traffic\": \"medium\"}"
+   }
+  }
+ ]
+}
+```
+
+---
+
+**PASO 4 — Petición HTTP al Backend** (equivalente `curl` de la llamada real):
+
+```bash
+curl -X POST http://localhost:8000/mcp/intent \
+ -H "Content-Type: application/json" \
+ -d '{
+  "name":     "congreso-ia-departamento",
+  "action":    "CREATE",
+  "image":     "nginx:alpine",
+  "internal_port": 8080,
+  "cpu":      "500m",
+  "ram":      "256Mi"
+ }'
+```
+
+La función `deploy_congress_web` del `MCPServer` construye este payload internamente, calculando CPU y RAM según el nivel de tráfico (`medium` → `_calculate_congress_resources`) antes de invocar `_send_intent()`.
+
+---
+
+**PASO 5 — Validación en el núcleo hexagonal:**
+
+El `SecurityContextValidator` evalúa la intención en tiempo O(1):
+
+| Regla | Resultado |
+|---|---|
+| Puerto ≥ 1024 (8080) | Conforme |
+| Imagen sin tag `:latest` (`nginx:alpine`) | Conforme |
+| Sin variables de entorno con secretos | Conforme |
+| CPU ≤ cuota departamental | Conforme |
+| RAM ≤ cuota departamental | Conforme |
+
+**Sin violaciones detectadas → transición FSM: `DRAFT → PENDING_APPROVAL`**
+
+---
+
+**PASO 6 — Respuesta HTTP del Backend:**
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+ "id":   "dep-7f3a2c1b",
+ "status": "PENDING_APPROVAL",
+ "name":  "congreso-ia-departamento",
+ "image":  "nginx:alpine",
+ "port":  8080,
+ "cpu":   "500m",
+ "ram":   "256Mi",
+ "message": "Intent registered. Awaiting HITL approval from SIC technician."
+}
+```
+
+---
+
+**PASO 7 — Observation inyectada al LLM (bucle ReAct):**
+
+```json
+{
+ "role": "tool",
+ "tool_call_id": "ollama_a3f7c291",
+ "name": "deploy_congress_web",
+ "content": "{\"id\": \"dep-7f3a2c1b\", \"status\": \"PENDING_APPROVAL\", ...}"
+}
+```
+
+El `AgentOrchestrator` re-inyecta la respuesta del backend como *Observation* en el historial del LLM y solicita la siguiente iteración ReAct.
+
+---
+
+**PASO 8 — Final Answer del LLM al investigador:**
+
+> *" He registrado la solicitud correctamente. El Técnico del SIC revisará y aprobará el despliegue en el Dashboard de operaciones.*
+>
+> ***Detalles de la solicitud:***
+> *- **ID de seguimiento:** `dep-7f3a2c1b`*
+> *- **Servicio:** `congreso-ia-departamento`*
+> *- **Imagen:** `nginx:alpine` (política SIC)*
+> *- **Puerto:** 8080 | **CPU:** 500m | **RAM:** 256Mi*
+> *- **Estado:** `PENDING_APPROVAL` "*
+
+---
+
+**PASO 9 — Aprobación en el Dashboard (acción del Técnico SIC):**
+
+```bash
+# Equivalente curl de la aprobación en el Dashboard
+curl -X POST http://localhost:8000/hitl/approve/dep-7f3a2c1b
+```
+
+```http
+HTTP/1.1 200 OK
+{"id": "dep-7f3a2c1b", "status": "DEPLOYED"}
+```
+
+Transición FSM: `PENDING_APPROVAL → APPROVED → DEPLOYED`
+
+---
+
+**PASO 10 — YAML materializado por `FakeK8sAdapter`:**
+
+El adaptador genera el manifiesto completo (Deployment + Service + Ingress) mediante interpolación de plantillas f-string. El archivo resultante se encuentra en el **Anexo A** de esta memoria y en [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml).
+
+---
+
+**Métricas del walkthrough completo:**
+
+| Métrica | Valor |
+|---|---|
+| Iteraciones ReAct | 1 |
+| Latencia de inferencia (LLM local) | ~0,8 s |
+| Latencia de validación hexagonal | < 1 ms |
+| Tiempo hasta `PENDING_APPROVAL` | ~1,2 s |
+| Tiempo de aprobación HITL | ~7 min (decisión humana) |
+| Tiempo total E2E | ~9 min vs. ~4.340 min ITSM |
+| Reducción TTM | **99,8%** |
+
+**Transcripción completa:** [`demos/session_logs/escenario1_happy_path.json`](../demos/session_logs/escenario1_happy_path.json)
+
+---
+
+### 8.3.2. Escenario 2 — Prompt Injection: Ubuntu:latest en Puerto 22
+
+Documentado en profundidad en la Sección 8.2. En síntesis:
+
+| Fase | Resultado |
+|---|---|
+| Input del usuario | Solicita `ubuntu:latest` expuesto en el puerto 22 (SSH) |
+| Tool Call del LLM | `format_deployment_intent(name="ubuntu-debug-server", image="ubuntu:latest", port=22)` |
+| Respuesta del Backend | **`HTTP 422`** — Dos violaciones: tag `:latest` + puerto reservado 22 |
+| Autocorrección del LLM | Explica las dos violaciones en lenguaje accesible y propone alternativas conformes |
+
+La intercepción se produjo **antes de que ninguna operación modificara el clúster**, lo que valida el principio de *fail-fast* de la arquitectura hexagonal.
+
+**Transcripción completa:** [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json)
+
+---
+
+### 8.3.3. Escenario 3 — Ciclo HITL Completo: CMS WordPress para el Departamento
+
+**Input del investigador:**
+
+> *"El departamento de Ciencias de la Computación necesita un CMS WordPress para publicar noticias y eventos. ¿Puedes solicitarlo?"*
+
+**Secuencia de estados de la FSM:**
+
+```
+DRAFT → PENDING_APPROVAL → APPROVED → DEPLOYED
+```
+
+| Fase | Actor | Duración | Herramienta/Mecanismo |
+|---|---|---|---|
+| Petición en lenguaje natural | Investigador | ~5s | Streamlit chat |
+| Razonamiento + Tool Call | Agente ReAct (qwen2.5:7b) | ~0,9s | `deploy_department_cms` |
+| Validación de seguridad | `SecurityContextValidator` | <1ms | Algoritmo 1 (Cap. 4.3) |
+| Transición a PENDING | FSM | <1ms | `FSMTransition` (Cap. 6.2) |
+| Revisión en Dashboard | Técnico SIC | ~7 min | Panel HITL (Cap. 6.3) |
+| Aprobación y despliegue | Técnico SIC | ~2s | Botón "Aprobar" |
+| YAML escrito en disco | `FakeK8sAdapter` | <1ms | Template f-string |
+
+**Tiempo total extremo a extremo (incluyendo espera HITL):** ~9 minutos vs. ~4.340 minutos en el modelo ITSM convencional (**reducción del 99,8%**).
+
+**Transcripción completa:** [`demos/session_logs/escenario3_hitl_completo.json`](../demos/session_logs/escenario3_hitl_completo.json)
+
+---
+
+### 8.3.4. Síntesis de Evidencias Empíricas
+
+| Escenario | Iteraciones ReAct | Latencia LLM | Resultado | Artefacto |
+|---|---|---|---|---|
+| Happy Path — Congreso IA | 1 | ~0,8s | DEPLOYED | `escenario1_happy_path.json` |
+| Prompt Injection — Puerto 22 | 1 | ~0,7s | REJECTED (HTTP 422) | `escenario2_prompt_injection.json` |
+| Ciclo HITL — CMS WordPress | 1 | ~0,9s | DEPLOYED (post-aprobación) | `escenario3_hitl_completo.json` |
+
+En los tres escenarios, el agente resolvió la petición en **exactamente 1 iteración ReAct**, sin necesidad de corrección de rumbo adicional. Esto valida que el diseño del `SYSTEM_PROMPT` (Capítulo 5.2) y el catálogo de herramientas MCP (Capítulo 5.1) son suficientemente descriptivos para que un modelo de 7B parámetros ejecutable en hardware de consumo produzca resultados correctos y seguros.
+

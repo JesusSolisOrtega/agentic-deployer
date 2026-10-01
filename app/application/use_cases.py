@@ -9,12 +9,7 @@ from __future__ import annotations
 
 from app.application.security_validator import SecurityContextValidator
 from app.domain.models import DeploymentIntent, DeploymentRecord
-
-# ---------------------------------------------------------------------------
-# In-memory store (global state of the prototype)
-# ---------------------------------------------------------------------------
-# dict[id → DeploymentRecord]
-deployment_store: dict[str, DeploymentRecord] = {}
+from app.domain.ports import DeploymentRepositoryPort
 
 
 class ProcessDeploymentUseCase:
@@ -24,8 +19,9 @@ class ProcessDeploymentUseCase:
     so that a human can approve it via HITL.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, repository: DeploymentRepositoryPort) -> None:
         self._validator = SecurityContextValidator()
+        self._repository = repository
 
     def execute(self, intent: DeploymentIntent) -> DeploymentRecord:
         """
@@ -43,8 +39,8 @@ class ProcessDeploymentUseCase:
         # 1. Validate security policies
         self._validator.validate(intent)
 
-        # 2. Create record and persist in memory
+        # 2. Create record and persist via repository
         record = DeploymentRecord(intent=intent)
-        deployment_store[record.id] = record
+        self._repository.save(record)
 
         return record

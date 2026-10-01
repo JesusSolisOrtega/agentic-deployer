@@ -8,7 +8,14 @@ Components:
   - ToolCall / AgentResponse: communication dataclasses.
   - LLMClient (ABC): interface that any provider must implement.
   - FakeLLMClient: simulation without API key for dev and demo.
+  - OllamaLLMClient: native Ollama client (free, local, zero data retention).
+  - OpenAILLMClient: OpenAI API client (also compatible with Ollama /v1).
   - AgentOrchestrator: ReAct (Reason + Act) loop that executes tools.
+
+Provider selection (LLM_PROVIDER env var):
+  - 'fake'   → FakeLLMClient (no API key required)
+  - 'ollama' → OllamaLLMClient (requires local Ollama server)
+  - 'openai' → OpenAILLMClient (requires OPENAI_API_KEY)
 """
 
 from __future__ import annotations
@@ -315,6 +322,90 @@ class OpenAILLMClient(LLMClient):
                 agent_response.tool_calls.append(
                     ToolCall(
                         id=tc.id,
+                        name=tc.function.name,
+                        arguments=args,
+                    )
+                )
+
+        return agent_response
+
+
+# ---------------------------------------------------------------------------
+# Ollama LLM Client — Native SDK (free, local, zero data retention)
+# ---------------------------------------------------------------------------
+
+class OllamaLLMClient(LLMClient):
+    """
+    Native Ollama client using the official `ollama` Python SDK.
+
+    Recommended for institutional environments (universities, public sector)
+    where data sovereignty (Zero Data Retention) is mandatory.
+
+    Requires a running Ollama server:
+        ollama serve                    # Start server
+        ollama pull qwen2.5:7b          # Download model (recommended)
+        ollama pull llama3.1            # Alternative with tool_calls support
+
+    Recommended models with native tool_calls support:
+        - qwen2.5:7b    (8 GB VRAM, best Spanish-language performance)
+        - llama3.1:8b   (8 GB VRAM, strong reasoning)
+        - mistral:7b    (4 GB VRAM, fast, lighter)
+    """
+
+    def __init__(
+        self,
+        model: str | None = None,
+        host: str | None = None,
+    ) -> None:
+        try:
+            import ollama as _ollama
+            self._ollama = _ollama
+        except ImportError as exc:
+            raise ImportError(
+                "The 'ollama' package is required. Install it with: "
+                "pip install ollama"
+            ) from exc
+
+        self.model = model or os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+        self.host = host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
+
+    def chat(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+    ) -> AgentResponse:
+        """
+        Sends messages to Ollama and returns an AgentResponse.
+
+        Converts OpenAI-format tool definitions to Ollama-compatible format
+        and maps the response back to the common AgentResponse dataclass.
+        """
+        client = self._ollama.Client(host=self.host)
+
+        # Ollama accepts OpenAI-compatible tool definitions directly
+        kwargs: dict = {
+            "model": self.model,
+            "messages": messages,
+        }
+        if tools:
+            kwargs["tools"] = tools
+
+        response = client.chat(**kwargs)
+        message = response.message
+
+        agent_response = AgentResponse(content=message.content or None)
+
+        # Map Ollama tool calls → ToolCall dataclass
+        if message.tool_calls:
+            for tc in message.tool_calls:
+                try:
+                    args = dict(tc.function.arguments) if tc.function.arguments else {}
+                except (TypeError, AttributeError):
+                    args = {}
+
+                agent_response.tool_calls.append(
+                    ToolCall(
+                        id=f"ollama_{uuid.uuid4().hex[:8]}",
                         name=tc.function.name,
                         arguments=args,
                     )

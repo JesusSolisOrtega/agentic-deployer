@@ -49,24 +49,24 @@ Los vértices de este grafo (Estados) y sus aristas dirigidas (Transiciones Auto
 - **Nodo de Tránsito (`APPROVED`):** Estado intermedio y volátil. Cuando el humano autoriza la operación, la petición ingresa a este nodo durante un lapso minúsculo. Actúa como el desencadenante imperativo (*Trigger*) para excitar al adaptador de red secundario (`FakeK8sAdapter` o `RealK8sAdapter`).
 - **Nodo de Sumidero B (`DEPLOYED`):** Estado terminal final. Solo se alcanza si, y solo si, la intención superó el nodo `APPROVED` y la API de Kubernetes confirma que los manifiestos YAML han sido guardados sin errores de persistencia en disco.
 
-La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 5**.
+La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 9**.
 
 ```mermaid
 stateDiagram-v2
-    direction LR
-    [*] --> PENDING_APPROVAL : Inyección
-    
-    PENDING_APPROVAL --> APPROVED : Clic en Aprobar (Técnico SIC)
-    PENDING_APPROVAL --> REJECTED : Clic en Denegar (Técnico SIC)
-    
-    APPROVED --> DEPLOYED : Éxito I/O Disco (K8s Adapter)
-    APPROVED --> FAILED_PHYSICAL_DEPLOYMENT : Fallo I/O Disco
-    
-    REJECTED --> [*] : Estado Terminal
-    DEPLOYED --> [*] : Estado Terminal Final
-    FAILED_PHYSICAL_DEPLOYMENT --> [*] : Estado Terminal
+  direction LR
+  [*] --> PENDING_APPROVAL : Inyección
+  
+  PENDING_APPROVAL --> APPROVED : Clic en Aprobar (Técnico SIC)
+  PENDING_APPROVAL --> REJECTED : Clic en Denegar (Técnico SIC)
+  
+  APPROVED --> DEPLOYED : Éxito I/O Disco (K8s Adapter)
+  APPROVED --> FAILED : Fallo I/O Disco
+  
+  REJECTED --> [*] : Estado Terminal
+  DEPLOYED --> [*] : Estado Terminal Final
+  FAILED --> [*] : Estado Terminal
 ```
-<p align="center"><i><b>Figura 5:</b> Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
+<p align="center"><i><b>Figura 12:</b> Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
 
 ### 6.2.2. Prevención de Concurrencia y *Race Conditions*
 
@@ -82,45 +82,45 @@ Para neutralizar este vector, la transición entre vértices del DAG se blinda m
 ALGORITMO 4: Transición Inmutable de la Máquina de Estados (FSM_Transition)
 
 ENTRADA:
-  id_peticion -> UUID del registro a transicionar
-  nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
+ id_peticion -> UUID del registro a transicionar
+ nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
 
 SALIDA:
-  Registro_Actualizado (Si la transición es lícita)
-  LANZA HttpConflictError (409) si hay violación de estado
+ Registro_Actualizado (Si la transición es lícita)
+ LANZA HttpConflictError (409) si hay violación de estado
 
 INICIO
-    // 1. Adquisición y comprobación (Atomicidad)
-    Variable registro = ObtenerRegistroMemoria(id_peticion)
-    
-    SI registro ES NULO ENTONCES
-        LANZAR HttpNotFoundError(404)
-    FIN SI
+  // 1. Adquisición y comprobación (Atomicidad)
+  Variable registro = ObtenerRegistroMemoria(id_peticion)
+  
+  SI registro ES NULO ENTONCES
+    LANZAR HttpNotFoundError(404)
+  FIN SI
 
-    // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
-    SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
-        LANZAR HttpConflictError(
-            409, 
-            "Conflicto de Mutación. El registro ya había sido procesado previamente " +
-            "(Estado Actual: " + registro.estado + ")."
-        )
-    FIN SI
-    
-    // 3. Mutación del Estado en Memoria (Bloqueo Atómico)
-    registro.estado = nuevo_estado
-    registro.fecha_modificacion = ObtenerTiempoSistemaActual()
-    
-    // 4. Activación de Adaptadores Secundarios (Side-Effects)
-    SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
-        INTENTAR
-            K8sAdapter.ejecutar_despliegue(registro.intencion)
-            registro.estado = "DEPLOYED" // Segunda transición
-        CAPTURAR ExcepcionIO COMO error
-            registro.estado = "FAILED_PHYSICAL_DEPLOYMENT"
-        FIN INTENTAR
-    FIN SI
-    
-    RETORNAR registro
+  // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
+  SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
+    LANZAR HttpConflictError(
+      409, 
+      "Conflicto de Mutación. El registro ya había sido procesado previamente " +
+      "(Estado Actual: " + registro.estado + ")."
+    )
+  FIN SI
+  
+  // 3. Mutación del Estado mediante el Repositorio (Bloqueo Atómico)
+  registro.estado = nuevo_estado
+  registro.fecha_modificacion = ObtenerTiempoSistemaActual()
+  
+  // 4. Activación de Adaptadores Secundarios (Side-Effects)
+  SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
+    INTENTAR
+      K8sAdapter.ejecutar_despliegue(registro.intencion)
+      registro.estado = "DEPLOYED" // Segunda transición
+    CAPTURAR ExcepcionIO COMO error
+      registro.estado = "FAILED"
+    FIN INTENTAR
+  FIN SI
+  
+  RETORNAR registro
 FIN
 ```
 
@@ -143,7 +143,7 @@ En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicac
 Consecuentemente, el TFM implementa una estrategia de **Polling Activo Ligero**. El *Dashboard* ejecuta bucles temporizados desde el navegador del técnico utilizando llamadas `fetch` nativas de JavaScript:
 
 1. **Interrogación Constante:** El cliente invoca el endpoint `GET /hitl/pending` a intervalos regulares (ej. cada 5.000 milisegundos).
-2. **Procesamiento de Bajo Coste:** El *Backend*, al no estar acoplado a bases de datos relacionales pesadas, realiza un filtrado $O(N)$ sobre su diccionario en memoria (`deployment_store`), retornando exclusivamente los metadatos de las peticiones cuyo estado sea `PENDING_APPROVAL`.
+2. **Procesamiento Eficiente y Transaccional:** El *Backend* delega la lectura de las intenciones pendientes en el repositorio local (SQLite). Mediante consultas estructuradas, este enfoque garantiza persistencia ACID y consistencia frente a reinicios inesperados, manteniendo el *overhead* al mínimo en el contexto del prototipo.
 3. **Inyección Dinámica:** El cliente recibe el *payload* JSON y reconstruye dinámicamente el Document Object Model (DOM), renderizando tarjetas visuales (*Cards*) para cada petición entrante.
 
 Esta arquitectura desacoplada (*Stateless* en la capa de transporte) favorece la resiliencia del sistema. Si el portátil del Técnico de Operaciones pierde conectividad Wi-Fi, el estado del *Backend* permanece intacto; al recuperar la conexión, el siguiente ciclo de *polling* rehidratará el *Dashboard* con las peticiones acumuladas durante la ventana de desconexión.
@@ -153,11 +153,161 @@ Esta arquitectura desacoplada (*Stateless* en la capa de transporte) favorece la
 La fase final del ciclo de vida del *Agentic Deployer* ocurre cuando el factor biológico colisiona con el *Backend* físico. El *Dashboard* expone visualmente los atributos inmutables de la intención extraída por la IA (UUID de rastreo, Imagen base a desplegar, Puerto de red y Cuotas de recursos CPU/RAM).
 
 Junto a esta tabla de datos puros, se exponen dos vectores de mutación REST:
-- El botón **"Rechazar"**: Ejecuta un `POST /hitl/reject/{id}`, desencadenando el estado `REJECTED` en la Máquina de Estados (sección 6.2).
+- El botón **"Rechazar"**: Ejecuta un `POST /hitl/reject/{id}`, desencadenando el estado `REJECTED` en la Máquina de Estados (sección 6.2). La petición queda archivada indefinidamente con fines de auditoría legal pero no genera ningún artefacto de infraestructura.
 - El botón **"Aprobar"**: Ejecuta un `POST /hitl/approve/{id}`. Esta es la llamada más crítica de toda la infraestructura.
 
 Cuando el técnico invoca la aprobación, el ciclo asíncrono concluye y el sistema recupera la naturaleza imperativa bloqueante (*Synchronous Blocking*). El *Backend* despierta la intención retenida y se la inyecta al Adaptador de Red Secundario (el `DeployPort`).
 
-Como se definió en los esquemas *Golden Path* (Capítulo 4), en este preciso milisegundo el Adaptador toma el control. El objeto Python abstracto se mapea contra los motores de renderizado de texto (ej. Jinja2 o formateo directo), produciendo estructuras de datos YAML puras. Finalmente, estas cadenas de texto se vuelcan sobre los volúmenes del sistema operativo mediante operaciones I/O del kernel (ej. `open(filepath, 'w')`), materializando físicamente el archivo `deploy_{uuid}.yaml`. 
+Como se definió en los esquemas *Golden Path* (Capítulo 4), en este preciso milisegundo el Adaptador toma el control. El objeto Python abstracto se mapea contra un motor de interpolación de cadenas basado en **f-strings** y la utilidad estándar `textwrap.dedent` de Python, produciendo estructuras de datos YAML puras. Finalmente, estas cadenas de texto se vuelcan sobre los volúmenes del sistema operativo mediante operaciones I/O del kernel (ej. `open(filepath, 'w')`), materializando físicamente el archivo `{name}.yaml`.
 
 La generación de este archivo en disco (o su envío directo a la API de Kubernetes) confirma que la Inteligencia Artificial, inicialmente un ente discursivo estocástico, ha logrado cristalizar su razonamiento lingüístico en un activo corporativo inmutable, habiendo sorteado con éxito las barreras matemáticas del `SecurityContextValidator` y el escrutinio ético del *Human-In-The-Loop*.
+
+### 6.3.3. Diagrama de Secuencia del Flujo HITL
+
+La **Figura 10** complementa el diagrama E2E global (Figuras 5, 6 y 7, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor SIC as Técnico SIC
+  participant Dash as Dashboard HTML
+  participant API as FastAPI Backend
+  participant Store as SQLiteDeploymentRepository
+  participant K8s as FakeK8sAdapter
+
+  Note over SIC,API: Contexto: intención dep-9b4f1a7e en PENDING_APPROVAL
+
+  loop Polling cada 3 segundos
+    Dash->>API: GET /hitl/pending
+    API->>Store: get_all()
+    Store-->>API: List[DeploymentRecord]
+    API-->>Dash: [{id, status...}] (filtrado)
+  end
+  Dash-->>SIC: Renderiza tarjetas de intenciones pendientes
+
+  rect rgb(220, 255, 220)
+    Note over SIC,K8s: VECTOR A — Aprobación del despliegue
+    SIC->>Dash: Clic en "Aprobar"
+    Dash->>API: POST /hitl/approve/dep-9b4f1a7e
+    activate API
+    API->>Store: get(id)
+    Store-->>API: record
+    API->>API: record.status = APPROVED (En memoria)
+    API->>K8s: deploy(DeploymentIntent)
+    activate K8s
+    K8s->>K8s: Renderiza template f-string (YAML)
+    K8s-->>API: Éxito — YAML escrito en disco
+    deactivate K8s
+    API->>API: record.status = DEPLOYED (En memoria)
+    API->>Store: save(record)
+    API-->>Dash: HTTP 200 {status: DEPLOYED}
+    deactivate API
+    Dash-->>SIC: Despliegue materializado
+  end
+
+  rect rgb(255, 220, 220)
+    Note over SIC,Store: VECTOR B — Rechazo de la petición
+    SIC->>Dash: Clic en "Rechazar"
+    Dash->>API: POST /hitl/reject/dep-9b4f1a7e
+    activate API
+    API->>Store: get(id)
+    Store-->>API: record
+    API->>API: record.status = REJECTED (En memoria)
+    API->>Store: save(record)
+    API-->>Dash: HTTP 200 {status: REJECTED}
+    deactivate API
+    Dash-->>SIC: Petición archivada
+    Note right of Store: Estado REJECTED terminal e inmutable.
+    Note right of Store: Ningún adaptador genera artefactos.
+  end
+```
+<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). La materialización del YAML ocurre exclusivamente en el Vector A.</i></p>
+
+## 6.4. Canal de Retorno al Investigador: Notificación Asíncrona del Estado
+
+Una brecha de usabilidad inherente al patrón HITL clásico es la **asimetría informacional**: el Técnico SIC conoce en todo momento el estado de las peticiones a través del Dashboard (sección 6.3), pero el investigador, una vez recibida la confirmación de `PENDING_APPROVAL` del agente, queda en un estado de incertidumbre. No sabe cuándo (ni si) su solicitud ha sido aprobada, rechazada o desplegada.
+
+Esta sección documenta el diseño e implementación del **canal de retorno al investigador**: el mecanismo bidireccional que cierra el ciclo de comunicación y permite al investigador consultar el estado de sus solicitudes directamente desde la interfaz conversacional.
+
+### 6.4.1. Diseño del Endpoint de Consulta de Estado
+
+Se ha incorporado un nuevo endpoint `GET /hitl/status/{deployment_id}` en el `BackendAPI`, diseñado específicamente como **canal orientado al investigador** (a diferencia de `/hitl/pending`, orientado al técnico):
+
+```text
+RUTINA: Consulta de Estado de Despliegue (Endpoint REST)
+
+ENDPOINT: GET /hitl/status/{id_despliegue}
+ENTRADA: id_despliegue -> Cadena de texto (ej. "dep-1a2b3c")
+SALIDA: RespuestaEstado (id, estado, mensaje_contextual)
+
+INICIO
+  Variable registro = RepositorioBD.obtener(id_despliegue)
+  SI registro ES Nulo ENTONCES
+    ABORTAR CON ExcepcionHttp(404, "Despliegue no encontrado")
+  FIN SI
+
+  // Mapeo semántico del estado técnico (FSM) a lenguaje natural
+  Variable mensajes = NUEVO Diccionario(
+    "PENDING_APPROVAL" -> "Su solicitud está en cola, pendiente de revisión por el técnico SIC.",
+    "APPROVED" -> "El técnico SIC ha aprobado su solicitud. Despliegue en curso.",
+    "DEPLOYED" -> "Su servicio ha sido desplegado exitosamente.",
+    "REJECTED" -> "El técnico SIC ha rechazado esta solicitud.",
+    "FAILED" -> "El despliegue ha encontrado un error técnico en el clúster."
+  )
+  
+  Variable mensaje_contextual = mensajes[registro.estado_fsm]
+  RETORNAR NUEVO RespuestaEstado(registro.id, registro.estado_fsm, mensaje_contextual)
+FIN
+```
+
+La respuesta incluye el estado actual de la FSM junto con un **mensaje de texto contextual** adaptado a cada estado, de modo que el investigador recibe información comprensible sin necesidad de conocer la nomenclatura técnica de la máquina de estados.
+
+### 6.4.2. Panel de Notificaciones en el Frontend (Streamlit)
+
+La interfaz conversacional (`chat_app.py`) implementa un panel pasivo de seguimiento que se activa automáticamente cuando el agente registra una solicitud con estado `PENDING_APPROVAL`. El mecanismo opera en tres fases:
+
+**1. Extracción automática del ID de seguimiento:**
+
+Tras cada respuesta del agente, el frontend aplica una expresión regular sobre el texto de respuesta para detectar identificadores de deployment del patrón `dep-[a-f0-9]{7,8}`. Si se detecta uno asociado a un estado pendiente, se añade a la lista `session_state.pending_deployments`:
+
+```text
+RUTINA: Extracción de Identificadores (Frontend HITL)
+
+ENTRADA: texto_respuesta -> Respuesta generada por el Agente Cognitivo
+ESTADO: panel_pendientes -> Lista de IDs mostrados en la interfaz gráfica
+
+INICIO
+  // Buscar expresiones regulares de la forma "dep-XXXXXXX"
+  Variable id_detectado = ExpresionRegular("dep-[a-f0-9]{7,8}").buscarEn(texto_respuesta)
+  
+  SI id_detectado EXISTE Y texto_respuesta CONTIENE "PENDING" ENTONCES
+    AÑADIR id_detectado A panel_pendientes
+  FIN SI
+FIN
+```
+
+**2. Panel de seguimiento persistente:**
+
+Mientras existan deployments pendientes en `session_state`, el panel " Mis Solicitudes Pendientes" se renderiza en la parte inferior del chat. Por cada solicitud, el investigador dispone de un botón **" Actualizar"** que realiza una llamada `GET /hitl/status/{id}` al backend y muestra el resultado en un badge de color semántico:
+
+| Estado FSM | Color | Mensaje para el investigador |
+|---|---|---|
+| `PENDING_APPROVAL` | Amarillo | "Su solicitud está en cola, pendiente de revisión." |
+| `APPROVED` | Azul | "El técnico ha aprobado. Despliegue en curso." |
+| `DEPLOYED` | Verde | "Su servicio ha sido desplegado exitosamente." |
+| `REJECTED` | Rojo | "Solicitud rechazada. Contacte con el SIC." |
+| `FAILED` | Rojo | "Error técnico. El equipo SIC ha sido notificado." |
+
+**3. Cierre automático del ciclo:**
+
+Cuando el estado devuelto es terminal (`DEPLOYED`, `REJECTED` o `FAILED`), el deployment se elimina de la lista de seguimiento y el agente inyecta automáticamente un mensaje de notificación en el historial del chat, informando al investigador del resultado final sin que este tenga que preguntar activamente.
+
+### 6.4.3. Justificación de Diseño: Polling Explícito frente a Notificaciones *Push*
+
+La alternativa técnica más evidente sería un sistema de notificaciones *push* (correo electrónico o *webhook*). Esta aproximación fue deliberadamente descartada para el prototipo por las siguientes razones arquitectónicas:
+
+1. **Dependencias externas no justificadas:** Un servidor SMTP o un broker de mensajería (Kafka, RabbitMQ) añadiría complejidad de infraestructura que excede el alcance del prototipo y dificulta la reproducibilidad en entornos académicos.
+2. **Coherencia con el modelo de polling del Dashboard:** El técnico ya opera bajo un modelo de polling (sección 6.3.1). Mantener el mismo paradigma en el canal del investigador simplifica el modelo mental del sistema y su testing.
+3. **Extensibilidad:** El endpoint `GET /hitl/status/{id}` es una interfaz pura REST que puede ser consumida por cualquier sistema externo (correo electrónico, Telegram Bot, Slack Webhook) en una evolución futura sin modificar la lógica del backend (principio de Segregación de Interfaces).
+
+Este diseño cierra el ciclo del patrón HITL, transformándolo de un mecanismo **unidireccional** (investigador → técnico) en un canal **bidireccional** (investigador → técnico → investigador), donde ambos actores disponen de la información necesaria para realizar su rol dentro del flujo de gobierno de la infraestructura.

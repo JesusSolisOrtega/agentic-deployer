@@ -14,6 +14,8 @@ La regla metodológica fundamental del proyecto fue la **estabilidad del núcleo
 
 Para materializar el producto final, el cronograma de ejecución se dividió orgánicamente en cinco fases secuenciales o *sprints* (hitos). Cada fase culminó con un entregable técnico funcional (un incremento de producto) que servía de base inmutable para la siguiente etapa.
 
+> *Nota metodológica: si bien la planificación inicial establece una secuencia ordenada de sprints, la naturaleza del trabajo académico y los compromisos paralelos inherentes al contexto universitario exigen reconocer que la asignación temporal de cada fase puede solaparse o reordenarse según disponibilidad. La planificación se concibe, por tanto, como un marco de referencia flexible y no como una secuencia rígida de Gantt. Los detalles de esta retrospectiva se documentan en el Capítulo 10.*
+
 ### 3.2.1. Fase 1: Núcleo Hexagonal y Dominio Base
 
 Esta fase supuso los cimientos del proyecto. El objetivo era modelar matemáticamente las reglas de negocio de un Servicio de Informática (SIC) universitario, obviando la existencia de la inteligencia artificial.
@@ -46,6 +48,13 @@ Añadida como una capa de valor adicional (*bonus*) no prevista en el alcance in
 - Se integraron técnicas de validación punteras como el *Property-Based Testing* (generando miles de intenciones pseudoaleatorias válidas) y Pruebas Metamórficas para verificar la resiliencia del modelo ante alteraciones lingüísticas (ruido sintáctico en el prompt, cambios de orden en las palabras).
 - Por último, se auditó la propia suite de pruebas con *Mutation Testing*, demostrando la robustez extrema del validador de seguridad.
 
+### 3.2.6. Fase 6 (Post-MVP): Robustez y Cierre del Ciclo HITL
+
+Tras la consolidación del MVP, se abordaron una serie de mejoras de calidad y usabilidad que elevan el sistema a un nivel de referencia académica:
+- **Cliente Ollama Nativo (`OllamaLLMClient`):** Eliminación de la dependencia en la librería `openai` para comunicaciones con el servidor Ollama local, sustituyéndola por peticiones `httpx` directas a la API REST nativa. Esta refactorización garantiza un esquema de *Zero Data Retention* sin dependencias de terceros.
+- **Canal de Retorno al Investigador:** Implementación del endpoint `GET /hitl/status/{id}` y el panel de notificaciones en el chat (` Mis Solicitudes Pendientes`), cerrando el ciclo de comunicación bidireccional del patrón HITL (sección 6.4).
+- **Ampliación de Evidencias Empíricas:** Creación del directorio `demos/` con transcripciones forenses de las sesiones de ejecución real y el manifiesto YAML generado por el `FakeK8sAdapter` (Anexo A).
+
 ## 3.3. Stack Tecnológico y Justificación Arquitectónica
 
 La elección de tecnologías en un ecosistema que combina Inteligencia Artificial y provisionamiento de infraestructura debe equilibrar la innovación disruptiva con la fiabilidad matemática exigida por las operaciones institucionales. A continuación, se desglosa y fundamenta el *stack* tecnológico adoptado.
@@ -58,9 +67,11 @@ El proyecto se ha construido íntegramente sobre **Python (versión 3.12)**. Si 
 - **Pydantic (v2):** Constituye el núcleo de validación de datos [11]. Reescripto recientemente en Rust para maximizar su velocidad, Pydantic se utiliza para modelar las entidades de dominio (como `DeploymentIntent`). Su justificación recae en su capacidad para forzar invariantes de negocio: rechazar peticiones del agente que no cumplan con rangos enteros (puertos) o expresiones regulares, antes incluso de que la lógica de la aplicación las procese.
 
 ### 3.3.3. Interfaz Conversacional y Capa de Agente
-- **Streamlit [10]:** Desarrollar interfaces gráficas (*Front-End*) modernas en React o Vue.js conlleva una alta fricción y sobrecarga de dependencias. Streamlit permite codificar la interfaz de chat (incluyendo historial, avatares e indicadores de estado) íntegramente en Python puro. Esto permite iterar el componente visual de forma ágil, manteniendo el foco del trabajo investigador en la ingeniería del *middleware* de infraestructura.
+- **Streamlit [10]:** Desarrollar interfaces gráficas (*Front-End*) modernas en React o Vue.js conlleva una alta fricción y sobrecarga de dependencias. Streamlit permite codificar la interfaz de chat (incluyendo historial, avatares, indicadores de estado y el panel de notificaciones HITL) íntegramente en Python puro. Esto permite iterar el componente visual de forma ágil, manteniendo el foco del trabajo investigador en la ingeniería del *middleware* de infraestructura.
 - **Model Context Protocol (MCP) SDK:** En lugar de diseñar una API HTTP propietaria para invocar herramientas, se ha adoptado el SDK oficial de MCP para Python. Esta librería permite decorar funciones arbitrarias (ej. `@server.tool()`) e introspeccionar sus firmas (nombres de parámetros y tipos) en tiempo de ejecución, transformándolas en esquemas JSON estandarizados consumibles por cualquier cliente LLM.
-- **Abstracción Agnostica (Ollama / OpenAI):** El orquestador implementa adaptadores (`LLMClient`) para evitar el anclaje a un proveedor (*vendor lock-in*). El sistema es plenamente operativo con **Ollama**, un servidor de código abierto que permite ejecutar pesos de modelos (como Llama 3 o Mistral) localmente, garantizando un esquema de "Soberanía del Dato" (Zero Data Retention) imperativo para universidades e instituciones de seguridad. Paralelamente, soporta la API de OpenAI para escenarios que requieran el techo cognitivo de modelos como GPT-4o.
+- **Abstracción Agnóstica de Proveedor LLM:** El orquestador implementa un contrato abstracto (`LLMClient`) con dos implementaciones concretas:
+ - **`OllamaLLMClient`**: Cliente nativo implementado con `httpx` que se comunica directamente con la API REST de Ollama (`POST /api/chat`), sin dependencias externas adicionales. Permite ejecutar modelos como `qwen2.5:7b` o `llama3.2:3b` en la red privada institucional, garantizando un esquema de **Soberanía del Dato** (*Zero Data Retention*) imperativo para universidades. No envía ningún token de texto del investigador a servidores externos.
+ - **`OpenAILLMClient`**: Adaptador para la API de OpenAI, que permite acceder a modelos como GPT-4o en escenarios donde la capacidad cognitiva de los modelos cloud supera a los modelos locales disponibles. La selección del cliente se realiza exclusivamente mediante la variable de entorno `LLM_PROVIDER`, sin requerir modificaciones al código.
 
 ### 3.3.4. Ecosistema de Aseguramiento de Calidad (QA)
 La confianza operativa en el *Agentic Deployer* se asienta sobre un *pipeline* de validación agresivo, sustentado por un ecosistema de librerías avanzadas:
@@ -69,3 +80,45 @@ La confianza operativa en el *Agentic Deployer* se asienta sobre un *pipeline* d
 - **Mutmut:** Herramienta de *Mutation Testing* que aplica alteraciones lógicas al código fuente del sistema en tiempo de ejecución. Garantiza empíricamente que la suite de pruebas es lo suficientemente exhaustiva como para detectar el más sutil de los fallos lógicos.
 - **Locust y Playwright:** Empleadas para certificar el rendimiento y la usabilidad final. *Locust* inunda la API asíncrona simulando concurrencia masiva, demostrando la escalabilidad del patrón asíncrono implementado. *Playwright* orquesta pruebas de interfaz E2E (*End-to-End*), levantando instancias de navegadores *headless* para simular y afirmar la interacción real del técnico (SIC) aprobando despliegues en el panel. 
 - **Ruff y Mypy:** Cadena de herramientas estáticas (*Linting* y *Type-Checking*) utilizadas en los ciclos de Integración Continua (CI) local para asegurar una homogeneidad estilística y rechazar cualquier compilación que vulnere los contratos de tipos de Python.
+
+```mermaid
+flowchart TD
+    subgraph UI [Capa de Interaccion Frontend]
+        ST[Streamlit<br><i>Interfaz Conversacional</i>]
+    end
+    
+    subgraph Cognicion [Motor Agéntico]
+        MCP[MCP SDK<br><i>Catálogo de Herramientas</i>]
+        LLM{LLM Client<br><i>Ollama / OpenAI</i>}
+    end
+    
+    subgraph Backend [Núcleo Hexagonal y API]
+        FA[FastAPI<br><i>Enrutamiento Asíncrono</i>]
+        PY[Pydantic v2<br><i>Validación Estricta</i>]
+    end
+    
+    subgraph QA [Aseguramiento de Calidad]
+        PYT[Pytest<br><i>Unit Testing</i>]
+        HYP[Hypothesis<br><i>Property-Based Testing</i>]
+        MUT[Mutmut<br><i>Mutation Testing</i>]
+    end
+    
+    ST <--> MCP
+    ST <--> LLM
+    MCP <--> FA
+    FA --> PY
+    PYT -.->|Audita| FA
+    HYP -.->|Audita| PY
+    MUT -.->|Evalúa Suite| PYT
+
+    classDef ui fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef cog fill:#fff8e1,stroke:#f57f17,stroke-width:2px;
+    classDef back fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef qa fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+
+    class ST ui;
+    class MCP,LLM cog;
+    class FA,PY back;
+    class PYT,HYP,MUT qa;
+```
+<p align="center"><i><b>Figura 2:</b> Diagrama de componentes del Stack Tecnológico empleado, evidenciando la segregación entre las capas de interfaz, razonamiento cognitivo, backend restrictivo y las herramientas de validación de calidad continua.</i></p>

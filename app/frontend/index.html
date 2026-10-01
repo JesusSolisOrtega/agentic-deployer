@@ -282,6 +282,26 @@
       box-shadow: none;
     }
 
+    .btn--reject {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .btn--reject:hover {
+      background: var(--red-bg);
+      border-color: var(--red);
+      transform: translateY(-1px);
+    }
+
+    .btn--reject:active { transform: translateY(0); }
+
+    .btn--reject:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .badge--create {
       color: var(--green);
       background: var(--green-bg);
@@ -404,6 +424,10 @@
       <div class="stat-card__value" id="stat-approved">0</div>
     </div>
     <div class="stat-card">
+      <div class="stat-card__label">Rechazados hoy</div>
+      <div class="stat-card__value" id="stat-rejected">0</div>
+    </div>
+    <div class="stat-card">
       <div class="stat-card__label">Estado API</div>
       <div class="stat-card__value" id="stat-api" style="font-size:14px;color:var(--text-muted);">Conectando…</div>
     </div>
@@ -421,7 +445,7 @@
           <th>Puerto</th>
           <th>CPU / RAM</th>
           <th>Estado</th>
-          <th>Aprobar</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody id="deployments-body">
@@ -509,12 +533,17 @@
           <td>${puerto}</td>
           <td>${d.intent.cpu} / ${d.intent.ram}</td>
           <td><span class="badge badge--pending">Pendiente</span></td>
-          <td>
+          <td style="display:flex;gap:6px;">
             <button
               class="${btnClass}"
               id="approve-btn-${d.id}"
               onclick="approveDeployment('${d.id}', this)"
             >${btnText}</button>
+            <button
+              class="btn btn--reject"
+              id="reject-btn-${d.id}"
+              onclick="rejectDeployment('${d.id}', this)"
+            >Rechazar</button>
           </td>
         </tr>`;
       }).join('');
@@ -552,6 +581,37 @@
       console.error('Error aprobando:', err);
       btn.disabled = false;
       btn.textContent = 'Reintentar';
+      showToast(`Error: ${err.message}`);
+    }
+  }
+
+  // ── Reject deployment ────────────────────────────────────────────────
+
+  async function rejectDeployment(id, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    // Also disable the approve button for this row
+    const approveBtn = document.getElementById(`approve-btn-${id}`);
+    if (approveBtn) approveBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/hitl/reject/${id}`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+
+      const rejectedEl = document.getElementById('stat-rejected');
+      if (rejectedEl) rejectedEl.textContent = parseInt(rejectedEl.textContent || '0') + 1;
+
+      showToast(`Solicitud ${id} rechazada por el operador`);
+      setTimeout(() => loadPending(), 600);
+
+    } catch (err) {
+      console.error('Error rechazando:', err);
+      btn.disabled = false;
+      btn.textContent = 'Rechazar';
+      if (approveBtn) approveBtn.disabled = false;
       showToast(`Error: ${err.message}`);
     }
   }

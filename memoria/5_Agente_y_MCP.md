@@ -22,41 +22,41 @@ El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilus
 ALGORITMO 2: Introspección Dinámica de Contratos de Herramientas
 
 ENTRADA:
-  funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
+ funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
 
 SALIDA:
-  json_schema -> Estructura estándar JSON-RPC de Tool Calling
+ json_schema -> Estructura estándar JSON-RPC de Tool Calling
 
 INICIO
-    Variable esquema = NUEVO Diccionario JSON
-    esquema["name"] = funcion_objetivo.obtenerNombre()
-    esquema["description"] = funcion_objetivo.obtenerDocstring()
+  Variable esquema = NUEVO Diccionario JSON
+  esquema["name"] = funcion_objetivo.obtenerNombre()
+  esquema["description"] = funcion_objetivo.obtenerDocstring()
+  
+  // Inspección del AST (Abstract Syntax Tree)
+  Variable parametros = funcion_objetivo.obtenerFirmaLexica()
+  esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
+  
+  PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
+    Variable tipo_json = "string" // Por defecto
     
-    // Inspección del AST (Abstract Syntax Tree)
-    Variable parametros = funcion_objetivo.obtenerFirmaLexica()
-    esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
+    // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
+    SI anotacion_de_tipo ES Entero ENTONCES
+      tipo_json = "integer"
+    SINO SI anotacion_de_tipo ES Booleano ENTONCES
+      tipo_json = "boolean"
+    FIN SI
     
-    PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
-        Variable tipo_json = "string" // Por defecto
-        
-        // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
-        SI anotacion_de_tipo ES Entero ENTONCES
-            tipo_json = "integer"
-        SINO SI anotacion_de_tipo ES Booleano ENTONCES
-            tipo_json = "boolean"
-        FIN SI
-        
-        esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
-            "type" -> tipo_json,
-            "description" -> extraerDescripcion(parametro)
-        )
-        
-        SI parametro ES obligatorio ENTONCES
-            AÑADIR parametro A esquema["parameters"]["required"]
-        FIN SI
-    FIN PARA
+    esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
+      "type" -> tipo_json,
+      "description" -> extraerDescripcion(parametro)
+    )
     
-    RETORNAR esquema
+    SI parametro ES obligatorio ENTONCES
+      AÑADIR parametro A esquema["parameters"]["required"]
+    FIN SI
+  FIN PARA
+  
+  RETORNAR esquema
 FIN
 ```
 
@@ -78,6 +78,35 @@ Esta decisión acarrea tres beneficios arquitectónicos fundamentales para el TF
 
 La simbiosis entre la introspección dinámica de tipos y el aislamiento a nivel de kernel convierte al Servidor MCP del proyecto en un catálogo de herramientas altamente seguro, universal e instantáneo.
 
+El siguiente diagrama ilustra el ciclo de vida completo de un mensaje MCP, desde el momento en que el Agente decide invocar una herramienta hasta que recibe el resultado:
+
+```mermaid
+sequenceDiagram
+    participant Orch as Orquestador<br/>(Streamlit)
+    participant LLM as Modelo LLM<br/>(OpenAI / Ollama)
+    participant MCP as Servidor MCP<br/>(stdio)
+    participant BE as Backend FastAPI<br/>(:8000)
+
+    Note over Orch,MCP: Fase de Inicialización (una sola vez)
+    Orch->>MCP: initialize {protocolVersion, capabilities}
+    MCP-->>Orch: {serverInfo, capabilities}
+    Orch->>MCP: tools/list
+    MCP-->>Orch: [{name, description, inputSchema}, ...]
+    Orch->>LLM: system_prompt + tool_definitions
+
+    Note over Orch,BE: Fase de Ejecución (por cada turno de conversación)
+    LLM-->>Orch: {tool_call: {name: "deploy_congress_web", arguments: {...}}}
+    Orch->>MCP: tools/call {name, arguments}
+    MCP->>BE: POST /mcp/intent (DeploymentIntent JSON)
+    BE-->>MCP: 201 Created {deployment_id}
+    MCP-->>Orch: {content: "Despliegue pendiente de aprobación. ID: ..."}
+    Orch->>LLM: [Observation: resultado de la herramienta]
+    LLM-->>Orch: Respuesta final en lenguaje natural
+```
+<p align="center"><i><b>Figura 10:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
+
+> **Nota de implementación (modos de transporte):** El servidor MCP desarrollado soporta dos modos operativos. En el **modo Cliente Externo** (proceso externo), el Agente y el Servidor MCP se comunican vía `stdio` tal y como se describe, beneficiándose de la latencia sub-milisegundo de las *Pipes* IPC del kernel. En el **modo Streamlit integrado** (el utilizado en este MVP), las herramientas MCP se importan directamente como módulos Python (`TOOL_REGISTRY`, `TOOL_DEFINITIONS`) y se invocan en el mismo proceso, lo que elimina incluso el overhead del `stdio`. Ambas modalidades son intercambiables gracias al diseño del `AgentOrchestrator`, que acepta cualquier registro de herramientas independientemente del transporte subyacente.
+
 ## 5.2. Diseño de la Abstracción Multiproveedor y Soberanía del Dato
 
 La vertiginosa evolución de la Inteligencia Artificial Generativa ha consolidado un mercado oligopólico liderado por grandes corporaciones tecnológicas proveedoras de inferencia en la nube (*AI-as-a-Service*). En el desarrollo de sistemas de software empresarial, acoplar el código fuente (el *Core Business*) a los kits de desarrollo de software (SDK) específicos de OpenAI, Anthropic o Google supone un riesgo inasumible de obsolescencia tecnológica y pérdida de poder de negociación.
@@ -86,35 +115,89 @@ Para garantizar la viabilidad a largo plazo del *Agentic Deployer*, el diseño d
 
 ### 5.2.1. El Contrato Abstracto (Patrones *Adapter* y *Factory*)
 
-El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [9]: el patrón **Adapter** y el patrón **Factory Method**. 
+El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [9]: el patrón **Adapter** y el patrón **Factory Method**.
 
-En la capa de aplicación, el orquestador (*AgentOrchestrator*) jamás invoca a la librería `openai` o a la librería `ollama`. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece la "Firma Matemática de la Inferencia", definiendo un contrato estricto de entrada y salida (I/O).
-
-Para asegurar el rigor del presente documento, a continuación se formaliza el comportamiento arquitectónico esperado de este contrato mediante notación algorítmica:
+En la capa de aplicación, el `AgentOrchestrator` jamás invoca directamente a ninguna librería de IA. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece la "Firma Matemática de la Inferencia":
 
 ```text
 CONTRATO ABSTRACTO: Interfaz Cliente LLM (LLMClient)
 
 ESTADO INTERNO:
-  - historial_conversacion -> Lista estructurada de mensajes (Rol, Contenido)
-  - sistema_base -> Prompt fundacional que define la personalidad y las reglas del Agente
+ - historial_conversacion -> Lista estructurada de mensajes (Rol, Contenido)
+ - sistema_base -> Prompt fundacional (personalidad y reglas del Agente)
 
-MÉTODO abstraer_peticion (herramientas_mcp):
-    ENTRADA: herramientas_mcp -> Lista de JSON Schemas (extraída del Contenedor MCP)
-    SALIDA_ESPERADA: 
-      - Objeto tipo RESPUESTA_TEXTO_PLANO
-      - Objeto tipo INVOCACION_DE_HERRAMIENTA (ToolCall ID, Nombre, Argumentos)
-
-    EXCEPCIONES CONTRACTUALES:
-      - LANZAR LlmTimeoutError SI el proveedor excede el tiempo máximo configurado.
-      - LANZAR ContextWindowExceededError SI los tokens superan el límite del modelo.
+MÉTODO chat(messages, tools):
+  ENTRADA: messages -> historial; tools -> JSON Schemas del servidor MCP
+  SALIDA_ESPERADA:
+   - Objeto tipo AgentResponse (texto plano)
+   - Objeto tipo ToolCall (id, nombre_función, argumentos_json)
 ```
 
-Basándose en este contrato formal, el sistema instancia adaptadores concretos. 
-Por un lado, el adaptador `OpenAIAdapter` recibe la llamada abstracta, formatea la lista de mensajes internos siguiendo la rígida especificación de la API REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS por la red de área amplia (WAN) y serializa la respuesta JSON de vuelta al contrato.
-Por otro lado, el adaptador `OllamaAdapter` realiza un proceso análogo, pero apuntando a un *socket* local o a un balanceador *on-premise*, utilizando la sintaxis abierta compatible con el ecosistema de Llama-3.
+El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 
-La instanciación en memoria recae sobre un patrón *Factory*. Durante la fase de inicialización (*Bootstrapping*) del contenedor web, el sistema lee una única variable de entorno de bajo nivel (ej. `LLM_PROVIDER=OLLAMA`). La clase Factory evalúa esta variable e inyecta la dependencia correcta en el Orquestador. Esta Inyección de Dependencias (DI) permite permutar el motor cognitivo con un simple reinicio del proceso físico, blindando el TFM contra cualquier futuro cambio en el panorama tecnológico de los LLM.
+**`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube y deserializa la respuesta JSON.
+
+**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
+
+```text
+ALGORITMO 4: Implementación Nativa del Cliente Ollama
+
+CLASE OllamaLLMClient IMPLEMENTA LLMClient:
+  ATRIBUTOS:
+    modelo: Cadena (ej. "qwen2.5:7b")
+    url_base: Cadena (ej. "http://localhost:11434")
+
+  MÉTODO chat(mensajes, herramientas):
+    Variable payload = NUEVO Diccionario(
+      "model" -> modelo,
+      "messages" -> mensajes,
+      "stream" -> FALSO
+    )
+    SI herramientas EXISTE ENTONCES
+      payload["tools"] = herramientas
+    FIN SI
+
+    // Petición HTTP POST síncrona a la API local
+    Variable respuesta = PeticionHttp(url_base + "/api/chat", json=payload)
+    
+    SI respuesta.codigo_estado != 200 ENTONCES
+      LANZAR ExcepcionHttp("Error en la inferencia LLM local")
+    FIN SI
+
+    Variable mensaje = respuesta.cuerpo_json["message"]
+
+    SI mensaje CONTIENE "tool_calls" ENTONCES
+      Variable llamada = mensaje["tool_calls"][1]
+      RETORNAR NUEVO AgentResponse(
+        tool_call = NUEVO ToolCall(llamada["name"], llamada["arguments"])
+      )
+    FIN SI
+
+    RETORNAR NUEVO AgentResponse(content=mensaje["content"])
+FIN CLASE
+```
+
+La instanciación en memoria recae sobre un patrón **Factory**. Durante la fase de inicialización (*bootstrapping*) del contenedor web, el sistema lee la variable de entorno `LLM_PROVIDER`. La clase Factory evalúa esta variable e inyecta la implementación correcta en el Orquestador mediante *Dependency Injection*:
+
+```text
+ALGORITMO 5: Inyección de Dependencias del Motor Cognitivo (Factory)
+
+ENTRADA: proveedor -> Cadena desde variable de entorno (LLM_PROVIDER)
+SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
+
+INICIO
+  SI proveedor ES "ollama" ENTONCES
+    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5:7b")
+  SINO SI proveedor ES "openai" ENTONCES
+    RETORNAR NUEVO OpenAILLMClient(modelo="gpt-4o-mini")
+  SINO
+    RETORNAR NUEVO SICFakeLLMClient() // Entorno de pruebas determinista
+  FIN SI
+FIN
+```
+
+Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
+
 
 ### 5.2.2. Soberanía del Dato en Entornos Institucionales
 
@@ -145,29 +228,29 @@ El patrón ReAct altera la topología conversacional subyacente. En lugar de pro
 
 El modelo reevalúa el estado global tras la observación y decide si necesita ejecutar una nueva acción o si la tarea ha concluido. Cuando dictamina que el objetivo se ha cumplido, transiciona a la fase final (*Final Answer*), devolviendo el control al usuario humano.
 
-Como se ilustra en la **Figura 4**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
+Como se ilustra en la **Figura 11**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
 ```mermaid
 flowchart LR
-    A([Prompt]) --> B[Thought: LLM]
-    B --> C{Requiere\nAcción Física?}
-    C -->|Sí| D[Action: Invocación JSON-RPC MCP]
-    C -->|No| G([Output: Final Answer])
-    
-    D --> E[Yield: Ejecución en Backend / K8s]
-    E --> F[Observation: Resultado o Error 422]
-    
-    F -->|Inyección en Contexto| B
-    
-    classDef llm fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
-    classDef phys fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef term fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
-    
-    class B,C llm;
-    class D,E,F phys;
-    class A,G term;
+  A([Prompt]) --> B[Thought: LLM]
+  B --> C{Requiere\nAcción Física?}
+  C -->|Sí| D[Action: Invocación JSON-RPC MCP]
+  C -->|No| G([Output: Final Answer])
+  
+  D --> E[Yield: Ejecución en Backend / K8s]
+  E --> F[Observation: Resultado o Error 422]
+  
+  F -->|Inyección en Contexto| B
+  
+  classDef llm fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+  classDef phys fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+  classDef term fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+  
+  class B,C llm;
+  class D,E,F phys;
+  class A,G term;
 ```
-<p align="center"><i><b>Figura 4:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
+<p align="center"><i><b>Figura 11:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
 
@@ -175,47 +258,47 @@ Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a c
 ALGORITMO 3: Bucle de Orquestación Cognitiva (ReAct Loop)
 
 ENTRADA: 
-  peticion_usuario -> Cadena de texto natural
-  contexto_historico -> Memoria de la sesión actual
+ peticion_usuario -> Cadena de texto natural
+ contexto_historico -> Memoria de la sesión actual
 
 SALIDA: 
-  respuesta_final -> Cadena de texto natural o Markdown
+ respuesta_final -> Cadena de texto natural o Markdown
 
 INICIO
-    AÑADIR peticion_usuario A contexto_historico
-    Variable turno_actual = 0
-    Variable MAX_TURNOS = 10 // Prevención de bucles infinitos (Infinite Loop)
+  AÑADIR peticion_usuario A contexto_historico
+  Variable turno_actual = 0
+  Variable MAX_TURNOS = 5 // Prevención de bucles infinitos (Infinite Loop)
 
-    MIENTRAS turno_actual < MAX_TURNOS HACER
-        // 1. Inferencia del LLM (Thought + Action)
-        Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
-        
-        SI respuesta_llm ES texto_plano ENTONCES
-            // El Agente decide que ha terminado y se dirige al humano
-            RETORNAR respuesta_llm
-        FIN SI
-
-        SI respuesta_llm ES invocacion_herramienta ENTONCES
-            Variable nombre_funcion = respuesta_llm.obtenerNombre()
-            Variable argumentos = respuesta_llm.obtenerArgumentos()
-            Variable resultado_accion
-            
-            INTENTAR
-                // 2 y 3. Ejecución y Pausa
-                resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
-            CAPTURAR ExcepcionHttp COMO error
-                // Serialización del error para que el LLM lo entienda
-                resultado_accion = error.obtenerMensajeHumano() 
-            FIN INTENTAR
-
-            // 4. Observación
-            AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
-        FIN SI
-        
-        turno_actual = turno_actual + 1
-    FIN MIENTRAS
+  MIENTRAS turno_actual < MAX_TURNOS HACER
+    // 1. Inferencia del LLM (Thought + Action)
+    Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
     
-    LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
+    SI respuesta_llm ES texto_plano ENTONCES
+      // El Agente decide que ha terminado y se dirige al humano
+      RETORNAR respuesta_llm
+    FIN SI
+
+    SI respuesta_llm ES invocacion_herramienta ENTONCES
+      Variable nombre_funcion = respuesta_llm.obtenerNombre()
+      Variable argumentos = respuesta_llm.obtenerArgumentos()
+      Variable resultado_accion
+      
+      INTENTAR
+        // 2 y 3. Ejecución y Pausa
+        resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
+      CAPTURAR ExcepcionHttp COMO error
+        // Serialización del error para que el LLM lo entienda
+        resultado_accion = error.obtenerMensajeHumano() 
+      FIN INTENTAR
+
+      // 4. Observación
+      AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
+    FIN SI
+    
+    turno_actual = turno_actual + 1
+  FIN MIENTRAS
+  
+  LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
 FIN
 ```
 

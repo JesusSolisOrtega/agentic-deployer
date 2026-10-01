@@ -157,6 +157,65 @@ def delete_university_service(service_name: str) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
+@mcp_server.tool()
+def deploy_static_website(project_name: str, domain: str) -> str:
+    """Requests the deployment of a static website.
+
+    Args:
+        project_name: Name of the project.
+        domain: Domain name for the website.
+    """
+    payload = {
+        "name": project_name,
+        "action": "CREATE",
+        "image": "nginx:alpine",
+        "internal_port": 80,
+        "cpu": "100m",
+        "ram": "64Mi",
+    }
+    result = _send_intent(payload)
+    return json.dumps(result, ensure_ascii=False)
+
+
+@mcp_server.tool()
+def deploy_database(db_type: str, version: str, storage_gb: int) -> str:
+    """Requests the deployment of a database (PostgreSQL/Redis/MySQL).
+
+    Args:
+        db_type: Type of database (e.g. 'postgres', 'redis', 'mysql').
+        version: Version of the database (e.g. '15', '7.0').
+        storage_gb: Requested storage in gigabytes.
+    """
+    payload = {
+        "name": f"{db_type}-db",
+        "action": "CREATE",
+        "image": f"{db_type}:{version}",
+        "internal_port": 5432 if db_type == "postgres" else 6379 if db_type == "redis" else 3306,
+        "cpu": "1",
+        "ram": "2Gi",
+    }
+    result = _send_intent(payload)
+    return json.dumps(result, ensure_ascii=False)
+
+
+@mcp_server.tool()
+def get_deployment_status(deployment_id: str) -> str:
+    """Retrieves the current status of a deployment intent.
+
+    Args:
+        deployment_id: The ID of the deployment intent to check.
+    """
+    response = requests.get(
+        f"{BACKEND_URL}/hitl/status/{deployment_id}",
+        timeout=10,
+    )
+    if response.status_code == 404:
+        return json.dumps({"error": f"Deployment {deployment_id} not found."})
+    response.raise_for_status()
+    return json.dumps(response.json(), ensure_ascii=False)
+
+
+
 # ---------------------------------------------------------------------------
 # Registries compatible with AgentOrchestrator and existing tests
 # ---------------------------------------------------------------------------
@@ -170,6 +229,9 @@ TOOL_REGISTRY: dict[str, typing.Callable[..., typing.Any]] = {
     "deploy_department_cms": lambda **kwargs: json.loads(deploy_department_cms(**kwargs)),
     "deploy_python_app": lambda **kwargs: json.loads(deploy_python_app(**kwargs)),
     "delete_university_service": lambda **kwargs: json.loads(delete_university_service(**kwargs)),
+    "deploy_static_website": lambda **kwargs: json.loads(deploy_static_website(**kwargs)),
+    "deploy_database": lambda **kwargs: json.loads(deploy_database(**kwargs)),
+    "get_deployment_status": lambda **kwargs: json.loads(get_deployment_status(**kwargs)),
 }
 
 # Definitions in OpenAI Function Calling format (for AgentOrchestrator)
@@ -258,6 +320,51 @@ TOOL_DEFINITIONS = [
                     },
                 },
                 "required": ["service_name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "deploy_static_website",
+            "description": "Requests the deployment of a static website without backend.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "project_name": {"type": "string", "description": "Name of the project."},
+                    "domain": {"type": "string", "description": "Domain name for the website."},
+                },
+                "required": ["project_name", "domain"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "deploy_database",
+            "description": "Requests the deployment of a database (PostgreSQL, MySQL, Redis).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "db_type": {"type": "string", "description": "Type of database (e.g. postgres, redis, mysql)."},
+                    "version": {"type": "string", "description": "Version of the database."},
+                    "storage_gb": {"type": "integer", "description": "Requested storage in GB."},
+                },
+                "required": ["db_type", "version", "storage_gb"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_deployment_status",
+            "description": "Retrieves the current status of a deployment intent (PENDING, DEPLOYED, REJECTED).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "deployment_id": {"type": "string", "description": "The ID of the deployment intent to check."},
+                },
+                "required": ["deployment_id"],
             },
         },
     },
