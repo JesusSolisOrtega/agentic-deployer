@@ -4,6 +4,8 @@ La integración de Modelos de Lenguaje Grandes (LLM) en la orquestación de infr
 
 Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [27].
 
+<div style="max-width: 6cm; margin: 0 auto;">
+
 ```mermaid
 flowchart BT
   %% Base de la pirámide
@@ -34,6 +36,8 @@ flowchart BT
   class Medio mid;
   class Cuspide top;
 ```
+
+</div>
 <p align="center"><i><b>Figura 14:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
 ## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
@@ -158,7 +162,11 @@ Por ejemplo, si la regla de seguridad del `SecurityContextValidator` dicta que e
 `SI puerto < 1024 ENTONCES LANZAR Error`
 
 El motor de mutación iterará sobre este fragmento y generará clones inyectando vulnerabilidades silenciosas:
-- **Mutante 1 (Alteración Operacional### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
+- **Mutante 1 (Alteración Operacional):** `SI puerto <= 1024` → Cambia `<` por `<=`, dejando el borde exacto del rango (puerto 1024) como potencialmente inseguro.
+- **Mutante 2 (Negación Lógica):** `SI puerto >= 1024` → Invierte la condición, aprobando todos los puertos privilegiados (22, 80, 443) y rechazando los seguros.
+- **Mutante 3 (Alteración de Constante):** `SI puerto < 1025` → Modifica el umbral numérico, generando una brecha silenciosa de un único puerto.
+
+### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
 
 Una vez generado el ejército de clones mutantes, el *framework* ejecuta la suite de pruebas completa (escrita en `pytest`) contra cada uno de los mutantes, uno por uno. El resultado de esta batalla computacional se clasifica en dos estados excluyentes:
 

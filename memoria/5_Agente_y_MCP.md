@@ -140,7 +140,7 @@ El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 **`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
 
 ```text
-ALGORITMO 4: Implementación Nativa del Cliente Ollama
+PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
 
 CLASE OllamaLLMClient IMPLEMENTA LLMClient:
   ATRIBUTOS:
@@ -167,7 +167,7 @@ CLASE OllamaLLMClient IMPLEMENTA LLMClient:
     Variable mensaje = respuesta.cuerpo_json["message"]
 
     SI mensaje CONTIENE "tool_calls" ENTONCES
-      Variable llamada = mensaje["tool_calls"][1]
+      Variable llamada = mensaje["tool_calls"][0]
       RETORNAR NUEVO AgentResponse(
         tool_call = NUEVO ToolCall(llamada["name"], llamada["arguments"])
       )
@@ -180,7 +180,7 @@ FIN CLASE
 La instanciación en memoria recae sobre un patrón **Factory**. Durante la fase de inicialización (*bootstrapping*) del contenedor web, el sistema lee la variable de entorno `LLM_PROVIDER`. La clase Factory evalúa esta variable e inyecta la implementación correcta en el Orquestador mediante *Dependency Injection*:
 
 ```text
-ALGORITMO 5: Inyección de Dependencias del Motor Cognitivo (Factory)
+PSEUDOCÓDIGO: Inyección de Dependencias del Motor Cognitivo (Factory)
 
 ENTRADA: proveedor -> Cadena desde variable de entorno (LLM_PROVIDER)
 SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
@@ -230,15 +230,17 @@ El modelo reevalúa el estado global tras la observación y decide si necesita e
 
 Como se ilustra en la **Figura 11**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
+<div style="max-width: 10cm; margin: 0 auto;">
+
 ```mermaid
-flowchart LR
-  A([Prompt]) --> B[Thought: LLM]
+flowchart TD
+  A([Entrada: Prompt]) --> B[Pensamiento: LLM]
   B --> C{Requiere\nAcción Física?}
-  C -->|Sí| D[Action: Invocación JSON-RPC MCP]
-  C -->|No| G([Output: Final Answer])
+  C -->|Sí| D[Acción: Invocación JSON-RPC MCP]
+  C -->|No| G([Salida: Respuesta Final])
   
-  D --> E[Yield: Ejecución en Backend / K8s]
-  E --> F[Observation: Resultado o Error 422]
+  D --> E[Pausa: Ejecución en Backend / K8s]
+  E --> F[Observación: Resultado o Error 422]
   
   F -->|Inyección en Contexto| B
   
@@ -250,6 +252,8 @@ flowchart LR
   class D,E,F phys;
   class A,G term;
 ```
+
+</div>
 <p align="center"><i><b>Figura 11:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:

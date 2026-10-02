@@ -78,7 +78,7 @@ En consecuencia, el código de Python aborta la transición en la FSM y arroja u
 
 ### 8.2.3. Autocorrección de la Inteligencia Artificial (*Feedback Loop*)
 
-Es en este instante crítico donde emerge el verdadero avance en la ingeniería agéntica propuesto en este TFM. En un sistema web monolítico clásico, el error 422 del servidor habría provocado el colapso del flujo y la UI habría escupido un pantallazo rojo con una traza de error ininteligible al investigador.
+Es en este instante crítico donde emerge el verdadero avance en la ingeniería agéntica propuesto en este TFM. En un sistema web monolítico clásico, el error 422 del servidor habría provocado el colapso del flujo y la interfaz habría mostrado una traza de error ininteligible al investigador.
 
 Sin embargo, el bucle incondicional ReAct (Capítulo 5) intercepta la excepción HTTP, no como un colapso, sino como una **Observación (*Observation*)** objetiva del entorno, re-inyectándola inmediatamente en el contexto (RAM de corto plazo) de la red neuronal.
 
@@ -179,7 +179,7 @@ El `SecurityContextValidator` evalúa la intención en tiempo O(1):
 | CPU ≤ cuota departamental | Conforme |
 | RAM ≤ cuota departamental | Conforme |
 
-**Sin violaciones detectadas → transición FSM: `DRAFT → PENDING_APPROVAL`**
+**Sin violaciones detectadas → transición FSM: intención registrada como `PENDING_APPROVAL`**
 
 ---
 
@@ -295,7 +295,7 @@ La intercepción se produjo **antes de que ninguna operación modificara el clú
 **Secuencia de estados de la FSM:**
 
 ```
-DRAFT → PENDING_APPROVAL → APPROVED → DEPLOYED
+[Creación] → PENDING_APPROVAL → APPROVED → DEPLOYED
 ```
 
 | Fase | Actor | Duración | Herramienta/Mecanismo |

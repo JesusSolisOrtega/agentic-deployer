@@ -49,7 +49,7 @@ Los vértices de este grafo (Estados) y sus aristas dirigidas (Transiciones Auto
 - **Nodo de Tránsito (`APPROVED`):** Estado intermedio y volátil. Cuando el humano autoriza la operación, la petición ingresa a este nodo durante un lapso minúsculo. Actúa como el desencadenante imperativo (*Trigger*) para excitar al adaptador de red secundario (`FakeK8sAdapter` o `RealK8sAdapter`).
 - **Nodo de Sumidero B (`DEPLOYED`):** Estado terminal final. Solo se alcanza si, y solo si, la intención superó el nodo `APPROVED` y la API de Kubernetes confirma que los manifiestos YAML han sido guardados sin errores de persistencia en disco.
 
-La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 9**.
+La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 12**.
 
 ```mermaid
 stateDiagram-v2
@@ -138,7 +138,7 @@ Para satisfacer esta dicotomía, se ha diseñado un segundo portal de acceso ind
 
 El reto técnico subyacente en el diseño del *Dashboard* es la sincronización del estado. Las peticiones de despliegue generadas por la IA no obedecen a un patrón predecible; ingresan en el sistema en ráfagas asíncronas, dependiendo del horario de investigación de la comunidad universitaria.
 
-En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicaciones de *Trading* o videojuegos), el estado del servidor suele transmitirse al cliente mediante conexiones bidireccionales persistentes (Protocolo *WebSocket*, ws://). Sin embargo, mantener cientos de hilos *WebSocket* abiertos de manera perpetua entre el *Dashboard* y el clúster perflila un sobrecoste de memoria y gestión de concurrencia injustificado para un sistema de auditoría asíncrona, en el cual un retraso de 3 segundos en la visualización no reviste criticidad operacional.
+En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicaciones de *Trading* o videojuegos), el estado del servidor suele transmitirse al cliente mediante conexiones bidireccionales persistentes (Protocolo *WebSocket*, ws://). Sin embargo, mantener cientos de hilos *WebSocket* abiertos de manera perpetua entre el *Dashboard* y el clúster perfila un sobrecoste de memoria y gestión de concurrencia injustificado para un sistema de auditoría asíncrona, en el cual un retraso de 3 segundos en la visualización no reviste criticidad operacional.
 
 Consecuentemente, el TFM implementa una estrategia de **Polling Activo Ligero**. El *Dashboard* ejecuta bucles temporizados desde el navegador del técnico utilizando llamadas `fetch` nativas de JavaScript:
 
@@ -164,7 +164,7 @@ La generación de este archivo en disco (o su envío directo a la API de Kuberne
 
 ### 6.3.3. Diagrama de Secuencia del Flujo HITL
 
-La **Figura 10** complementa el diagrama E2E global (Figuras 5, 6 y 7, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
+La **Figura 13** complementa el diagrama E2E global (Figuras 7, 8 y 9, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
 
 ```mermaid
 sequenceDiagram
@@ -172,56 +172,43 @@ sequenceDiagram
   actor SIC as Técnico SIC
   participant Dash as Dashboard HTML
   participant API as FastAPI Backend
-  participant Store as SQLiteDeploymentRepository
+  participant Store as SQLiteRepository
   participant K8s as FakeK8sAdapter
 
-  Note over SIC,API: Contexto: intención dep-9b4f1a7e en PENDING_APPROVAL
-
-  loop Polling cada 3 segundos
+  loop Polling cada 3s
     Dash->>API: GET /hitl/pending
     API->>Store: get_all()
     Store-->>API: List[DeploymentRecord]
-    API-->>Dash: [{id, status...}] (filtrado)
+    API-->>Dash: [{id, status...}]
   end
-  Dash-->>SIC: Renderiza tarjetas de intenciones pendientes
+  Dash-->>SIC: Renderiza tarjetas
 
-  rect rgb(220, 255, 220)
-    Note over SIC,K8s: VECTOR A — Aprobación del despliegue
-    SIC->>Dash: Clic en "Aprobar"
-    Dash->>API: POST /hitl/approve/dep-9b4f1a7e
-    activate API
-    API->>Store: get(id)
-    Store-->>API: record
-    API->>API: record.status = APPROVED (En memoria)
-    API->>K8s: deploy(DeploymentIntent)
-    activate K8s
-    K8s->>K8s: Renderiza template f-string (YAML)
-    K8s-->>API: Éxito — YAML escrito en disco
-    deactivate K8s
-    API->>API: record.status = DEPLOYED (En memoria)
-    API->>Store: save(record)
-    API-->>Dash: HTTP 200 {status: DEPLOYED}
-    deactivate API
-    Dash-->>SIC: Despliegue materializado
-  end
-
-  rect rgb(255, 220, 220)
-    Note over SIC,Store: VECTOR B — Rechazo de la petición
-    SIC->>Dash: Clic en "Rechazar"
-    Dash->>API: POST /hitl/reject/dep-9b4f1a7e
-    activate API
-    API->>Store: get(id)
-    Store-->>API: record
-    API->>API: record.status = REJECTED (En memoria)
-    API->>Store: save(record)
-    API-->>Dash: HTTP 200 {status: REJECTED}
-    deactivate API
-    Dash-->>SIC: Petición archivada
-    Note right of Store: Estado REJECTED terminal e inmutable.
-    Note right of Store: Ningún adaptador genera artefactos.
-  end
+  Note over SIC,K8s: VECTOR A — Aprobación del despliegue
+  SIC->>Dash: Clic en "Aprobar"
+  Dash->>API: POST /hitl/approve
+  API->>K8s: deploy(DeploymentIntent)
+  K8s-->>API: YAML escrito en disco
+  API->>Store: save(status=DEPLOYED)
+  API-->>Dash: HTTP 200 {status: DEPLOYED}
+  Dash-->>SIC: Despliegue materializado
 ```
-<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). La materialización del YAML ocurre exclusivamente en el Vector A.</i></p>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor SIC as Técnico SIC
+  participant Dash as Dashboard HTML
+  participant API as FastAPI Backend
+  participant Store as SQLiteRepository
+
+  Note over SIC,Store: VECTOR B — Rechazo de la petición
+  SIC->>Dash: Clic en "Rechazar"
+  Dash->>API: POST /hitl/reject
+  API->>Store: save(status=REJECTED)
+  API-->>Dash: HTTP 200 {status: REJECTED}
+  Dash-->>SIC: Petición archivada
+```
+<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL. (Arriba) Polling asíncrono y Vector de Aprobación. (Abajo) Vector de Rechazo (estado inmutable terminal).</i></p>
 
 ## 6.4. Canal de Retorno al Investigador: Notificación Asíncrona del Estado
 

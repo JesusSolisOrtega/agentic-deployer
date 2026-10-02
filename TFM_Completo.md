@@ -1,3 +1,26 @@
+# Resumen
+
+La creciente complejidad de la infraestructura declarativa de Kubernetes supone una barrera de entrada para investigadores universitarios, forzando ciclos de entrega prolongados y costosos procesos de negociación con los Servicios de Informática (SIC). Este Trabajo de Fin de Máster presenta el **Agentic Deployer**, un sistema de orquestación que permite provisionar infraestructura mediante lenguaje natural bajo estricta supervisión humana determinista.
+
+La solución se articula sobre tres pilares: (1) una Arquitectura Hexagonal que aísla las reglas de negocio de la estocasticidad de los Modelos de Lenguaje (LLM); (2) el estándar abierto *Model Context Protocol* (MCP), que evita el *vendor lock-in*; y (3) un patrón *Human-In-The-Loop* (HITL) gobernado por una Máquina de Estados inmutable que asegura que ningún despliegue impacte en el clúster sin validación técnica.
+
+El desarrollo siguió un enfoque *Domain-First*, asegurando la calidad mediante *Property-Based* y *Mutation Testing*. Los casos de estudio revelan que el sistema elimina los cuellos de botella asíncronos, reduciendo el tiempo de entrega de un orden de días a escasos minutos. Adicionalmente, el análisis económico proyecta un ROI superior al 460% a tres años, demostrando la alta viabilidad corporativa de la ingeniería agéntica.
+
+**Palabras clave:** Agentes LLM, Model Context Protocol (MCP), Arquitectura Hexagonal, Human-In-The-Loop, Kubernetes, Platform Engineering.
+
+## Abstract
+
+The growing complexity of Kubernetes declarative infrastructure poses a significant entry barrier for university researchers, leading to prolonged delivery cycles and costly negotiation processes with IT departments. This Master's Thesis presents the **Agentic Deployer**, an orchestration system that provisions infrastructure through natural language under strict, deterministic human supervision.
+
+The solution is built upon three pillars: (1) a Hexagonal Architecture that isolates business rules from the stochasticity of Large Language Models (LLMs); (2) the open *Model Context Protocol* (MCP) standard, which prevents vendor lock-in; and (3) a *Human-In-The-Loop* (HITL) pattern governed by an immutable Finite State Machine that ensures no deployment reaches the cluster without technical validation.
+
+Development followed a Domain-First approach, with quality assured through Property-Based and Mutation Testing. Documented case studies reveal that the system eliminates asynchronous bottlenecks, reducing Time-to-Market from an order of days to mere minutes. Furthermore, the economic analysis projects a ROI exceeding 460% over three years, demonstrating the high corporate viability of agentic engineering.
+
+**Keywords:** LLM Agents, Model Context Protocol (MCP), Hexagonal Architecture, Human-In-The-Loop, Kubernetes, Platform Engineering.
+
+
+<div style='page-break-after: always;'></div>
+
 # Índice de Contenidos
 
 - **Capítulo 1. Introducción**
@@ -41,9 +64,12 @@
   - 8.2. Caso de Estudio: Resiliencia ante Ataques (*Prompt Injection*)
   - 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
 - **Capítulo 9. Gestión y Viabilidad del Proyecto**
-  - 9.1. Esfuerzo de Desarrollo y Desviaciones
-  - 9.2. Análisis Económico del Desarrollo
-  - 9.3. Coste de Adopción Corporativa y ROI
+  - 9.1. Plan de Proyecto — Contexto y Restricciones
+  - 9.2. Estructura de Sprints y Estimación de Esfuerzo
+  - 9.3. Esfuerzo de Desarrollo y Desviaciones
+  - 9.4. Análisis Económico del Desarrollo
+  - 9.5. Coste de Adopción Corporativa y ROI
+  - 9.6. Conclusiones del Análisis de Viabilidad
 - **Capítulo 10. Conclusiones, Limitaciones y Trabajo Futuro**
   - 10.1. Conclusiones
   - 10.2. Limitaciones del Prototipo
@@ -53,14 +79,14 @@
   - A.1. Contexto de Generación
   - A.2. Manifiesto YAML Completo
   - A.3. Relación con el Código Fuente
-- **Anexo B. Planificación Detallada del Proyecto y Costes**
-  - B.1. Plan de Proyecto — Contexto y Restricciones
-  - B.2. Estructura de Sprints y Estimación de Esfuerzo
-  - B.3. Seguimiento Real del Proyecto — Retrospectivas por Sprint
-  - B.4. Resumen de Desviaciones Globales
-  - B.5. Análisis de Costes del Desarrollo
-  - B.6. Estimación de Costes de Adopción para Organizaciones
-  - B.7. Conclusiones del Análisis
+- **Anexo B. Retrospectivas Detalladas por Sprint**
+  - B.1. Sprint 1 — Núcleo Hexagonal
+  - B.2. Sprint 2 — Backend HITL y FSM
+  - B.3. Sprint 3 — Golden Paths y FakeK8s
+  - B.4. Sprint 4 — Agente ReAct y MCP SDK
+  - B.5. Sprint 5 — QA Avanzado
+  - B.6. Fase 6 — Redacción y Cierre
+  - B.7. Fase 7 — Consolidación de Excelencia Técnica
 
 
 <div style='page-break-after: always;'></div>
@@ -104,7 +130,7 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 
 ## 1.1. Contexto y motivación
 
-Durante la última década, el ecosistema de la ingeniería de software y la administración de sistemas ha experimentado una transformación tectónica. La necesidad de entregar valor al mercado con mayor rapidez, escalabilidad y resiliencia ha impulsado la transición desde arquitecturas monolíticas alojadas en servidores físicos (*bare-metal*) hacia ecosistemas distribuidos basados en microservicios [14] y computación en la nube (*Cloud Computing*) [13]. En el corazón de esta revolución se encuentra la contenerización de aplicaciones, popularizada por tecnologías como Docker [15], y, de forma más crítica, la orquestación de dichos contenedores mediante plataformas estándar de la industria como Kubernetes [4].
+Durante la última década, el ecosistema de la ingeniería de software y la administración de sistemas ha experimentado una transformación profunda. La necesidad de entregar valor al mercado con mayor rapidez, escalabilidad y resiliencia ha impulsado la transición desde arquitecturas monolíticas alojadas en servidores físicos (*bare-metal*) hacia ecosistemas distribuidos basados en microservicios [14] y computación en la nube (*Cloud Computing*) [13]. En el corazón de esta revolución se encuentra la contenerización de aplicaciones, popularizada por tecnologías como Docker [15], y, de forma más crítica, la orquestación de dichos contenedores mediante plataformas estándar de la industria como Kubernetes [4].
 
 Si bien Kubernetes ha resuelto problemas fundamentales de alta disponibilidad, auto-escalado y gestión de fallos, su adopción ha introducido un incremento drástico en la complejidad operativa. El paradigma de la "Infraestructura como Código" (IaC) y la gestión de recursos declarativa obliga a los ingenieros a interactuar con el sistema a través de extensos y complejos manifiestos en formato YAML o JSON. Estos documentos no solo describen el servicio computacional en sí (*Deployments* o *Pods*), sino que exigen la definición minuciosa de topologías de red (*Services*, *Ingress*), políticas de control de acceso (*RBAC*), asignación y limitación de recursos de hardware (CPU, memoria), y volúmenes de persistencia de datos.
 
@@ -190,7 +216,7 @@ Para facilitar la trazabilidad desde la concepción teórica hasta la verificaci
 
 - El **Capítulo 2** expone de manera exhaustiva el Estado del Arte, desglosando la teoría de los agentes conversacionales, la génesis y arquitectura del *Model Context Protocol* (MCP), el paradigma de infraestructura declarativa de Kubernetes, los principios de la Arquitectura Hexagonal y —en la sección 2.5— una comparativa con los trabajos y herramientas relacionadas más relevantes del ecosistema, incluyendo el posicionamiento diferencial del *Agentic Deployer*.
 - El **Capítulo 3** detalla la Metodología empleada a lo largo del ciclo de vida del proyecto, así como el marco tecnológico, justificando las herramientas y librerías que conforman el ecosistema de la aplicación. Incluye la descripción de la fase post-MVP (Fase 6) con el cliente Ollama nativo y el canal de retorno HITL.
-- El **Capítulo 4** aborda el Diseño del Sistema, ilustrando mediante diagramas formales el flujo de datos y analizando el código del núcleo de negocio y los contratos de validación. Las Figuras 5, 6 y 7 documentan el flujo E2E completo incluyendo el camino de error (422 → autocorrección) y el ciclo HITL.
+- El **Capítulo 4** aborda el Diseño del Sistema, ilustrando mediante diagramas formales el flujo de datos y analizando el código del núcleo de negocio y los contratos de validación. Las Figuras 7, 8 y 9 documentan el flujo E2E completo incluyendo el camino de error (422 → autocorrección) y el ciclo HITL.
 - El **Capítulo 5** profundiza en la Implementación técnica del Servidor MCP y el Agente, diseccionando el bucle de razonamiento, la exposición dinámica de herramientas y la abstracción multiproveedor de LLM (`OllamaLLMClient` / `OpenAILLMClient`).
 - El **Capítulo 6** describe la interfaz de administración y el módulo de seguridad, fundamentando el ciclo asíncrono de aprobaciones humanas (*Human-In-The-Loop*). La sección 6.4 documenta el canal de retorno al investigador: el endpoint de consulta de estado y el panel de notificaciones en la interfaz conversacional.
 - El **Capítulo 7** expone el plan de Aseguramiento de la Calidad (QA), detallando las estrategias de Testing Unitario, *Property-Based Testing*, Pruebas Metamórficas y *Mutation Testing* implementadas, con los resultados reales de la auditoría de supervivientes.
@@ -210,15 +236,15 @@ Este capítulo articula el marco teórico y tecnológico sobre el que se sustent
 
 ## 2.1. Agentes autónomos basados en Modelos de Lenguaje de Gran Escala (LLM)
 
-Durante años, la investigación en Procesamiento de Lenguaje Natural (NLP, por sus siglas en inglés) persiguió la construcción de modelos capaces de comprender y generar texto humano con fluidez. Sin embargo, con el advenimiento de la arquitectura Transformer y la posterior explosión de los Modelos de Lenguaje de Gran Escala (LLM, *Large Language Models*), se descubrió empíricamente que, a partir de cierto umbral de parámetros y datos de entrenamiento, los modelos exhibían habilidades "emergentes" que excedían la simple predicción probabilística de la siguiente palabra (*next-token prediction*). 
+Durante años, la investigación en Procesamiento de Lenguaje Natural (NLP, por sus siglas en inglés) persiguió la construcción de modelos capaces de comprender y generar texto humano con fluidez. Sin embargo, con el advenimiento de la arquitectura Transformer [28] y la posterior explosión de los Modelos de Lenguaje de Gran Escala (LLM, *Large Language Models*), se descubrió empíricamente que, a partir de cierto umbral de parámetros y datos de entrenamiento, los modelos exhibían habilidades "emergentes" que excedían la simple predicción probabilística de la siguiente palabra (*next-token prediction*). 
 
-Estas habilidades incluyen el razonamiento lógico deductivo, la generalización zero-shot y la capacidad de seguir instrucciones complejas (Brown et al., 2020). La explotación de estas capacidades cognitivas superiores ha propiciado un cambio de paradigma en la disciplina: la evolución desde los meros *asistentes conversacionales* pasivos hacia los **Agentes Autónomos**. Un agente basado en LLM es un sistema computacional diseñado donde el modelo de lenguaje actúa no solo como interfaz, sino como el motor de razonamiento central (el "cerebro") que coordina la percepción de un estado, la planificación cognitiva y la ejecución de acciones sobre su entorno para alterar dicho estado.
+Estas habilidades incluyen el razonamiento lógico deductivo, la generalización zero-shot y la capacidad de seguir instrucciones complejas (Brown et al., 2020) [29]. La explotación de estas capacidades cognitivas superiores ha propiciado un cambio de paradigma en la disciplina: la evolución desde los meros *asistentes conversacionales* pasivos hacia los **Agentes Autónomos**. Un agente basado en LLM es un sistema computacional diseñado donde el modelo de lenguaje actúa no solo como interfaz, sino como el motor de razonamiento central (el "cerebro") que coordina la percepción de un estado, la planificación cognitiva y la ejecución de acciones sobre su entorno para alterar dicho estado.
 
 Para que un LLM trascienda su encapsulamiento (estando típicamente aislado de la internet en tiempo real y limitado por su fecha de corte de conocimiento) y adquiera verdadera agencia, la industria ha consolidado dos avances técnicos fundamentales: el paradigma de razonamiento *ReAct* y la capacidad técnica de invocación de herramientas (*Function Calling*).
 
 ### 2.1.1. El Paradigma ReAct (Reason + Act)
 
-Previo a la formalización de arquitecturas agénticas, los enfoques tradicionales obligaban a los modelos a emitir una respuesta final inmediata, o bien a razonar estáticamente mediante técnicas como *Chain-of-Thought* (CoT) (Wei et al., 2022). Aunque CoT mejora drásticamente el razonamiento al obligar al modelo a "pensar paso a paso", padece de una limitación intrínseca: el modelo razona exclusivamente sobre la información contenida en el *prompt* inicial o en sus pesos internos, sin capacidad para consultar nueva información o rectificar premisas falsas en tiempo real. Esto a menudo desemboca en fenómenos de alucinación y propagación de errores, inadmisibles en escenarios de operaciones críticas de infraestructura.
+Previo a la formalización de arquitecturas agénticas, los enfoques tradicionales obligaban a los modelos a emitir una respuesta final inmediata, o bien a razonar estáticamente mediante técnicas como *Chain-of-Thought* (CoT) (Wei et al., 2022) [30]. Aunque CoT mejora drásticamente el razonamiento al obligar al modelo a "pensar paso a paso", padece de una limitación intrínseca: el modelo razona exclusivamente sobre la información contenida en el *prompt* inicial o en sus pesos internos, sin capacidad para consultar nueva información o rectificar premisas falsas en tiempo real. Esto a menudo desemboca en fenómenos de alucinación y propagación de errores, inadmisibles en escenarios de operaciones críticas de infraestructura.
 
 Para resolver este desafío, Yao et al. [1] introdujeron el paradigma **ReAct**. Este marco conceptual propone intercalar dinámicamente la generación de trazas de razonamiento humano-inteligibles con la ejecución de acciones específicas en el entorno. En un bucle ReAct, el agente opera bajo un ciclo continuo estructurado en tres primitivas:
 
@@ -243,6 +269,8 @@ Esta capacidad ha transformado el rol de los lenguajes de programación en la In
 Si bien el *Function Calling* dotó a los modelos de lenguaje de capacidades de ejecución, su adopción temprana generó un ecosistema tecnológico fuertemente fragmentado. Cada proveedor de Inteligencia Artificial (OpenAI, Google, Anthropic) diseñó especificaciones propietarias para el registro de herramientas. Paralelamente, los frameworks de orquestación de IA más populares (tales como LangChain, LlamaIndex o AutoGen) crearon abstracciones incompatibles entre sí. 
 
 Este escenario desembocó en el problema clásico de la interoperabilidad (*vendor lock-in*). Si un departamento de operaciones desarrollaba un conjunto de herramientas para orquestar su infraestructura compatible con LangChain y OpenAI, migrar hacia un ecosistema gobernado por modelos de código abierto (ej. Ollama o vLLM) requería reescribir por completo la capa de integración de las herramientas. Resultaba insostenible para las organizaciones mantener adaptadores múltiples para cada nueva iteración de los modelos fundacionales.
+
+<div style="max-width: 12cm; margin: 0 auto;">
 
 ```mermaid
 flowchart LR
@@ -278,6 +306,8 @@ flowchart LR
   class L1,L2,L3,S1,S2,S3 good;
   class Bus core;
 ```
+
+</div>
 <p align="center"><i><b>Figura 1:</b> Contraste arquitectónico entre el problema de integración N×M (acoplamiento propietario) y la topología de Bus Universal propuesta por el protocolo MCP.</i></p>
 
 ### 2.2.1. Génesis y Principios de MCP
@@ -629,7 +659,7 @@ flowchart LR
 
 #### 4.1.2.1. Desglose Funcional de los Contenedores
 
-La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución. La siguiente figura ilustra cómo estos cuatro procesos coexisten en la máquina local durante la ejecución del sistema:
+La siguiente figura ilustra cómo los componentes coexisten en la máquina local durante la ejecución del sistema:
 
 ```mermaid
 flowchart LR
@@ -654,7 +684,7 @@ flowchart LR
 ```
 <p align="center"><i><b>Figura 4:</b> Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por <code>stdio</code> sin exponer ningún puerto TCP.</i></p>
 
-La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución:
+La arquitectura interna se sustenta sobre tres pilares de ejecución:
 
 1. **Contenedor A: Frontend de Orquestación Cognitiva (Streamlit):**
   Esta aplicación web es el punto de entrada para el usuario investigador. Sin embargo, su responsabilidad trasciende la mera renderización de interfaces (UX/UI). Este proceso aloja en su núcleo el `AgentOrchestrator`, siendo la única entidad del sistema autorizada a mantener estado de red (conexiones HTTP/gRPC) con el proveedor externo de Inteligencia Artificial (OpenAI/Ollama). Su función principal es gestionar la asincronía del chat, administrar el contexto histórico de la sesión y gobernar las iteraciones del bucle de razonamiento y acción (*ReAct*).
@@ -662,7 +692,7 @@ La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tre
 2. **Contenedor B: El Catálogo Dinámico (Servidor MCP):**
   Concebido como un proceso ligero, el Servidor del Protocolo de Contexto de Modelos (MCP) actúa como el diccionario vivo de operaciones tecnológicas de la universidad. Su propósito es traducir los métodos y funciones estandarizadas (por ejemplo, el método `deploy_congress_web()`) a una representación JSON universal que cualquier LLM moderno pueda ingerir como *Tool Calling*. Por motivos de latencia estricta, este contenedor no suele comunicarse con el orquestador mediante APIs HTTP tradicionales, sino que se enlaza a través de flujos de Entrada/Salida estándar (`stdio`) del sistema operativo, garantizando intercambios de mensajes JSON-RPC en el orden de los submilisegundos.
 
-3. **Contenedor C: El Santuario Determinista (Backend Core Hexagonal):**
+3. **Contenedor C: El Núcleo Determinista (Backend Core Hexagonal):**
   Implementado sobre el *framework* asíncrono FastAPI, este contenedor representa la base de datos volátil y la autoridad máxima de seguridad de la arquitectura. Su filosofía de diseño es el agnosticismo cognitivo: a este proceso backend no le concierne cómo la Inteligencia Artificial dedujo una acción, ni si el usuario utilizó jerga técnica o lenguaje coloquial. Su única misión arquitectónica es recibir un objeto JSON estructuralmente tipado desde el Servidor MCP. 
   Una vez recibida la intención, el Backend aplica las reglas institucionales más férreas. Si la petición viola políticas (ej. abrir un puerto reservado), el Backend la rechaza; si es válida, la persiste en una cuarentena lógica (memoria volátil o base de datos) y se expone a sí mismo para que el *Dashboard* del Técnico de Operaciones pueda consumirla de forma asíncrona mediante técnicas de *Polling* o WebSockets.
 
@@ -676,7 +706,7 @@ Este patrón se fundamenta en estructurar el software en capas concéntricas, im
 
 ### 4.2.1. Capa de Dominio: Entidades e Invariantes
 
-En el centro exacto del hexágono reside la Capa de Dominio. Esta capa representa la "Verdad Absoluta" del negocio corporativo y debe ser completamente agnóstica a cualquier *framework* externo. En el contexto de este Trabajo de Fin de Máster, la capa de dominio modela las intenciones de infraestructura antes de que estas se traduzcan a código declarativo.
+En el centro exacto del hexágono reside la Capa de Dominio. Esta capa representa la fuente de verdad de la lógica de negocio y debe ser completamente agnóstica a cualquier *framework* externo. En el contexto de este Trabajo de Fin de Máster, la capa de dominio modela las intenciones de infraestructura antes de que estas se traduzcan a código declarativo.
 
 Para dotar al núcleo de una inviolabilidad tipográfica estructural (esencial al operar en lenguajes interpretados), el sistema no manipula estructuras de datos dinámicas (como diccionarios JSON crudos emitidos por el LLM). En su lugar, el orquestador obliga a mapear cualquier solicitud externa hacia una Entidad de Dominio rígidamente definida. El contrato principal de este núcleo es la entidad `DeploymentIntent` (Intención de Despliegue).
 
@@ -852,6 +882,8 @@ La adopción de este árbol de decisión, fuertemente condicionado de manera imp
 
 La siguiente figura resume visualmente el árbol de validación como diagrama de flujo:
 
+<div style="max-width: 6cm; margin: 0 auto;">
+
 ```mermaid
 flowchart TD
     A(["DeploymentIntent\n(JSON Validado)"]) --> B{"Motor de\nReglas Institucionales"}
@@ -861,6 +893,8 @@ flowchart TD
     style ERR fill:#ffcccc,stroke:#cc0000
     style OK fill:#ccffcc,stroke:#007700
 ```
+
+</div>
 <p align="center"><i><b>Figura 6:</b> Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija.</i></p>
 
 ### 4.3.2. Gestión de Excepciones y Ciclo de Vida del Error
@@ -941,44 +975,49 @@ Este bloque constituye el "Embrague" del sistema. El Servidor MCP cruza el lími
 sequenceDiagram
   autonumber
   participant Orch as AgentOrchestrator
-  participant LLM as LLM
   participant MCP as MCPServer
   participant API as FastAPI Backend
-  participant UseCase as ProcessDeploymentUseCase
-  participant Sec as SecurityContextValidator
-  participant Store as SQLiteDeploymentRepository
+  participant UseCase as ProcessUseCase
+  participant Sec as SecurityValidator
+  participant Store as SQLiteRepository
+  participant LLM as LLM
 
-  %% ── CAMINO FELIZ ───────────────────────────────────────────────
-  rect rgb(220, 255, 220)
-    Note over Orch,Store: FASE 2A — Happy Path: Petición conforme
-    Orch->>MCP: dispatch_tool(name, args)
-    MCP->>API: POST /mcp/intent {name, image, port, cpu, ram}
-    API->>UseCase: execute(DeploymentIntent)
-    UseCase->>Sec: validate(intent)
-    Sec-->>UseCase: OK (sin violaciones)
-    UseCase->>Store: save(DeploymentRecord[status=PENDING_APPROVAL])
-    Store-->>UseCase: OK
-    UseCase-->>API: record
-    API-->>MCP: HTTP 201 Created
-    MCP-->>Orch: Observation: {id, status: PENDING_APPROVAL}
-    Orch->>LLM: [historial + observación] → siguiente iteración
-  end
-
-  %% ── CAMINO DE ERROR ────────────────────────────────────────────
-  rect rgb(255, 230, 220)
-    Note over Orch,Store: FASE 2B — Error Path: Violación de seguridad
-    Orch->>MCP: dispatch_tool("ubuntu-debug", "ubuntu:latest", 22)
-    MCP->>API: POST /mcp/intent {image: ubuntu:latest, port: 22}
-    API->>UseCase: execute(DeploymentIntent)
-    UseCase->>Sec: validate(intent)
-    Sec-->>UseCase: SecurityViolationError [Port 22 + :latest tag]
-    UseCase-->>API: Raise Exception
-    API-->>MCP: HTTP 422 Unprocessable Entity
-    MCP-->>Orch: Observation: {error: 422, violations: [...]}
-    Orch->>LLM: [historial + error 422] → autocorrección
-  end
+  Note over Orch,LLM: FASE 2A — Flujo de Éxito: Petición conforme
+  Orch->>MCP: dispatch_tool(name, args)
+  MCP->>API: POST /mcp/intent
+  API->>UseCase: execute(DeploymentIntent)
+  UseCase->>Sec: validate(intent)
+  Sec-->>UseCase: OK (sin violaciones)
+  UseCase->>Store: save([status=PENDING_APPROVAL])
+  Store-->>UseCase: OK
+  UseCase-->>API: record
+  API-->>MCP: HTTP 201 Created
+  MCP-->>Orch: Observación: {id, status}
+  Orch->>LLM: [historial] → siguiente iteración
 ```
-<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). El Backend procesa la petición, aplicando reglas de negocio estrictas.</i></p>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Orch as AgentOrchestrator
+  participant MCP as MCPServer
+  participant API as FastAPI Backend
+  participant UseCase as ProcessUseCase
+  participant Sec as SecurityValidator
+  participant LLM as LLM
+
+  Note over Orch,LLM: FASE 2B — Flujo de Error: Violación de seguridad
+  Orch->>MCP: dispatch_tool("ubuntu:latest", 22)
+  MCP->>API: POST /mcp/intent {port: 22}
+  API->>UseCase: execute(DeploymentIntent)
+  UseCase->>Sec: validate(intent)
+  Sec-->>UseCase: SecurityViolationError [Port 22]
+  UseCase-->>API: Lanza Excepción
+  API-->>MCP: HTTP 422 Unprocessable Entity
+  MCP-->>Orch: Observación: {error: 422}
+  Orch->>LLM: [error 422] → autocorrección
+```
+<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
 
 ### 4.5.3. Fase 3: Ejecución Autoritaria (Ciclo HITL)
 
@@ -1176,7 +1215,7 @@ El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 **`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
 
 ```text
-ALGORITMO 4: Implementación Nativa del Cliente Ollama
+PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
 
 CLASE OllamaLLMClient IMPLEMENTA LLMClient:
   ATRIBUTOS:
@@ -1203,7 +1242,7 @@ CLASE OllamaLLMClient IMPLEMENTA LLMClient:
     Variable mensaje = respuesta.cuerpo_json["message"]
 
     SI mensaje CONTIENE "tool_calls" ENTONCES
-      Variable llamada = mensaje["tool_calls"][1]
+      Variable llamada = mensaje["tool_calls"][0]
       RETORNAR NUEVO AgentResponse(
         tool_call = NUEVO ToolCall(llamada["name"], llamada["arguments"])
       )
@@ -1216,7 +1255,7 @@ FIN CLASE
 La instanciación en memoria recae sobre un patrón **Factory**. Durante la fase de inicialización (*bootstrapping*) del contenedor web, el sistema lee la variable de entorno `LLM_PROVIDER`. La clase Factory evalúa esta variable e inyecta la implementación correcta en el Orquestador mediante *Dependency Injection*:
 
 ```text
-ALGORITMO 5: Inyección de Dependencias del Motor Cognitivo (Factory)
+PSEUDOCÓDIGO: Inyección de Dependencias del Motor Cognitivo (Factory)
 
 ENTRADA: proveedor -> Cadena desde variable de entorno (LLM_PROVIDER)
 SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
@@ -1266,15 +1305,17 @@ El modelo reevalúa el estado global tras la observación y decide si necesita e
 
 Como se ilustra en la **Figura 11**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
+<div style="max-width: 10cm; margin: 0 auto;">
+
 ```mermaid
-flowchart LR
-  A([Prompt]) --> B[Thought: LLM]
+flowchart TD
+  A([Entrada: Prompt]) --> B[Pensamiento: LLM]
   B --> C{Requiere\nAcción Física?}
-  C -->|Sí| D[Action: Invocación JSON-RPC MCP]
-  C -->|No| G([Output: Final Answer])
+  C -->|Sí| D[Acción: Invocación JSON-RPC MCP]
+  C -->|No| G([Salida: Respuesta Final])
   
-  D --> E[Yield: Ejecución en Backend / K8s]
-  E --> F[Observation: Resultado o Error 422]
+  D --> E[Pausa: Ejecución en Backend / K8s]
+  E --> F[Observación: Resultado o Error 422]
   
   F -->|Inyección en Contexto| B
   
@@ -1286,6 +1327,8 @@ flowchart LR
   class D,E,F phys;
   class A,G term;
 ```
+
+</div>
 <p align="center"><i><b>Figura 11:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
@@ -1408,7 +1451,7 @@ Los vértices de este grafo (Estados) y sus aristas dirigidas (Transiciones Auto
 - **Nodo de Tránsito (`APPROVED`):** Estado intermedio y volátil. Cuando el humano autoriza la operación, la petición ingresa a este nodo durante un lapso minúsculo. Actúa como el desencadenante imperativo (*Trigger*) para excitar al adaptador de red secundario (`FakeK8sAdapter` o `RealK8sAdapter`).
 - **Nodo de Sumidero B (`DEPLOYED`):** Estado terminal final. Solo se alcanza si, y solo si, la intención superó el nodo `APPROVED` y la API de Kubernetes confirma que los manifiestos YAML han sido guardados sin errores de persistencia en disco.
 
-La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 9**.
+La única entidad del universo físico con autoridad criptográfica y de red para empujar un registro desde el Nodo Raíz a los Nodos Secundarios es el Técnico Humano portador de la sesión de operaciones en el *Dashboard*. Este flujo unidireccional y acíclico se representa visualmente en la **Figura 12**.
 
 ```mermaid
 stateDiagram-v2
@@ -1497,7 +1540,7 @@ Para satisfacer esta dicotomía, se ha diseñado un segundo portal de acceso ind
 
 El reto técnico subyacente en el diseño del *Dashboard* es la sincronización del estado. Las peticiones de despliegue generadas por la IA no obedecen a un patrón predecible; ingresan en el sistema en ráfagas asíncronas, dependiendo del horario de investigación de la comunidad universitaria.
 
-En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicaciones de *Trading* o videojuegos), el estado del servidor suele transmitirse al cliente mediante conexiones bidireccionales persistentes (Protocolo *WebSocket*, ws://). Sin embargo, mantener cientos de hilos *WebSocket* abiertos de manera perpetua entre el *Dashboard* y el clúster perflila un sobrecoste de memoria y gestión de concurrencia injustificado para un sistema de auditoría asíncrona, en el cual un retraso de 3 segundos en la visualización no reviste criticidad operacional.
+En arquitecturas web modernas fuertemente acopladas al tiempo real (como aplicaciones de *Trading* o videojuegos), el estado del servidor suele transmitirse al cliente mediante conexiones bidireccionales persistentes (Protocolo *WebSocket*, ws://). Sin embargo, mantener cientos de hilos *WebSocket* abiertos de manera perpetua entre el *Dashboard* y el clúster perfila un sobrecoste de memoria y gestión de concurrencia injustificado para un sistema de auditoría asíncrona, en el cual un retraso de 3 segundos en la visualización no reviste criticidad operacional.
 
 Consecuentemente, el TFM implementa una estrategia de **Polling Activo Ligero**. El *Dashboard* ejecuta bucles temporizados desde el navegador del técnico utilizando llamadas `fetch` nativas de JavaScript:
 
@@ -1523,7 +1566,7 @@ La generación de este archivo en disco (o su envío directo a la API de Kuberne
 
 ### 6.3.3. Diagrama de Secuencia del Flujo HITL
 
-La **Figura 10** complementa el diagrama E2E global (Figuras 5, 6 y 7, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
+La **Figura 13** complementa el diagrama E2E global (Figuras 7, 8 y 9, Cap. 4.5) con un foco específico en la interacción entre el Técnico SIC y el Backend durante la fase de decisión. Se ilustran explícitamente los dos vectores de mutación posibles (aprobación y rechazo) y las transiciones de estado intermedias de la FSM, incluyendo la materialización del YAML por `FakeK8sAdapter` únicamente en el camino de aprobación.
 
 ```mermaid
 sequenceDiagram
@@ -1531,56 +1574,43 @@ sequenceDiagram
   actor SIC as Técnico SIC
   participant Dash as Dashboard HTML
   participant API as FastAPI Backend
-  participant Store as SQLiteDeploymentRepository
+  participant Store as SQLiteRepository
   participant K8s as FakeK8sAdapter
 
-  Note over SIC,API: Contexto: intención dep-9b4f1a7e en PENDING_APPROVAL
-
-  loop Polling cada 3 segundos
+  loop Polling cada 3s
     Dash->>API: GET /hitl/pending
     API->>Store: get_all()
     Store-->>API: List[DeploymentRecord]
-    API-->>Dash: [{id, status...}] (filtrado)
+    API-->>Dash: [{id, status...}]
   end
-  Dash-->>SIC: Renderiza tarjetas de intenciones pendientes
+  Dash-->>SIC: Renderiza tarjetas
 
-  rect rgb(220, 255, 220)
-    Note over SIC,K8s: VECTOR A — Aprobación del despliegue
-    SIC->>Dash: Clic en "Aprobar"
-    Dash->>API: POST /hitl/approve/dep-9b4f1a7e
-    activate API
-    API->>Store: get(id)
-    Store-->>API: record
-    API->>API: record.status = APPROVED (En memoria)
-    API->>K8s: deploy(DeploymentIntent)
-    activate K8s
-    K8s->>K8s: Renderiza template f-string (YAML)
-    K8s-->>API: Éxito — YAML escrito en disco
-    deactivate K8s
-    API->>API: record.status = DEPLOYED (En memoria)
-    API->>Store: save(record)
-    API-->>Dash: HTTP 200 {status: DEPLOYED}
-    deactivate API
-    Dash-->>SIC: Despliegue materializado
-  end
-
-  rect rgb(255, 220, 220)
-    Note over SIC,Store: VECTOR B — Rechazo de la petición
-    SIC->>Dash: Clic en "Rechazar"
-    Dash->>API: POST /hitl/reject/dep-9b4f1a7e
-    activate API
-    API->>Store: get(id)
-    Store-->>API: record
-    API->>API: record.status = REJECTED (En memoria)
-    API->>Store: save(record)
-    API-->>Dash: HTTP 200 {status: REJECTED}
-    deactivate API
-    Dash-->>SIC: Petición archivada
-    Note right of Store: Estado REJECTED terminal e inmutable.
-    Note right of Store: Ningún adaptador genera artefactos.
-  end
+  Note over SIC,K8s: VECTOR A — Aprobación del despliegue
+  SIC->>Dash: Clic en "Aprobar"
+  Dash->>API: POST /hitl/approve
+  API->>K8s: deploy(DeploymentIntent)
+  K8s-->>API: YAML escrito en disco
+  API->>Store: save(status=DEPLOYED)
+  API-->>Dash: HTTP 200 {status: DEPLOYED}
+  Dash-->>SIC: Despliegue materializado
 ```
-<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). La materialización del YAML ocurre exclusivamente en el Vector A.</i></p>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor SIC as Técnico SIC
+  participant Dash as Dashboard HTML
+  participant API as FastAPI Backend
+  participant Store as SQLiteRepository
+
+  Note over SIC,Store: VECTOR B — Rechazo de la petición
+  SIC->>Dash: Clic en "Rechazar"
+  Dash->>API: POST /hitl/reject
+  API->>Store: save(status=REJECTED)
+  API-->>Dash: HTTP 200 {status: REJECTED}
+  Dash-->>SIC: Petición archivada
+```
+<p align="center"><i><b>Figura 13:</b> Diagrama de Secuencia del flujo HITL. (Arriba) Polling asíncrono y Vector de Aprobación. (Abajo) Vector de Rechazo (estado inmutable terminal).</i></p>
 
 ## 6.4. Canal de Retorno al Investigador: Notificación Asíncrona del Estado
 
@@ -1680,6 +1710,8 @@ La integración de Modelos de Lenguaje Grandes (LLM) en la orquestación de infr
 
 Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [27].
 
+<div style="max-width: 6cm; margin: 0 auto;">
+
 ```mermaid
 flowchart BT
   %% Base de la pirámide
@@ -1710,6 +1742,8 @@ flowchart BT
   class Medio mid;
   class Cuspide top;
 ```
+
+</div>
 <p align="center"><i><b>Figura 14:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
 ## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
@@ -1834,7 +1868,11 @@ Por ejemplo, si la regla de seguridad del `SecurityContextValidator` dicta que e
 `SI puerto < 1024 ENTONCES LANZAR Error`
 
 El motor de mutación iterará sobre este fragmento y generará clones inyectando vulnerabilidades silenciosas:
-- **Mutante 1 (Alteración Operacional### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
+- **Mutante 1 (Alteración Operacional):** `SI puerto <= 1024` → Cambia `<` por `<=`, dejando el borde exacto del rango (puerto 1024) como potencialmente inseguro.
+- **Mutante 2 (Negación Lógica):** `SI puerto >= 1024` → Invierte la condición, aprobando todos los puertos privilegiados (22, 80, 443) y rechazando los seguros.
+- **Mutante 3 (Alteración de Constante):** `SI puerto < 1025` → Modifica el umbral numérico, generando una brecha silenciosa de un único puerto.
+
+### 7.3.2. Evaluación de Supervivencia (*Killed* vs *Survived*)
 
 Una vez generado el ejército de clones mutantes, el *framework* ejecuta la suite de pruebas completa (escrita en `pytest`) contra cada uno de los mutantes, uno por uno. El resultado de esta batalla computacional se clasifica en dos estados excluyentes:
 
@@ -2008,7 +2046,7 @@ En consecuencia, el código de Python aborta la transición en la FSM y arroja u
 
 ### 8.2.3. Autocorrección de la Inteligencia Artificial (*Feedback Loop*)
 
-Es en este instante crítico donde emerge el verdadero avance en la ingeniería agéntica propuesto en este TFM. En un sistema web monolítico clásico, el error 422 del servidor habría provocado el colapso del flujo y la UI habría escupido un pantallazo rojo con una traza de error ininteligible al investigador.
+Es en este instante crítico donde emerge el verdadero avance en la ingeniería agéntica propuesto en este TFM. En un sistema web monolítico clásico, el error 422 del servidor habría provocado el colapso del flujo y la interfaz habría mostrado una traza de error ininteligible al investigador.
 
 Sin embargo, el bucle incondicional ReAct (Capítulo 5) intercepta la excepción HTTP, no como un colapso, sino como una **Observación (*Observation*)** objetiva del entorno, re-inyectándola inmediatamente en el contexto (RAM de corto plazo) de la red neuronal.
 
@@ -2109,7 +2147,7 @@ El `SecurityContextValidator` evalúa la intención en tiempo O(1):
 | CPU ≤ cuota departamental | Conforme |
 | RAM ≤ cuota departamental | Conforme |
 
-**Sin violaciones detectadas → transición FSM: `DRAFT → PENDING_APPROVAL`**
+**Sin violaciones detectadas → transición FSM: intención registrada como `PENDING_APPROVAL`**
 
 ---
 
@@ -2225,7 +2263,7 @@ La intercepción se produjo **antes de que ninguna operación modificara el clú
 **Secuencia de estados de la FSM:**
 
 ```
-DRAFT → PENDING_APPROVAL → APPROVED → DEPLOYED
+[Creación] → PENDING_APPROVAL → APPROVED → DEPLOYED
 ```
 
 | Fase | Actor | Duración | Herramienta/Mecanismo |
@@ -2260,39 +2298,282 @@ En los tres escenarios, el agente resolvió la petición en **exactamente 1 iter
 
 # Capítulo 9. Gestión y Viabilidad del Proyecto
 
-> Este capítulo condensa el análisis ejecutivo de la viabilidad técnica y económica del *Agentic Deployer*, así como las métricas globales de esfuerzo. El desglose exhaustivo de los *sprints*, retrospectivas ágiles, y cálculo de costes pormenorizado se encuentra documentado en el **Anexo B (Planificación Detallada del Proyecto y Costes)**.
+La construcción de un sistema que hibrida disciplinas clásicas de Ingeniería de Software con dominios emergentes como la Inteligencia Artificial Generativa exige un marco de planificación riguroso pero flexible. Este capítulo documenta las restricciones del proyecto, la estructura de *sprints*, el seguimiento global de desviaciones y un análisis económico completo que evalúa tanto el coste del desarrollo como la viabilidad de adopción institucional. El desglose pormenorizado de las retrospectivas por sprint se encuentra en el **Anexo B**.
 
 ---
 
-## 9.1. Esfuerzo de Desarrollo y Desviaciones
+## 9.1. Plan de Proyecto — Contexto y Restricciones
 
-El proyecto se estructuró bajo una metodología ágil iterativa-incremental orientada al dominio (*Domain-First*), distribuyendo el esfuerzo en 5 *Sprints* técnicos y 2 fases de redacción y cierre de excelencia. 
+### 9.1.1. Restricciones Estructurales
 
-Frente a la estimación inicial de ~300 horas, el cierre empírico del proyecto arrojó un esfuerzo total de **~340 horas**, lo que representa una desviación del **+13%**. Esta inversión adicional se encuadra holgadamente dentro del margen de contingencia previsto (±15%) y se asumió de manera deliberada en la recta final para elevar el MVP a un estándar de excelencia ingenieril (implementación de persistencia ACID en SQLite, ampliación de 4 a 7 herramientas MCP, y consecución del 100% de letalidad en *Mutation Testing*).
+El *Agentic Deployer* se desarrolla en el contexto de un Trabajo de Fin de Máster bajo las siguientes restricciones:
+
+- **Dedicación:** Régimen parcial de investigación (~15–20 horas semanales, compatibles con actividad profesional externa).
+- **Equipo:** 1 alumno investigador + 1 tutor académico (sesiones de supervisión periódicas, con cadencia condicionada a la disponibilidad de ambas partes).
+- **Infraestructura:** Entorno de desarrollo local (portátil personal), sin coste de nube durante el desarrollo.
+- **Metodología:** Iterativa incremental, centrada en el dominio (*Domain-First*).
+
+### 9.1.2. Principio de Flexibilidad y Priorización Adaptativa
+
+> [!IMPORTANT]
+> La planificación aquí descrita es de carácter **indicativo y orientativo**, no normativo. Dado que el presente TFM se desarrolla en régimen de dedicación parcial, compatibilizado con compromisos profesionales y personales de carácter variable, se asume *a priori* que los intervalos temporales de cada sprint son permeables: su ejecución puede acelerarse, posponerse o solaparse según la disponibilidad real del investigador y la capacidad de respuesta del tutor en los hitos críticos de revisión.
+
+Esta aproximación es coherente con las recomendaciones de gestión ágil de proyectos de I+D aplicados en contextos académicos (IEEE Std 12207, ISO/IEC 29110), donde la rigidez del cronograma es sustituida por la **priorización explícita de objetivos**: se garantiza primero el alcance mínimo viable (MVP) y, en función del tiempo residual, se abordan los módulos de mayor complejidad o acabado opcionales.
+
+**Jerarquía de prioridades del proyecto:**
+
+| Prioridad | Módulo | Estado |
+|---|---|---|
+| **P0 — MVP obligatorio** | Núcleo hexagonal, validador de seguridad, API REST, FSM, Dashboard HITL | Completado |
+| **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
+| **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia ACID (SQLite), catálogo MCP extendido (7 herramientas), evidencias empíricas (MCP Inspector) | Completado |
+| **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
+
+Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de excelencia técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Sección 10.3).
+
+---
+
+## 9.2. Estructura de Sprints y Estimación de Esfuerzo
+
+### 9.2.1. Diagrama de Planificación
+
+La planificación se estructura en **5 sprints temáticos** más una fase transversal de redacción y una fase de consolidación de excelencia, con un esfuerzo total estimado de **~300 horas** (±15% de margen de contingencia estándar). Las fechas son referencias aproximadas sujetas al principio de flexibilidad enunciado en la sección anterior.
+
+```mermaid
+gantt
+  title Plan de Proyecto — Agentic Deployer (referencia orientativa)
+  dateFormat YYYY-MM-DD
+  axisFormat %b
+
+  section P0 · Sprint 1 — Núcleo Hexagonal
+  Modelado de Entidades (DeploymentIntent)    :s1a, 2026-03-02, 5d
+  SecurityContextValidator (Algoritmo 1)     :s1b, after s1a, 5d
+  Ports y Contratos (DeployPort)         :s1c, after s1b, 4d
+  Tests Unitarios y Property-Based (Hypothesis) :s1d, after s1c, 7d
+
+  section P0 · Sprint 2 — Backend HITL y FSM
+  API REST FastAPI (endpoints MCP + HITL)    :s2a, 2026-03-23, 6d
+  FSM y transiciones de estado          :s2b, after s2a, 4d
+  Dashboard HTML (polling asíncrono)       :s2c, after s2b, 5d
+  Tests de integración (use_cases)        :s2d, after s2c, 6d
+
+  section P1 · Sprint 3 — Golden Paths y FakeK8s
+  FakeK8sAdapter (YAML Deployment+Service+Ingress):s3a, 2026-04-13, 7d
+  Herramientas MCP (Golden Paths)        :s3b, after s3a, 5d
+  Pipeline CI local (run_tests.sh)        :s3c, after s3b, 3d
+  Linting Ruff + Type-checking Mypy       :s3d, after s3c, 3d
+
+  section P1 · Sprint 4 — Agente ReAct y MCP SDK
+  Integración SDK MCP oficial          :s4a, 2026-05-04, 6d
+  LLMClient ABC + OllamaLLMClient        :s4b, after s4a, 5d
+  AgentOrchestrator (bucle ReAct)        :s4c, after s4b, 5d
+  Chat Streamlit + System Prompt SIC       :s4d, after s4c, 5d
+
+  section P1 · Sprint 5 — QA Avanzado
+  Mutation Testing (mutmut)           :s5a, 2026-05-25, 7d
+  Pruebas Metamórficas (MR)           :s5b, after s5a, 5d
+  Pruebas de carga (Locust)           :s5c, after s5b, 4d
+  E2E Playwright (Dashboard HITL)        :s5d, after s5c, 3d
+
+  section P2 · Fase 6 — Redacción y Cierre
+  Redacción de Capítulos 1-5           :s6a, 2026-06-15, 21d
+  Redacción de Capítulos 6-9           :s6b, after s6a, 14d
+  Revisión tutor + correcciones iterativas    :s6c, after s6b, 28d
+  Acabado P2 (costes, evidencias, anexos)    :s6d, after s6c, 14d
+
+  section P2 · Fase 7 — Excelencia Técnica
+  Persistencia ACID (SQLite) e Inyección de Dep. :s7a, after s6d, 7d
+  Ampliación MCP a 7 herramientas operativas   :s7b, after s7a, 5d
+  QA 360: Mutmut + Pruebas Integración      :s7c, after s7b, 4d
+```
+
+### 9.2.2. Estimación de Esfuerzo por Sprint
+
+La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un ritmo de trabajo parcial y la incorporación de asistencia mediante herramientas de IA generativa, cuyo efecto es la aceleración del ciclo de implementación sin merma de la calidad del análisis.
+
+| Sprint | Fase | Estimación (h) | Rango (±15%) | Prioridad |
+|---|---|---|---|---|
+| Sprint 1 | Núcleo Hexagonal | 50h | 43–58h | P0 |
+| Sprint 2 | Backend HITL y FSM | 45h | 38–52h | P0 |
+| Sprint 3 | Golden Paths y FakeK8s | 40h | 34–46h | P1 |
+| Sprint 4 | Agente ReAct y MCP SDK | 55h | 47–63h | P1 |
+| Sprint 5 | QA Avanzado | 45h | 38–52h | P1 |
+| Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
+| Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
+| **Total estimado** | | **~300h** | **~255–345h** | |
+
+> [!NOTE]
+> La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de *scaffolding*, generación de código *boilerplate*, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
+
+---
+
+## 9.3. Esfuerzo de Desarrollo y Desviaciones
+
+Frente a la estimación inicial de ~300 horas, el cierre empírico del proyecto arrojó un esfuerzo total de **~340 horas**, lo que representa una desviación del **+13%**. Esta inversión adicional se encuadra holgadamente dentro del margen de contingencia previsto (±15%) y se asumió de manera deliberada en la recta final para elevar el MVP a un estándar de excelencia ingenieril (implementación de persistencia ACID en SQLite, ampliación de 4 a 7 herramientas MCP e identificación exhaustiva de brechas mediante *Mutation Testing*).
 
 La adopción de asistentes de Inteligencia Artificial (Google Gemini Advanced) demostró actuar como un multiplicador de productividad esencial. Permitió absorber esta densidad arquitectónica dentro de un cronograma manejable para un único ingeniero, validando de forma recursiva la hipótesis de investigación del TFM sobre la utilidad de los agentes LLM en ciclos de vida de software.
 
-## 9.2. Análisis Económico del Desarrollo
+La siguiente tabla resume las desviaciones por fase:
 
-El proyecto fue desarrollado utilizando recursos de código abierto e infraestructura personal, por lo que el coste material directo fue marginal. No obstante, al calcular el **coste de oportunidad equivalente** (la inversión que requeriría el proyecto si se externalizara en el mercado tecnológico español a tarifas de 2026), los resultados son los siguientes:
+| Fase | Estimación (h) | Real (h) | Desviación | Causa Principal |
+|---|---|---|---|---|
+| Sprint 1 · Núcleo Hexagonal | 50 | ~55 | +10% | Ampliación del validador de seguridad |
+| Sprint 2 · Backend HITL y FSM | 45 | ~45 | 0% | Desarrollo ajustado a la previsión |
+| Sprint 3 · Golden Paths y FakeK8s | 40 | ~46 | +15% | Integración dual SDK MCP |
+| Sprint 4 · Agente ReAct y MCP SDK | 55 | ~62 | +13% | Agente ReAct + Ollama nativo |
+| Sprint 5 · QA Avanzado | 45 | ~50 | +11% | Análisis forense de mutantes |
+| Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
+| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | Inyección dependencias SQLite y QA final |
+| **Total** | **~300** | **~340** | **~+13%** | |
 
-*   **Coste de Recursos Humanos (Investigador + Tutoría):** ~9.280 €
-*   **Coste de Infraestructura (Amortización hardware + Licencias IA):** ~261 €
-*   **Coste Total del Proyecto:** **~9.541 €**
-*   **Coste Promedio por Hora Efectiva:** ~26,2 €/h
+> [!NOTE]
+> Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control. El desglose pormenorizado por sprint con las retrospectivas detalladas, incluyendo los hitos completados y las lecciones aprendidas, se documenta en el **Anexo B**.
 
-## 9.3. Coste de Adopción Corporativa y ROI
+---
 
-La viabilidad comercial del prototipo se evaluó proyectando su implantación en diferentes tamaños de Servicios de Informática y Comunicaciones (SIC). Para una universidad u organización mediana (5.000 – 30.000 usuarios con una carga promedio de 500 solicitudes de infraestructura al año):
+## 9.4. Análisis Económico del Desarrollo
 
-1.  **Modelo de Coste Cero Operativo (Ollama):** Aprovechando la modularidad de la Arquitectura Hexagonal, la organización puede prescindir de APIs de pago y enrutar la lógica cognitiva a través de un servidor *on-premise* con LLMs *open-source* (ej. `Llama-3.1` o `Qwen-2.5`). Esto reduce el coste operativo de la IA a **0 €/año**, al tiempo que blinda al 100% la privacidad del dato institucional (*Zero Data Retention*).
-2.  **Rentabilidad (ROI):** 
-    *   La inversión inicial (*CAPEX*) de adaptación e integración con el clúster físico se estima en ~8.100 €.
-    *   El ahorro operativo anual (reducción del tiempo de negociación, modelado YAML y auditoría manual de políticas de 24h a 2 minutos por solicitud) se cifra en ~20.320 €/año.
-    *   El **período de recuperación de la inversión (Payback Period)** se alcanza a los **5,4 meses**.
-    *   El **Retorno de la Inversión (ROI) acumulado a 3 años** supera el **460%**.
+El proyecto fue desarrollado utilizando recursos de código abierto e infraestructura personal, por lo que el coste material directo fue marginal. No obstante, para evaluar la viabilidad económica de la solución, se ha calculado el **coste de oportunidad equivalente**: la inversión que requeriría el proyecto si se externalizara en el mercado tecnológico español a tarifas de 2026.
 
-*Para acceder al desglose de los diagramas de Gantt, las tablas forenses por Sprint y los cálculos de OPEX/CAPEX detallados, véase el **Anexo B**.*
+### 9.4.1. Costes de Recursos Humanos
+
+| Perfil | Tarifa/hora | Horas | Coste de oportunidad |
+|---|---|---|---|
+| **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
+| **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
+| **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
+
+> **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
+
+### 9.4.2. Costes de Infraestructura y Herramientas
+
+| Recurso | Proveedor | Coste imputable | Cálculo / Observación |
+|---|---|---|---|
+| **Portátil de desarrollo** | Hardware personal | **~126 €** | Portátil ~1.200 € · vida útil 4 años · fracción de uso TFM (6 meses / 48 meses) ≈ 150 € · factor dedicación parcial ~84% ≈ **126 €** |
+| Sistema operativo y utilidades | Linux (Ubuntu) | 0 € | Open source |
+| Python 3.12 + ecosistema | Open source | 0 € | — |
+| FastAPI, Pydantic, Hypothesis, Pytest | Open source | 0 € | — |
+| SDK MCP oficial (`mcp==2.2.0`) | Anthropic (MIT License) | 0 € | Open source |
+| Ollama (servidor LLM local) | Open source | 0 € | Modelos gratuitos |
+| **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
+| OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
+| **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
+
+### 9.4.3. Costes Totales de Desarrollo
+
+| Categoría | Coste |
+|---|---|
+| Recursos Humanos (coste de oportunidad) | ~9.280 € |
+| Infraestructura y herramientas | ~261 € |
+| **Coste Total del Proyecto** | **~9.541 €** |
+| **Coste por hora efectiva** | **~26,2 €/h** |
+
+---
+
+## 9.5. Coste de Adopción Corporativa y ROI
+
+Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar e implantar el *Agentic Deployer* en un entorno institucional real**, como un Servicio de Informática universitario o un departamento de IT corporativo?
+
+### 9.5.1. Perfiles de Organización Adoptante
+
+| Perfil | Descripción | Complejidad |
+|---|---|---|
+| **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
+| **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
+| **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
+
+### 9.5.2. Costes de Implantación (CAPEX — Inversión Inicial)
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| **Adaptación del código** *(personalizar `SYSTEM_PROMPT`, herramientas MCP y políticas de seguridad al catálogo corporativo)* | 20h × 40 €/h = **800 €** | 60h × 50 €/h = **3.000 €** | 160h × 60 €/h = **9.600 €** |
+| **Implementación `RealK8sAdapter`** *(integración con clúster físico vía `kubernetes-client`)* | 20h × 40 €/h = **800 €** | 40h × 50 €/h = **2.000 €** | 80h × 60 €/h = **4.800 €** |
+| **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
+| **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
+| **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
+
+### 9.5.3. Costes Operativos Anuales (OPEX)
+
+#### Infraestructura de Servidor
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
+| Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
+
+#### Motor LLM — La Variable Determinante del OPEX
+
+**Opción 1 — Ollama local (modelos open-source, recomendado para instituciones públicas)**
+
+| Modelo | VRAM necesaria | Inversión hardware (única vez) | Coste API | Privacidad |
+|---|---|---|---|---|
+| `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
+| `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
+| `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
+
+**Opción 2 — API en la nube**
+
+| Proveedor | Modelo | Precio entrada | Precio salida | Estimación anual* |
+|---|---|---|---|---|
+| OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~600–2.400 €/año** |
+| OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
+| Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
+| Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
+
+> *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
+
+#### OPEX Total Anual por Perfil
+
+| Componente | Perfil A | Perfil B | Perfil C |
+|---|---|---|---|
+| Servidor aplicación | 600 €/año | 300 €/año | 3.600 €/año |
+| Almacenamiento | 60 €/año | 200 €/año | 800 €/año |
+| LLM Ollama local (hardware, única vez) | +400 € (año 0) | +400 € (año 0) | +400 € (año 0) |
+| LLM API nube (alternativa) | ~600 €/año | ~2.400 €/año | ~6.000 €/año |
+| Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
+| **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
+| **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
+
+### 9.5.4. Análisis de Retorno de Inversión (ROI)
+
+El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8 (Tabla 1).
+
+**Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
+
+| Proceso eliminado | Tiempo ahorrado/solicitud | Solicitudes/año | Coste hora técnico N3 | Ahorro anual |
+|---|---|---|---|---|
+| Negociación de requisitos (email asíncrono) | 1.440 min → 0,5 min | 500 | 50 €/h | **11.995 €** |
+| Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
+| Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
+| **Ahorro total anual** | | | | **~20.320 €** |
+
+**ROI a 3 años — Perfil B con Ollama**
+
+| Concepto | Año 0 | Año 1 | Año 2 | Año 3 |
+|---|---|---|---|---|
+| Inversión CAPEX | -8.100 € | — | — | — |
+| Hardware LLM (Ollama GPU, única vez) | -400 € | — | — | — |
+| OPEX anual | — | -1.500 € | -1.500 € | -1.500 € |
+| Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
+| **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
+| **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
+
+> **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
+> **ROI a 3 años: ~464%**
+
+---
+
+## 9.6. Conclusiones del Análisis de Viabilidad
+
+1. **La flexibilidad de la planificación es una característica del diseño, no una deficiencia.** La naturaleza parcial y asincrónica del desarrollo impide la aplicación de cronogramas rígidos; la priorización explícita (P0→P3) garantiza que el núcleo de valor académico se complete antes que cualquier módulo de acabado opcional.
+
+2. **La asistencia de IA generativa es un multiplicador de productividad consistente con el objeto de estudio.** El uso de un agente de codificación (Google Gemini Advanced, ~120 € de coste imputable) permitió abordar un alcance técnico ambicioso —arquitectura hexagonal, SDK MCP oficial, QA multicapa, agente ReAct— dentro de un esfuerzo total contenido (~340h), que de otro modo habría requerido un equipo de al menos 2 personas.
+
+3. **El modelo de coste cero es viable con Ollama para instituciones públicas.** La combinación Ollama + servidor on-premise reduce el OPEX a menos de 2.000 €/año, con garantía total de privacidad del dato (Zero Data Retention), lo que lo convierte en la opción recomendada para organismos con restricciones presupuestarias o de soberanía del dato.
+
+4. **El ROI superior al 460% en 3 años justifica la adopción institucional.** El umbral de rentabilidad se alcanza en menos de 6 meses para un volumen mínimo de 500 solicitudes de infraestructura anuales.
+
+5. **La arquitectura hexagonal protege la inversión tecnológica a largo plazo.** La sustitución de cualquier adaptador —`FakeK8sAdapter` → `RealK8sAdapter`, Ollama → GPT-4o, etc.— no requiere modificar la lógica de negocio. El coste de evolución tecnológica está estructuralmente minimizado por el Principio de Inversión de Dependencias (DIP).
 
 
 <div style='page-break-after: always;'></div>
@@ -2343,7 +2624,7 @@ El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de e
 
 ## 10.2. Limitaciones del Prototipo
 
-Todo sistema de investigación que persiga la honestidad académica debe documentar con precisión sus limitaciones inherentes. El *Agentic Deployer* es un *Minimum Viable Product* (MVP) avanzado cuya función es demostrar la viabilidad de la arquitectura, no sustituir un sistema de orquestación empresarial maduro. Las siguientes limitaciones son conscientes, deliberadas y en varios casos representan las semillas del trabajo futuro descrito en la sección 9.3.
+Todo sistema de investigación que persiga la honestidad académica debe documentar con precisión sus limitaciones inherentes. El *Agentic Deployer* es un *Minimum Viable Product* (MVP) avanzado cuya función es demostrar la viabilidad de la arquitectura, no sustituir un sistema de orquestación empresarial maduro. Las siguientes limitaciones son conscientes, deliberadas y en varios casos representan las semillas del trabajo futuro descrito en la sección 10.3.
 
 ### 10.2.1. Adaptador de Kubernetes Simulado (`FakeK8sAdapter`)
 
@@ -2395,7 +2676,7 @@ El prototipo actual certifica matemáticamente la viabilidad de la integración 
 
 El diseño Hexagonal permite la sustitución de la capa de persistencia actual (`FakeK8sAdapter`) sin impactar la lógica de negocio subyacente. El primer hito evolutivo consiste en desarrollar e inyectar un **`RealK8sAdapter`** utilizando la librería oficial de Kubernetes para Python (`kubernetes-client`). En lugar de volcar manifiestos YAML estáticos en el disco físico del servidor, el adaptador consumirá directamente el *Control Plane* de un clúster físico experimental (como Minikube, K3s o un entorno *sandbox* universitario), permitiendo que la aprobación del técnico (HITL) despierte los *pods* de forma inmediata. El pseudocódigo de esta integración se documenta en el Anexo A (sección A.3).
 
-De forma paralela a esta integración, debe abordarse la consolidación de la persistencia mediante repositorios distribuidos como PostgreSQL (evolucionando la solución actual basada en SQLite para entornos de alta disponibilidad) y la **autenticación JWT** en todos los endpoints (mitigando la limitación 9.2.2).
+De forma paralela a esta integración, debe abordarse la consolidación de la persistencia mediante repositorios distribuidos como PostgreSQL (evolucionando la solución actual basada en SQLite para entornos de alta disponibilidad) y la **autenticación JWT** en todos los endpoints (mitigando la limitación 10.2.2).
 
 ### 10.3.2. Horizonte a Medio Plazo: Adopción de la Filosofía GitOps
 
@@ -2405,7 +2686,7 @@ Para alinear el sistema con los más altos estándares corporativos, se propone 
 - El adaptador secundario no atacará a Kubernetes directamente, sino que realizará un *commit* de los YAML autogenerados hacia un repositorio Git (ej. GitLab o GitHub) dedicado a la topología del clúster.
 - Herramientas de reconciliación consolidadas, como **ArgoCD** o **Flux**, monitorizarán dicho repositorio. Al detectar un nuevo *commit* aprobado por el sistema HITL, ArgoCD se encargará de traccionar (*pull*) los manifiestos y aplicarlos en el clúster.
 
-Esta separación garantizará un *Disaster Recovery* altamente fiable y una trazabilidad de auditoría completa, ya que el estado real del centro de datos siempre residirá en un repositorio Git versionado. Adicionalmente, se propone escalar el catálogo de herramientas MCP para cubrir las operaciones de gestión ausentes (limitación 9.2.4).
+Esta separación garantizará un *Disaster Recovery* altamente fiable y una trazabilidad de auditoría completa, ya que el estado real del centro de datos siempre residirá en un repositorio Git versionado. Adicionalmente, se propone escalar el catálogo de herramientas MCP para cubrir las operaciones de gestión ausentes (limitación 10.2.4).
 
 ### 10.3.3. Horizonte a Largo Plazo: Policy-as-Code y Agentic DevSecOps
 
@@ -2519,6 +2800,16 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 
 **[27]** Cohn, M. (2009). *Succeeding with Agile: Software Development Using Scrum*. Addison-Wesley Professional.
 *(Obra seminal donde se propone el modelo conceptual de la Pirámide de Pruebas Automáticas, adaptado en el Capítulo 7 para jerarquizar el QA de IA).*
+
+**[28]** Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017). *Attention Is All You Need*. Advances in Neural Information Processing Systems (NeurIPS), 30, 5998–6008. DOI: 10.48550/arXiv.1706.03762
+*(Arquitectura fundacional de los Transformers, sobre la que se construyen todos los Modelos de Lenguaje de Gran Escala referenciados en este trabajo, incluyendo GPT, Llama y Qwen).*
+
+**[29]** Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., ... & Amodei, D. (2020). *Language Models are Few-Shot Learners*. Advances in Neural Information Processing Systems (NeurIPS), 33, 1877–1901. DOI: 10.48550/arXiv.2005.14165
+*(Estudio seminal que demostró las capacidades emergentes de generalización zero-shot y few-shot en LLMs a gran escala, fundamentando el marco teórico de la Sección 2.1).*
+
+**[30]** Wei, J., Wang, X., Schuurmans, D., Bosma, M., Ichter, B., Xia, F., Chi, E., Le, Q., & Zhou, D. (2022). *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models*. Advances in Neural Information Processing Systems (NeurIPS), 35, 24824–24837. DOI: 10.48550/arXiv.2201.11903
+*(Técnica de prompting que precede conceptualmente al paradigma ReAct, analizada en la Sección 2.1 como antecedente directo del razonamiento intercalado con acción).*
+
 
 
 <div style='page-break-after: always;'></div>
@@ -2694,120 +2985,13 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 
 <div style='page-break-after: always;'></div>
 
-# Anexo B. Planificación Detallada del Proyecto y Costes
+# Anexo B. Retrospectivas Detalladas por Sprint
 
-> Este capítulo complementa la metodología descrita en la Sección 3.2 con el plan de proyecto detallado, el seguimiento real de las desviaciones y un análisis económico riguroso del desarrollo y la adopción del sistema.
-
----
-
-## B.1. Plan de Proyecto — Contexto y Restricciones
-
-### B.1.1. Restricciones Estructurales
-
-El *Agentic Deployer* se desarrolla en el contexto de un Trabajo de Fin de Máster bajo las siguientes restricciones:
-
-- **Dedicación:** Régimen parcial de investigación (~15–20 horas semanales, compatibles con actividad profesional externa).
-- **Equipo:** 1 alumno investigador + 1 tutor académico (sesiones de supervisión periódicas, con cadencia condicionada a la disponibilidad de ambas partes).
-- **Infraestructura:** Entorno de desarrollo local (portátil personal), sin coste de nube durante el desarrollo.
-- **Metodología:** Iterativa incremental, centrada en el dominio (*Domain-First*).
-
-### B.1.2. Principio de Flexibilidad y Priorización Adaptativa
-
-> [!IMPORTANT]
-> La planificación aquí descrita es de carácter **indicativo y orientativo**, no normativo. Dado que el presente TFM se desarrolla en régimen de dedicación parcial, compatibilizado con compromisos profesionales y personales de carácter variable, se asume *a priori* que los intervalos temporales de cada sprint son permeables: su ejecución puede acelerarse, posponerse o solaparse según la disponibilidad real del investigador y la capacidad de respuesta del tutor en los hitos críticos de revisión.
-
-Esta aproximación es coherente con las recomendaciones de gestión ágil de proyectos de I+D aplicados en contextos académicos (IEEE Std 12207, ISO/IEC 29110), donde la rigidez del cronograma es sustituida por la **priorización explícita de objetivos**: se garantiza primero el alcance mínimo viable (MVP) y, en función del tiempo residual, se abordan los módulos de mayor complejidad o acabado opcionales.
-
-**Jerarquía de prioridades del proyecto:**
-
-| Prioridad | Módulo | Estado |
-|---|---|---|
-| **P0 — MVP obligatorio** | Núcleo hexagonal, validador de seguridad, API REST, FSM, Dashboard HITL | Completado |
-| **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
-| **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia ACID (SQLite), catálogo MCP extendido (7 herramientas), evidencias empíricas (MCP Inspector) | Completado |
-| **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
-
-Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de "excelencia" técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Cap. 9.2).
+> Este anexo complementa el **Capítulo 9** con el seguimiento granular de cada sprint del proyecto. Para el marco de planificación, las estimaciones de esfuerzo, el análisis económico y el cálculo de ROI, véase el cuerpo del Capítulo 9.
 
 ---
 
-## B.2. Estructura de Sprints y Estimación de Esfuerzo
-
-### B.2.1. Diagrama de Planificación
-
-La planificación se estructura en **5 sprints temáticos** más una fase transversal de redacción, con un esfuerzo total estimado de **~300 horas** (±15% de margen de contingencia estándar). Las fechas son referencias aproximadas sujetas al principio de flexibilidad enunciado en la sección anterior.
-
-```mermaid
-gantt
-  title Plan de Proyecto — Agentic Deployer (referencia orientativa)
-  dateFormat YYYY-MM-DD
-  axisFormat %b
-
-  section P0 · Sprint 1 — Núcleo Hexagonal
-  Modelado de Entidades (DeploymentIntent)    :s1a, 2026-03-02, 5d
-  SecurityContextValidator (Algoritmo 1)     :s1b, after s1a, 5d
-  Ports y Contratos (DeployPort)         :s1c, after s1b, 4d
-  Tests Unitarios y Property-Based (Hypothesis) :s1d, after s1c, 7d
-
-  section P0 · Sprint 2 — Backend HITL y FSM
-  API REST FastAPI (endpoints MCP + HITL)    :s2a, 2026-03-23, 6d
-  FSM y transiciones de estado          :s2b, after s2a, 4d
-  Dashboard HTML (polling asíncrono)       :s2c, after s2b, 5d
-  Tests de integración (use_cases)        :s2d, after s2c, 6d
-
-  section P1 · Sprint 3 — Golden Paths y FakeK8s
-  FakeK8sAdapter (YAML Deployment+Service+Ingress):s3a, 2026-04-13, 7d
-  Herramientas MCP (Golden Paths)        :s3b, after s3a, 5d
-  Pipeline CI local (run_tests.sh)        :s3c, after s3b, 3d
-  Linting Ruff + Type-checking Mypy       :s3d, after s3c, 3d
-
-  section P1 · Sprint 4 — Agente ReAct y MCP SDK
-  Integración SDK MCP oficial          :s4a, 2026-05-04, 6d
-  LLMClient ABC + OllamaLLMClient        :s4b, after s4a, 5d
-  AgentOrchestrator (bucle ReAct)        :s4c, after s4b, 5d
-  Chat Streamlit + System Prompt SIC       :s4d, after s4c, 5d
-
-  section P1 · Sprint 5 — QA Avanzado
-  Mutation Testing (mutmut)           :s5a, 2026-05-25, 7d
-  Pruebas Metamórficas (MR)           :s5b, after s5a, 5d
-  Pruebas de carga (Locust)           :s5c, after s5b, 4d
-  E2E Playwright (Dashboard HITL)        :s5d, after s5c, 3d
-
-  section P2 · Fase 6 — Redacción y Cierre
-  Redacción de Capítulos 1-5           :s6a, 2026-06-15, 21d
-  Redacción de Capítulos 6-9           :s6b, after s6a, 14d
-  Revisión tutor + correcciones iterativas    :s6c, after s6b, 28d
-  Acabado P2 (costes, evidencias, anexos)    :s6d, after s6c, 14d
-
-  section P2 · Fase 7 — Excelencia Técnica
-  Persistencia ACID (SQLite) e Inyección de Dep. :s7a, after s6d, 7d
-  Ampliación MCP a 7 herramientas operativas   :s7b, after s7a, 5d
-  QA 360: Mutmut + Pruebas Integración      :s7c, after s7b, 4d
-```
-
-### B.2.2. Estimación de Esfuerzo por Sprint
-
-La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un ritmo de trabajo parcial y la incorporación de asistencia mediante herramientas de IA generativa, cuyo efecto es la aceleración del ciclo de implementación sin merma de la calidad del análisis.
-
-| Sprint | Fase | Estimación (h) | Rango (±15%) | Prioridad |
-|---|---|---|---|---|
-| Sprint 1 | Núcleo Hexagonal | 50h | 43–58h | P0 |
-| Sprint 2 | Backend HITL y FSM | 45h | 38–52h | P0 |
-| Sprint 3 | Golden Paths y FakeK8s | 40h | 34–46h | P1 |
-| Sprint 4 | Agente ReAct y MCP SDK | 55h | 47–63h | P1 |
-| Sprint 5 | QA Avanzado | 45h | 38–52h | P1 |
-| Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
-| Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
-| **Total estimado** | | **~300h** | **~255–345h** | |
-
-> [!NOTE]
-> La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de scaffolding, generación de código boilerplate, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
-
----
-
-## B.3. Seguimiento Real del Proyecto — Retrospectivas por Sprint
-
-### B.3.1. Sprint 1 — Núcleo Hexagonal
+## B.1. Sprint 1 — Núcleo Hexagonal
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2821,7 +3005,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 
 ---
 
-### B.3.2. Sprint 2 — Backend HITL y FSM
+## B.2. Sprint 2 — Backend HITL y FSM
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2835,7 +3019,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 
 ---
 
-### B.3.3. Sprint 3 — Golden Paths y FakeK8s
+## B.3. Sprint 3 — Golden Paths y FakeK8s
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2849,7 +3033,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 
 ---
 
-### B.3.4. Sprint 4 — Agente ReAct y MCP SDK
+## B.4. Sprint 4 — Agente ReAct y MCP SDK
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2857,13 +3041,13 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
 | Iteraciones ReAct máximas | 5 | 5 | 0% |
 
-**Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (SDK `ollama` v0.6), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
+**Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (`httpx` directo a la API REST de Ollama), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
 
 **Notas:** La serialización de firmas de herramientas Python a JSON Schema para el protocolo MCP requirió depuración adicional. El `OllamaLLMClient` nativo se completó en la fase de cierre, elevando el módulo de P1 a un acabado P2.
 
 ---
 
-### B.3.5. Sprint 5 — QA Avanzado
+## B.5. Sprint 5 — QA Avanzado
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2878,7 +3062,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 
 ---
 
-### B.3.6. Fase 6 — Redacción y Cierre
+## B.6. Fase 6 — Redacción y Cierre
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2886,12 +3070,13 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
 | Iteraciones de revisión | 2–3 | 5 | +67% |
 
-**Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (11 figuras), Anexos YAML y de Planificación.
-**Notas:** La memoria creció muy por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
+**Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (14 figuras), Anexos YAML y de Planificación.
+
+**Notas:** La memoria creció por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
 
 ---
 
-### B.3.7. Fase 7 — Consolidación de Excelencia Técnica
+## B.7. Fase 7 — Consolidación de Excelencia Técnica
 
 | Métrica | Estimación | Real | Desviación |
 |---|---|---|---|
@@ -2900,168 +3085,5 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
 
 **Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos.
-**Notas:** Esta fase, aunque no estaba prevista en el alcance original P0/P1, se abordó para elevar el proyecto a los máximos estándares de calidad ("Nota 10"). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores, sin que la lógica de negocio se vea afectada, validando empíricamente la hipótesis principal de diseño (Cap. 4.2).
 
----
-
-## B.4. Resumen de Desviaciones Globales
-
-| Fase | Estimación (h) | Real (h) | Desviación | Causa Principal |
-|---|---|---|---|---|
-| Sprint 1 · Núcleo Hexagonal | 50 | ~55 | +10% | Ampliación del validador de seguridad |
-| Sprint 2 · Backend HITL y FSM | 45 | ~45 | 0% | Desarrollo ajustado a la previsión |
-| Sprint 3 · Golden Paths y FakeK8s | 40 | ~46 | +15% | Integración dual SDK MCP |
-| Sprint 4 · Agente ReAct y MCP SDK | 55 | ~62 | +13% | Agente ReAct + Ollama nativo |
-| Sprint 5 · QA Avanzado | 45 | ~50 | +11% | Análisis forense de mutantes |
-| Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
-| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | Inyección dependencias SQLite y QA final |
-| **Total** | **~300** | **~340** | **~+13%** | |
-
-> [!NOTE]
-> Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control.
-
----
-
-## B.5. Análisis de Costes del Desarrollo
-
-### B.5.1. Costes de Recursos Humanos
-
-El cálculo aplica tarifas de referencia del mercado tecnológico español (2026), expresadas como **coste de oportunidad equivalente**, dado que el trabajo se realiza en el marco académico sin contraprestación económica directa.
-
-| Perfil | Tarifa/hora | Horas | Coste de oportunidad |
-|---|---|---|---|
-| **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
-| **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
-| **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
-
-> **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
-
-### B.5.2. Costes de Infraestructura y Herramientas
-
-| Recurso | Proveedor | Coste imputable | Cálculo / Observación |
-|---|---|---|---|
-| **Portátil de desarrollo** | Hardware personal | **~126 €** | Portátil ~1.200 € · vida útil 4 años · fracción de uso TFM (6 meses / 48 meses) ≈ 150 € · factor dedicación parcial ~84% ≈ **126 €** |
-| Sistema operativo y utilidades | Linux (Ubuntu) | 0 € | Open source |
-| Python 3.12 + ecosistema | Open source | 0 € | — |
-| FastAPI, Pydantic, Hypothesis, Pytest | Open source | 0 € | — |
-| SDK MCP oficial (`mcp==2.2.0`) | Anthropic (MIT License) | 0 € | Open source |
-| Ollama (servidor LLM local) | Open source | 0 € | Modelos gratuitos |
-| **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
-| OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
-| **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
-
-### B.5.3. Costes Totales de Desarrollo
-
-| Categoría | Coste |
-|---|---|
-| Recursos Humanos (coste de oportunidad) | ~9.280 € |
-| Infraestructura y herramientas | ~261 € |
-| **Coste Total del Proyecto** | **~9.541 €** |
-| **Coste por hora efectiva** | **~26,2 €/h** |
-
----
-
-## B.6. Estimación de Costes de Adopción para Organizaciones
-
-Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar e implantar el *Agentic Deployer* en un entorno institucional real**, como un Servicio de Informática universitario o un departamento de IT corporativo?
-
-### B.6.1. Perfiles de Organización Adoptante
-
-| Perfil | Descripción | Complejidad |
-|---|---|---|
-| **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
-| **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
-| **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
-
-### B.6.2. Costes de Implantación (CAPEX — Inversión Inicial)
-
-| Componente | Perfil A | Perfil B | Perfil C |
-|---|---|---|---|
-| **Adaptación del código** *(personalizar `SYSTEM_PROMPT`, herramientas MCP y políticas de seguridad al catálogo corporativo)* | 20h × 40 €/h = **800 €** | 60h × 50 €/h = **3.000 €** | 160h × 60 €/h = **9.600 €** |
-| **Implementación `RealK8sAdapter`** *(integración con clúster físico vía `kubernetes-client`)* | 20h × 40 €/h = **800 €** | 40h × 50 €/h = **2.000 €** | 80h × 60 €/h = **4.800 €** |
-| **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
-| **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
-| **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
-
-### B.6.3. Costes Operativos Anuales (OPEX)
-
-#### Infraestructura de Servidor
-
-| Componente | Perfil A | Perfil B | Perfil C |
-|---|---|---|---|
-| Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
-| Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
-
-#### Motor LLM — La Variable Determinante del OPEX
-
-**Opción 1 — Ollama local (modelos open-source, recomendado para instituciones públicas)**
-
-| Modelo | VRAM necesaria | Inversión hardware (única vez) | Coste API | Privacidad |
-|---|---|---|---|---|
-| `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
-| `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
-| `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
-
-**Opción 2 — API en la nube**
-
-| Proveedor | Modelo | Precio entrada | Precio salida | Estimación anual* |
-|---|---|---|---|---|
-| OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~600–2.400 €/año** |
-| OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
-| Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
-| Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
-
-> *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
-
-#### OPEX Total Anual por Perfil
-
-| Componente | Perfil A | Perfil B | Perfil C |
-|---|---|---|---|
-| Servidor aplicación | 600 €/año | 300 €/año | 3.600 €/año |
-| Almacenamiento | 60 €/año | 200 €/año | 800 €/año |
-| LLM Ollama local (hardware, única vez) | +400 € (año 0) | +400 € (año 0) | +400 € (año 0) |
-| LLM API nube (alternativa) | ~600 €/año | ~2.400 €/año | ~6.000 €/año |
-| Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
-| **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
-| **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
-
-### B.6.4. Análisis de Retorno de Inversión (ROI)
-
-El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8, Tabla 1.
-
-**Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
-
-| Proceso eliminado | Tiempo ahorrado/solicitud | Solicitudes/año | Coste hora técnico N3 | Ahorro anual |
-|---|---|---|---|---|
-| Negociación de requisitos (email asíncrono) | 1.440 min → 0,5 min | 500 | 50 €/h | **11.995 €** |
-| Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
-| Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
-| **Ahorro total anual** | | | | **~20.320 €** |
-
-**ROI a 3 años — Perfil B con Ollama**
-
-| Concepto | Año 0 | Año 1 | Año 2 | Año 3 |
-|---|---|---|---|---|
-| Inversión CAPEX | -8.100 € | — | — | — |
-| Hardware LLM (Ollama GPU, única vez) | -400 € | — | — | — |
-| OPEX anual | — | -1.500 € | -1.500 € | -1.500 € |
-| Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
-| **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
-| **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
-
-> **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
-> **ROI a 3 años: ~464%**
-
----
-
-## B.7. Conclusiones del Análisis
-
-1. **La flexibilidad de la planificación es una característica del diseño, no una deficiencia.** La naturaleza parcial y asincrónica del desarrollo impide la aplicación de cronogramas rígidos; la priorización explícita (P0→P3) garantiza que el núcleo de valor académico se complete antes que cualquier módulo de acabado opcional.
-
-2. **La asistencia de IA generativa es un multiplicador de productividad consistente con el objeto de estudio.** El uso de un agente de codificación (Google Gemini Advanced, ~120 € de coste imputable) permitió abordar un alcance técnico ambicioso —arquitectura hexagonal, SDK MCP oficial, QA multicapa, agente ReAct— dentro de un esfuerzo total contenido (~300h), que de otro modo habría requerido un equipo de al menos 2 personas.
-
-3. **El modelo de coste cero es viable con Ollama para instituciones públicas.** La combinación Ollama + servidor on-premise reduce el OPEX a menos de 2.000 €/año, con garantía total de privacidad del dato (Zero Data Retention), lo que lo convierte en la opción recomendada para organismos con restricciones presupuestarias o de soberanía del dato.
-
-4. **El ROI superior al 460% en 3 años justifica la adopción institucional.** El umbral de rentabilidad se alcanza en menos de 6 meses para un volumen mínimo de 500 solicitudes de infraestructura anuales.
-
-5. **La arquitectura hexagonal protege la inversión tecnológica a largo plazo.** La sustitución de cualquier adaptador —`FakeK8sAdapter` → `RealK8sAdapter`, Ollama → GPT-4o, etc.— no requiere modificar la lógica de negocio. El coste de evolución tecnológica está estructuralmente minimizado por el Principio de Inversión de Dependencias (DIP).
+**Notas:** Esta fase, aunque no estaba prevista en el alcance original P0/P1, se abordó para elevar el proyecto a los máximos estándares de calidad. Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores, sin que la lógica de negocio se vea afectada, validando empíricamente la hipótesis principal de diseño (Cap. 4.2).

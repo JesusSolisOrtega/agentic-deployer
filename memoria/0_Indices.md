@@ -41,9 +41,12 @@
   - 8.2. Caso de Estudio: Resiliencia ante Ataques (*Prompt Injection*)
   - 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
 - **Capítulo 9. Gestión y Viabilidad del Proyecto**
-  - 9.1. Esfuerzo de Desarrollo y Desviaciones
-  - 9.2. Análisis Económico del Desarrollo
-  - 9.3. Coste de Adopción Corporativa y ROI
+  - 9.1. Plan de Proyecto — Contexto y Restricciones
+  - 9.2. Estructura de Sprints y Estimación de Esfuerzo
+  - 9.3. Esfuerzo de Desarrollo y Desviaciones
+  - 9.4. Análisis Económico del Desarrollo
+  - 9.5. Coste de Adopción Corporativa y ROI
+  - 9.6. Conclusiones del Análisis de Viabilidad
 - **Capítulo 10. Conclusiones, Limitaciones y Trabajo Futuro**
   - 10.1. Conclusiones
   - 10.2. Limitaciones del Prototipo
@@ -53,14 +56,14 @@
   - A.1. Contexto de Generación
   - A.2. Manifiesto YAML Completo
   - A.3. Relación con el Código Fuente
-- **Anexo B. Planificación Detallada del Proyecto y Costes**
-  - B.1. Plan de Proyecto — Contexto y Restricciones
-  - B.2. Estructura de Sprints y Estimación de Esfuerzo
-  - B.3. Seguimiento Real del Proyecto — Retrospectivas por Sprint
-  - B.4. Resumen de Desviaciones Globales
-  - B.5. Análisis de Costes del Desarrollo
-  - B.6. Estimación de Costes de Adopción para Organizaciones
-  - B.7. Conclusiones del Análisis
+- **Anexo B. Retrospectivas Detalladas por Sprint**
+  - B.1. Sprint 1 — Núcleo Hexagonal
+  - B.2. Sprint 2 — Backend HITL y FSM
+  - B.3. Sprint 3 — Golden Paths y FakeK8s
+  - B.4. Sprint 4 — Agente ReAct y MCP SDK
+  - B.5. Sprint 5 — QA Avanzado
+  - B.6. Fase 6 — Redacción y Cierre
+  - B.7. Fase 7 — Consolidación de Excelencia Técnica
 
 
 <div style='page-break-after: always;'></div>

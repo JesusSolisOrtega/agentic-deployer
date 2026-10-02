@@ -75,7 +75,7 @@ flowchart LR
 
 #### 4.1.2.1. Desglose Funcional de los Contenedores
 
-La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución. La siguiente figura ilustra cómo estos cuatro procesos coexisten en la máquina local durante la ejecución del sistema:
+La siguiente figura ilustra cómo los componentes coexisten en la máquina local durante la ejecución del sistema:
 
 ```mermaid
 flowchart LR
@@ -100,7 +100,7 @@ flowchart LR
 ```
 <p align="center"><i><b>Figura 4:</b> Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por <code>stdio</code> sin exponer ningún puerto TCP.</i></p>
 
-La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tres pilares de ejecución:
+La arquitectura interna se sustenta sobre tres pilares de ejecución:
 
 1. **Contenedor A: Frontend de Orquestación Cognitiva (Streamlit):**
   Esta aplicación web es el punto de entrada para el usuario investigador. Sin embargo, su responsabilidad trasciende la mera renderización de interfaces (UX/UI). Este proceso aloja en su núcleo el `AgentOrchestrator`, siendo la única entidad del sistema autorizada a mantener estado de red (conexiones HTTP/gRPC) con el proveedor externo de Inteligencia Artificial (OpenAI/Ollama). Su función principal es gestionar la asincronía del chat, administrar el contexto histórico de la sesión y gobernar las iteraciones del bucle de razonamiento y acción (*ReAct*).
@@ -108,7 +108,7 @@ La arquitectura interna, modelada en el diagrama superior, se sustenta sobre tre
 2. **Contenedor B: El Catálogo Dinámico (Servidor MCP):**
   Concebido como un proceso ligero, el Servidor del Protocolo de Contexto de Modelos (MCP) actúa como el diccionario vivo de operaciones tecnológicas de la universidad. Su propósito es traducir los métodos y funciones estandarizadas (por ejemplo, el método `deploy_congress_web()`) a una representación JSON universal que cualquier LLM moderno pueda ingerir como *Tool Calling*. Por motivos de latencia estricta, este contenedor no suele comunicarse con el orquestador mediante APIs HTTP tradicionales, sino que se enlaza a través de flujos de Entrada/Salida estándar (`stdio`) del sistema operativo, garantizando intercambios de mensajes JSON-RPC en el orden de los submilisegundos.
 
-3. **Contenedor C: El Santuario Determinista (Backend Core Hexagonal):**
+3. **Contenedor C: El Núcleo Determinista (Backend Core Hexagonal):**
   Implementado sobre el *framework* asíncrono FastAPI, este contenedor representa la base de datos volátil y la autoridad máxima de seguridad de la arquitectura. Su filosofía de diseño es el agnosticismo cognitivo: a este proceso backend no le concierne cómo la Inteligencia Artificial dedujo una acción, ni si el usuario utilizó jerga técnica o lenguaje coloquial. Su única misión arquitectónica es recibir un objeto JSON estructuralmente tipado desde el Servidor MCP. 
   Una vez recibida la intención, el Backend aplica las reglas institucionales más férreas. Si la petición viola políticas (ej. abrir un puerto reservado), el Backend la rechaza; si es válida, la persiste en una cuarentena lógica (memoria volátil o base de datos) y se expone a sí mismo para que el *Dashboard* del Técnico de Operaciones pueda consumirla de forma asíncrona mediante técnicas de *Polling* o WebSockets.
 
@@ -122,7 +122,7 @@ Este patrón se fundamenta en estructurar el software en capas concéntricas, im
 
 ### 4.2.1. Capa de Dominio: Entidades e Invariantes
 
-En el centro exacto del hexágono reside la Capa de Dominio. Esta capa representa la "Verdad Absoluta" del negocio corporativo y debe ser completamente agnóstica a cualquier *framework* externo. En el contexto de este Trabajo de Fin de Máster, la capa de dominio modela las intenciones de infraestructura antes de que estas se traduzcan a código declarativo.
+En el centro exacto del hexágono reside la Capa de Dominio. Esta capa representa la fuente de verdad de la lógica de negocio y debe ser completamente agnóstica a cualquier *framework* externo. En el contexto de este Trabajo de Fin de Máster, la capa de dominio modela las intenciones de infraestructura antes de que estas se traduzcan a código declarativo.
 
 Para dotar al núcleo de una inviolabilidad tipográfica estructural (esencial al operar en lenguajes interpretados), el sistema no manipula estructuras de datos dinámicas (como diccionarios JSON crudos emitidos por el LLM). En su lugar, el orquestador obliga a mapear cualquier solicitud externa hacia una Entidad de Dominio rígidamente definida. El contrato principal de este núcleo es la entidad `DeploymentIntent` (Intención de Despliegue).
 
@@ -298,6 +298,8 @@ La adopción de este árbol de decisión, fuertemente condicionado de manera imp
 
 La siguiente figura resume visualmente el árbol de validación como diagrama de flujo:
 
+<div style="max-width: 6cm; margin: 0 auto;">
+
 ```mermaid
 flowchart TD
     A(["DeploymentIntent\n(JSON Validado)"]) --> B{"Motor de\nReglas Institucionales"}
@@ -307,6 +309,8 @@ flowchart TD
     style ERR fill:#ffcccc,stroke:#cc0000
     style OK fill:#ccffcc,stroke:#007700
 ```
+
+</div>
 <p align="center"><i><b>Figura 6:</b> Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija.</i></p>
 
 ### 4.3.2. Gestión de Excepciones y Ciclo de Vida del Error
@@ -387,44 +391,49 @@ Este bloque constituye el "Embrague" del sistema. El Servidor MCP cruza el lími
 sequenceDiagram
   autonumber
   participant Orch as AgentOrchestrator
-  participant LLM as LLM
   participant MCP as MCPServer
   participant API as FastAPI Backend
-  participant UseCase as ProcessDeploymentUseCase
-  participant Sec as SecurityContextValidator
-  participant Store as SQLiteDeploymentRepository
+  participant UseCase as ProcessUseCase
+  participant Sec as SecurityValidator
+  participant Store as SQLiteRepository
+  participant LLM as LLM
 
-  %% ── CAMINO FELIZ ───────────────────────────────────────────────
-  rect rgb(220, 255, 220)
-    Note over Orch,Store: FASE 2A — Happy Path: Petición conforme
-    Orch->>MCP: dispatch_tool(name, args)
-    MCP->>API: POST /mcp/intent {name, image, port, cpu, ram}
-    API->>UseCase: execute(DeploymentIntent)
-    UseCase->>Sec: validate(intent)
-    Sec-->>UseCase: OK (sin violaciones)
-    UseCase->>Store: save(DeploymentRecord[status=PENDING_APPROVAL])
-    Store-->>UseCase: OK
-    UseCase-->>API: record
-    API-->>MCP: HTTP 201 Created
-    MCP-->>Orch: Observation: {id, status: PENDING_APPROVAL}
-    Orch->>LLM: [historial + observación] → siguiente iteración
-  end
-
-  %% ── CAMINO DE ERROR ────────────────────────────────────────────
-  rect rgb(255, 230, 220)
-    Note over Orch,Store: FASE 2B — Error Path: Violación de seguridad
-    Orch->>MCP: dispatch_tool("ubuntu-debug", "ubuntu:latest", 22)
-    MCP->>API: POST /mcp/intent {image: ubuntu:latest, port: 22}
-    API->>UseCase: execute(DeploymentIntent)
-    UseCase->>Sec: validate(intent)
-    Sec-->>UseCase: SecurityViolationError [Port 22 + :latest tag]
-    UseCase-->>API: Raise Exception
-    API-->>MCP: HTTP 422 Unprocessable Entity
-    MCP-->>Orch: Observation: {error: 422, violations: [...]}
-    Orch->>LLM: [historial + error 422] → autocorrección
-  end
+  Note over Orch,LLM: FASE 2A — Flujo de Éxito: Petición conforme
+  Orch->>MCP: dispatch_tool(name, args)
+  MCP->>API: POST /mcp/intent
+  API->>UseCase: execute(DeploymentIntent)
+  UseCase->>Sec: validate(intent)
+  Sec-->>UseCase: OK (sin violaciones)
+  UseCase->>Store: save([status=PENDING_APPROVAL])
+  Store-->>UseCase: OK
+  UseCase-->>API: record
+  API-->>MCP: HTTP 201 Created
+  MCP-->>Orch: Observación: {id, status}
+  Orch->>LLM: [historial] → siguiente iteración
 ```
-<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). El Backend procesa la petición, aplicando reglas de negocio estrictas.</i></p>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Orch as AgentOrchestrator
+  participant MCP as MCPServer
+  participant API as FastAPI Backend
+  participant UseCase as ProcessUseCase
+  participant Sec as SecurityValidator
+  participant LLM as LLM
+
+  Note over Orch,LLM: FASE 2B — Flujo de Error: Violación de seguridad
+  Orch->>MCP: dispatch_tool("ubuntu:latest", 22)
+  MCP->>API: POST /mcp/intent {port: 22}
+  API->>UseCase: execute(DeploymentIntent)
+  UseCase->>Sec: validate(intent)
+  Sec-->>UseCase: SecurityViolationError [Port 22]
+  UseCase-->>API: Lanza Excepción
+  API-->>MCP: HTTP 422 Unprocessable Entity
+  MCP-->>Orch: Observación: {error: 422}
+  Orch->>LLM: [error 422] → autocorrección
+```
+<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
 
 ### 4.5.3. Fase 3: Ejecución Autoritaria (Ciclo HITL)
 

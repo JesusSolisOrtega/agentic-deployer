@@ -12,6 +12,7 @@ import os
 # Archivos que componen la memoria (en orden)
 # ---------------------------------------------------------------------------
 files = [
+    "00_Resumen_Abstract.md",
     "1_Introduccion.md",
     "2_Estado_del_Arte.md",
     "3_Metodologia_y_Stack.md",
@@ -32,10 +33,15 @@ OUTPUT_MD  = "/home/jesus/projects/TFM/TFM_Completo.md"
 
 # ---------------------------------------------------------------------------
 # 1. Generar índice de contenidos (TOC)
+#    Se construye automáticamente a partir de los encabezados H1 y H2
+#    de los capítulos (excluyendo el Resumen/Abstract que va antes del TOC).
 # ---------------------------------------------------------------------------
+# Solo usamos los capítulos 1-11 + Anexos para el TOC (no el Resumen)
+toc_source_files = [f for f in files if f != "00_Resumen_Abstract.md"]
+
 toc_lines = ["# Índice de Contenidos\n\n"]
 
-for fname in files:
+for fname in toc_source_files:
     fpath = os.path.join(BASE_DIR, fname)
     if os.path.exists(fpath):
         with open(fpath, "r", encoding="utf-8") as f:
@@ -94,8 +100,11 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 
 # ---------------------------------------------------------------------------
 # 2. Combinar todos los Markdown en TFM_Completo.md
+#    Orden: Resumen → TOC + Índice de Figuras → Capítulos 1-11 → Anexos
 # ---------------------------------------------------------------------------
-all_files = ["0_Indices.md"] + files
+all_files = ["00_Resumen_Abstract.md", "0_Indices.md"] + [
+    f for f in files if f != "00_Resumen_Abstract.md"
+]
 parts = []
 
 for fname in all_files:
@@ -104,10 +113,10 @@ for fname in all_files:
         with open(fpath, "r", encoding="utf-8") as f:
             parts.append(f.read())
 
-    combined = "\n\n<div style='page-break-after: always;'></div>\n\n".join(parts)
+combined = "\n\n<div style='page-break-after: always;'></div>\n\n".join(parts)
 
-    with open(OUTPUT_MD, "w", encoding="utf-8") as f:
-        f.write(combined)
+with open(OUTPUT_MD, "w", encoding="utf-8") as f:
+    f.write(combined)
 
 print(f"✓ Markdown generado: {OUTPUT_MD}")
 print(f"  → Ábrelo en Typora · File > Export > PDF")
