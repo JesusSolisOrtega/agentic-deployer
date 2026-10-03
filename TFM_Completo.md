@@ -2501,16 +2501,10 @@ Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundo
 
 ### 8.3.6. Comparativa de Inferencia Multimodelo (Agnosticismo)
 
-Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), se repitió la batería de escenarios sobre tres motores LLM locales alternativos.
+Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. 
 
-| Modelo LLM | Tamaño | Iteraciones Medias | Latencia E2E (µ) | Tasa de Éxito |
-|---|---|---|---|---|
-| **Qwen 2.5 (Base)** | 7B | 1,2 | 840 ms | 100% |
-| **Llama 3.2** | 3B | 1,6 | 510 ms | 100% |
-| **Mistral** | 7B | 1,4 | 930 ms | 100% |
-<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo utilizando modelos alternativos.</i></p>
+Aunque el trabajo empírico y las trazas presentadas en las secciones anteriores se han materializado sobre la familia de modelos Qwen (concretamente `qwen2.5:7b`), el sistema está diseñado para que la sustitución del motor de inferencia (por ejemplo, hacia `llama3.2` o `mistral`) requiera únicamente la alteración de la variable de entorno correspondiente, sin necesidad de modificar el código del núcleo (principio Open-Closed).
 
-Todos los modelos superaron la prueba utilizando exactamente el mismo código base y catálogo de herramientas. La principal divergencia se observó en modelos de menor tamaño (Llama 3.2 3B), los cuales requirieron más iteraciones de autocorrección (1,6 iteraciones promedio) debido a un seguimiento de instrucciones ligeramente inferior, pero logrando el éxito final gracias a la resiliencia del bucle iterativo.
 
 
 
