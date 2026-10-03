@@ -12,6 +12,9 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_DIR"
+
 echo -e "${CYAN}${BOLD}🧹 Limpiando el repositorio...${RESET}"
 
 # 1. Limpiar archivos precompilados de Python

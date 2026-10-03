@@ -29,8 +29,9 @@ files = [
     "Anexo_C_Glosario.md",
 ]
 
-BASE_DIR   = "/home/jesus/projects/TFM/memoria"
-OUTPUT_MD  = "/home/jesus/projects/TFM/TFM_Completo.md"
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = os.path.join(ROOT_DIR, "memoria")
+OUTPUT_MD = os.path.join(ROOT_DIR, "TFM_Completo.md")
 
 # ---------------------------------------------------------------------------
 # 1. Generar índice de contenidos (TOC)

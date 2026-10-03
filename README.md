@@ -77,12 +77,12 @@ Para garantizar la estabilidad del sistema frente al ruido inyectado por la IA, 
 
 ### Ejecución de la Suite de Pruebas
 
-Para mayor comodidad y rigor, el proyecto incluye un script de *pipeline* continuo (`run_tests.sh`) que ejecuta de forma desatendida y secuencial todas las capas de calidad: linters, análisis de tipos, pruebas de interfaz (E2E), pruebas estocásticas y de propiedades, inyección de mutantes lógicos (mutmut) y pruebas de carga (Locust).
+Para mayor comodidad y rigor, el proyecto incluye un script de *pipeline* continuo (`scripts/run_tests.sh`) que ejecuta de forma desatendida y secuencial todas las capas de calidad: linters, análisis de tipos, pruebas de interfaz (E2E), pruebas estocásticas y de propiedades, inyección de mutantes lógicos (mutmut) y pruebas de carga (Locust).
 
 ```bash
 # Otorgar permisos y ejecutar el pipeline completo (recomendado):
-chmod +x run_tests.sh
-./run_tests.sh
+chmod +x scripts/run_tests.sh
+./scripts/run_tests.sh
 ```
 
 Alternativamente, se pueden ejecutar bloques aislados:
@@ -94,7 +94,7 @@ mutmut run                          # Auditoría de mutantes
 
 ## 📄 Memoria del Proyecto
 
-Toda la fundamentación teórica, diagramas arquitectónicos, decisiones de diseño y análisis de resultados se encuentran documentados en los archivos Markdown dentro del directorio `/memoria`. Se proveen scripts (como `combinar_tfm_y_toc.py`) para compilar un documento único listo para su exportación a PDF.
+Toda la fundamentación teórica, diagramas arquitectónicos, decisiones de diseño y análisis de resultados se encuentran documentados en los archivos Markdown dentro del directorio `/memoria`. Se proveen scripts (como `scripts/combinar_tfm_y_toc.py`) para compilar un documento único listo para su exportación a PDF.
 
 ## 🔌 Integración con Clientes MCP Externos
 

@@ -16,7 +16,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-from app.agent_layer.agent import AgentOrchestrator, OllamaLLMClient
+from app.agent_layer.agent import AgentOrchestrator, OpenAILLMClient
 
 DEMOS_DIR = "demos/session_logs"
 
@@ -46,9 +46,9 @@ SCENARIOS = [
 def save_demo(scenario_id: str, description: str, conversation: list[dict], elapsed: float) -> None:
     filepath = os.path.join(DEMOS_DIR, f"{scenario_id}.json")
     
-    if os.path.exists(filepath):
-        print(f"⏭️  Saltando {scenario_id}: El archivo ya existe.")
-        return
+    # if os.path.exists(filepath):
+    #     print(f"⏭️  Saltando {scenario_id}: El archivo ya existe.")
+    #     return
 
     data: dict[str, Any] = {
         "scenario": scenario_id,
@@ -71,7 +71,7 @@ def generate_demos() -> None:
     print("Iniciando generación de Demos (Modo Reproducibilidad)...")
     
     # Comprobar si ollama está activo antes de intentar nada
-    client = OllamaLLMClient(model_name="qwen2.5:7b")
+    client = OpenAILLMClient(model="qwen2.5:7b", base_url="http://localhost:11434/v1")
     try:
         # Check liveness
         import requests
@@ -80,28 +80,29 @@ def generate_demos() -> None:
         print("⚠️  Ollama no parece estar ejecutándose. Asegúrate de ejecutar 'ollama serve' primero.")
         return
 
-    orchestrator = AgentOrchestrator(llm_client=client)
+    orchestrator = AgentOrchestrator(llm=client)
 
     for scenario in SCENARIOS:
         filepath = os.path.join(DEMOS_DIR, f"{scenario['id']}.json")
-        if os.path.exists(filepath):
-            print(f"⏭️  Saltando {scenario['id']}: El archivo ya existe.")
-            continue
+        # if os.path.exists(filepath):
+        #     print(f"⏭️  Saltando {scenario['id']}: El archivo ya existe.")
+        #     continue
             
         print(f"\n▶️  Ejecutando {scenario['id']}...")
-        orchestrator.reset_memory()
+        history = [{"role": "system", "content": "Eres el asistente IA del Servicio de Informática. Usa herramientas para desplegar y calcular recursos."}]
         
         start_time = time.time()
         try:
             # Ejecutar el orquestador
-            final_answer = orchestrator.process_message(scenario["prompt"])
+            final_answer, updated_history = orchestrator.run(scenario["prompt"], history)
         except Exception as e:
             print(f"❌ Error en la ejecución: {e}")
             final_answer = f"Error: {e}"
+            updated_history = history
         elapsed = time.time() - start_time
         
-        # El historial de orchestrator.history incluye user, tool calls, tool returns, etc.
-        save_demo(scenario["id"], scenario["description"], orchestrator.history, elapsed)
+        # El historial incluye user, tool calls, tool returns, etc.
+        save_demo(scenario["id"], scenario["description"], updated_history, elapsed)
 
 if __name__ == "__main__":
     generate_demos()

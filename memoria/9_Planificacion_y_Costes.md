@@ -63,7 +63,7 @@ gantt
   section P1 · Sprint 3<br>- Golden Paths y FakeK8s
   FakeK8sAdapter (YAML Deployment+Service+Ingress):s3a, 2026-04-13, 7d
   Herramientas MCP (Golden Paths)        :s3b, after s3a, 5d
-  Pipeline CI local (run_tests.sh)        :s3c, after s3b, 3d
+  Pipeline CI local (scripts/run_tests.sh)        :s3c, after s3b, 3d
   Linting Ruff + Type-checking Mypy       :s3d, after s3c, 3d
 
   section P1 · Sprint 4<br>- Agente ReAct y MCP SDK

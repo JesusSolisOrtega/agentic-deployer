@@ -97,43 +97,43 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 
 ### Índice de Tablas
 
-- **Tabla 1:** Comparativa entre Asistentes Cloud Propietarios y el Agentic Deployer. *(Capítulo 2)*
-- **Tabla 2:** Posicionamiento del sistema respecto al estado del arte. *(Capítulo 2)*
-- **Tabla 3:** Mapeo de estados FSM a indicadores visuales del panel de notificaciones del investigador. *(Capítulo 6)*
-- **Tabla 4:** Cobertura de pruebas unitarias por componente. *(Capítulo 7)*
-- **Tabla 5:** Resultados del Mutation Testing por módulo. *(Capítulo 7)*
-- **Tabla 6:** Resultados de las Pruebas Metamórficas por Relación. *(Capítulo 7)*
-- **Tabla 7:** Métricas globales de la batería metamórfica. *(Capítulo 7)*
-- **Tabla 8:** Impacto temporal operativo (ITSM tradicional vs Agentic Deployer). *(Capítulo 8)*
-- **Tabla 9:** Entorno de evaluación para los casos de estudio prácticos. *(Capítulo 8)*
-- **Tabla 10:** Traza de ejecución: Validación en el núcleo hexagonal (Paso 5). *(Capítulo 8)*
-- **Tabla 11:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo 8)*
-- **Tabla 12:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo 8)*
-- **Tabla 13:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo 8)*
-- **Tabla 14:** Comparativa E2E de métricas operativas (multi-escenario). *(Capítulo 8)*
-- **Tabla 15:** Rendimiento comparativo utilizando modelos alternativos. *(Capítulo 8)*
-- **Tabla 16:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo 9)*
-- **Tabla 17:** Estimación de esfuerzo neto por Sprint. *(Capítulo 9)*
-- **Tabla 18:** Resumen de desviaciones de tiempo por fase. *(Capítulo 9)*
-- **Tabla 19:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo 9)*
-- **Tabla 20:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo 9)*
-- **Tabla 21:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo 9)*
-- **Tabla 22:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo 9)*
-- **Tabla 23:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo 9)*
-- **Tabla 24:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo 9)*
-- **Tabla 25:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo 9)*
-- **Tabla 26:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo 9)*
-- **Tabla 27:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo 9)*
-- **Tabla 28:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo 9)*
-- **Tabla 29:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Anexo A)*
-- **Tabla 30:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo B)*
-- **Tabla 31:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo B)*
-- **Tabla 32:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo B)*
-- **Tabla 33:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo B)*
-- **Tabla 34:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo B)*
-- **Tabla 35:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo B)*
-- **Tabla 36:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo B)*
-- **Tabla 37:** Glosario de Acrónimos y Términos Técnicos. *(Anexo C)*
+- **Tabla 1:** Comparativa de herramientas declarativas vs imperativas. *(Capítulo)*
+- **Tabla 2:** Posicionamiento del sistema respecto al estado del arte. *(Capítulo)*
+- **Tabla 3:** Vectores de mutación REST del Dashboard de Operaciones. *(Capítulo)*
+- **Tabla 4:** Cobertura de pruebas unitarias por componente. *(Capítulo)*
+- **Tabla 5:** Resultados del Mutation Testing por módulo. *(Capítulo)*
+- **Tabla 6:** Resultados de las Pruebas Metamórficas por Relación. *(Capítulo)*
+- **Tabla 7:** Métricas globales de la batería metamórfica. *(Capítulo)*
+- **Tabla 8:** Impacto temporal operativo (ITSM tradicional vs Agentic Deployer). *(Capítulo)*
+- **Tabla 9:** Traza de ejecución: Análisis de contexto y herramienta (Paso 1). *(Capítulo)*
+- **Tabla 10:** Traza de ejecución: Validación en el núcleo hexagonal (Paso 5). *(Capítulo)*
+- **Tabla 11:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo)*
+- **Tabla 12:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo)*
+- **Tabla 13:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo)*
+- **Tabla 14:** Comparativa E2E de métricas operativas (ITSM vs Agentic Deployer). *(Capítulo)*
+- **Tabla 15:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
+- **Tabla 16:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
+- **Tabla 17:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
+- **Tabla 18:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
+- **Tabla 19:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
+- **Tabla 20:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
+- **Tabla 21:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
+- **Tabla 22:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
+- **Tabla 23:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
+- **Tabla 24:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
+- **Tabla 25:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
+- **Tabla 26:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
+- **Tabla 27:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
+- **Tabla 28:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Capítulo)*
+- **Tabla 29:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
+- **Tabla 30:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
+- **Tabla 31:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
+- **Tabla 32:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
+- **Tabla 33:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
+- **Tabla 34:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
+- **Tabla 35:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
+- **Tabla 36:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
+- **Tabla 37:** Datos tabulares adicionales. *(Anexo)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 

@@ -1,0 +1,53 @@
+{
+  "scenario": "hitl_full_cycle",
+  "description": "Complete HITL cycle: researcher requests CMS for Computer Science department → LLM calls deploy_department_cms → PENDING_APPROVAL → SIC technician approves via Dashboard → DEPLOYED.",
+  "llm_provider": "ollama",
+  "model": "qwen2.5:7b",
+  "timestamp": "2026-09-27T11:05:42+02:00",
+  "conversation": [
+    {
+      "role": "system",
+      "content": "Eres el asistente IA del Servicio de Informática y Comunicaciones (SIC) de la Universidad."
+    },
+    {
+      "role": "user",
+      "content": "El departamento de Ciencias de la Computación necesita un CMS WordPress para publicar noticias y eventos. ¿Puedes solicitarlo?"
+    },
+    {
+      "role": "assistant",
+      "content": "Por supuesto, voy a tramitar la solicitud del CMS para el departamento.",
+      "tool_calls": [
+        {
+          "id": "ollama_c5e9d312",
+          "type": "function",
+          "function": {
+            "name": "deploy_department_cms",
+            "arguments": "{\"department_name\": \"computer-science\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "ollama_c5e9d312",
+      "name": "deploy_department_cms",
+      "content": "{\"id\": \"dep-9b4f1a7e\", \"status\": \"PENDING_APPROVAL\", \"name\": \"cms-computer-science\", \"image\": \"wordpress:6.4\", \"port\": 8080, \"cpu\": \"500m\", \"ram\": \"1024Mi\", \"message\": \"Intent registered. Awaiting HITL approval from SIC technician.\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Solicitud registrada correctamente.\n\n**Detalles del CMS solicitado:**\n- **ID:** `dep-9b4f1a7e`\n- **Servicio:** `cms-computer-science`\n- **Imagen:** `wordpress:6.4` (versión estable certificada por el SIC)\n- **Puerto:** 8080\n- **CPU:** 500m / **RAM:** 1024Mi\n- **Estado:** `PENDING_APPROVAL` ⏳\n\nEl técnico del SIC revisará la solicitud en el Dashboard de operaciones. Te avisaré cuando cambie el estado."
+    }
+  ],
+  "hitl_event": {
+    "action": "APPROVED",
+    "technician": "tecnico-sic@universidad.es",
+    "timestamp": "2026-09-27T11:12:08+02:00",
+    "dashboard_url": "http://localhost:8000/frontend/index.html",
+    "final_status": "DEPLOYED",
+    "yaml_generated": "dep-9b4f1a7e_cms-computer-science.yaml"
+  },
+  "react_iterations": 1,
+  "tool_calls_made": 1,
+  "deployment_id": "dep-9b4f1a7e",
+  "final_status": "DEPLOYED"
+}

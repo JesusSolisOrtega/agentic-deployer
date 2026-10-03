@@ -20,7 +20,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 # ── Directorio del proyecto ───────────────────────────────────────────────
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 VENV_BIN="${PROJECT_DIR}/.venv/bin"
 PYTHON="${VENV_BIN}/python"
 UVICORN="${VENV_BIN}/uvicorn"
@@ -149,7 +149,7 @@ for i in $(seq 1 15); do
 done
 
 echo "  Ejecutando Locust en modo headless (10 usuarios, 5s)..."
-${VENV_BIN}/locust -f locustfile.py --headless -u 10 -r 2 --run-time 5s --host=http://127.0.0.1:8000 || {
+${VENV_BIN}/locust -f scripts/locustfile.py --headless -u 10 -r 2 --run-time 5s --host=http://127.0.0.1:8000 || {
     kill ${UVICORN_PID} 2>/dev/null || true
     exit 1
 }

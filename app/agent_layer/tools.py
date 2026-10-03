@@ -72,6 +72,8 @@ def format_deployment_intent(
     response = requests.post(
         f"{BACKEND_URL}/mcp/intent", json=payload, timeout=10,
     )
+    if response.status_code == 422:
+        return dict(response.json())
     response.raise_for_status()
     return dict(response.json())
 
