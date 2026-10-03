@@ -2501,10 +2501,21 @@ Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundo
 
 ### 8.3.6. Comparativa de Inferencia Multimodelo (Agnosticismo)
 
-Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. 
+Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. El sistema está diseñado para que la sustitución del motor de inferencia requiera únicamente la alteración de la variable de entorno correspondiente. 
 
-Aunque el trabajo empírico y las trazas presentadas en las secciones anteriores se han materializado sobre la familia de modelos Qwen (concretamente `qwen2.5:7b`), el sistema está diseñado para que la sustitución del motor de inferencia (por ejemplo, hacia `llama3.2` o `mistral`) requiera únicamente la alteración de la variable de entorno correspondiente, sin necesidad de modificar el código del núcleo (principio Open-Closed).
+Para demostrar esta interoperabilidad, se descargaron y evaluaron dos modelos adicionales bajo las mismas precondiciones (Llama 3.2 de 3B y Mistral de 7B).
 
+| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Invocación |
+|---|---|---|---|---|
+| **Qwen 2.5** | 7B | 3,0 | 47,33 s | 100% |
+| **Llama 3.2** | 3B | 0,8 | 9,44 s | 75% |
+| **Mistral** | 7B | 0,0 | 15,93 s | 0% |
+<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos.</i></p>
+
+Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente (promediando 3 iteraciones de corrección hasta lograr el éxito), **Mistral** demostró incapacidad para formatear las llamadas a herramientas (`tool_calls`), prefiriendo responder en texto plano (0 iteraciones en el bucle ReAct). **Llama 3.2** presentó un rendimiento aceptable pero errático (promediando menos de 1 iteración real de tool calls). Esto subraya la idoneidad empírica de Qwen 2.5 como motor principal del sistema, y valida el encapsulamiento arquitectónico que permitió evaluarlos libremente.
+
+> **Disclaimer sobre métricas temporales (Limitaciones de Hardware):**  
+> Es imperativo señalar que las latencias recogidas en esta memoria (que oscilan entre 9 y 47 segundos) son **estrictamente ilustrativas de un entorno local con hardware fuertemente restringido** (ejecución sin GPU dedicada). En un entorno institucional o de producción equipado con clústeres de aceleración (ej. NVIDIA A100 o H100) o a través de APIs gestionadas corporativas, estos tiempos de inferencia se verían reducidos drásticamente, haciendo la experiencia de usuario sustancialmente más rápida.
 
 
 
