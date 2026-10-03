@@ -364,6 +364,8 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 
 En la mayoría de escenarios, el agente resolvió la petición en 1 iteración, validando la solidez del `SYSTEM_PROMPT`. El escenario 4 demostró concluyentemente la capacidad de recuperación autónoma ante errores, una de las garantías clave de la integración del bucle ReAct con validadores estrictos.
 
+**Nota de Reproducibilidad:** Para certificar el rigor empírico y la transparencia de este TFM, la totalidad de los datos volcados en la Tabla 14 y en los anexos no son teóricos, sino que han sido obtenidos mediante ejecución de caja negra contra la API de Ollama y el orquestador desarrollado. En el código fuente del proyecto se ha habilitado un script de validación automatizada (`scripts/generate_demos.py`) que audita y recrea programáticamente estos *logs* (almacenados en `demos/session_logs/`), certificando que el comportamiento metodológico detallado es 100% reproducible en un entorno local dotado de aceleración hardware.
+
 ### 8.3.6. Comparativa de Inferencia Multimodelo (Agnosticismo)
 
 Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), se repitió la batería de escenarios sobre tres motores LLM locales alternativos.
