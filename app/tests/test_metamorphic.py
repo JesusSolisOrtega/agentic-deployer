@@ -9,13 +9,93 @@ essential metamorphic relations in natural language processing:
 3. MR-3 (Case Invariance): Changes in uppercase/lowercase should not affect extraction.
 """
 
+import os
+import json
+import time
+import subprocess
+import urllib.request
+import urllib.error
 import pytest
 
-from app.agent_layer.agent import FakeLLMClient
+from app.agent_layer.agent import FakeLLMClient, OllamaLLMClient
+from app.agent_layer.tools import TOOL_DEFINITIONS
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_ollama_running():
+    """
+    Si se solicita ejecución real, comprueba si Ollama está corriendo.
+    Si no lo está, levanta el demonio en background y lo cierra al terminar.
+    """
+    if os.getenv("RUN_REAL_LLM") != "true":
+        yield
+        return
+
+    # Check if Ollama is already running
+    url = "http://localhost:11434/api/tags"
+    is_running = False
+    try:
+        urllib.request.urlopen(url, timeout=2)
+        is_running = True
+    except urllib.error.URLError:
+        pass
+
+    process = None
+    if not is_running:
+        print("\n[Metamorphic Tests] Iniciando demonio local de Ollama...")
+        try:
+            # Start Ollama daemon in background
+            process = subprocess.Popen(
+                ["ollama", "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except FileNotFoundError:
+            pytest.fail("El ejecutable 'ollama' no está instalado o no se encuentra en el PATH.")
+        
+        # Wait for daemon to be ready (up to 15 seconds)
+        ready = False
+        for _ in range(15):
+            time.sleep(1)
+            try:
+                urllib.request.urlopen(url, timeout=2)
+                ready = True
+                break
+            except urllib.error.URLError:
+                continue
+                
+        if not ready:
+            if process:
+                process.terminate()
+            pytest.fail("No se pudo conectar a Ollama tras iniciar el demonio.")
+
+    yield  # Run tests
+
+    # Cleanup if we started the daemon
+    if process:
+        print("\n[Metamorphic Tests] Deteniendo demonio de Ollama...")
+        process.terminate()
+        process.wait()
+
+
+def extract_params(client, messages: list[dict]) -> dict:
+    """Extrae los parámetros usando el Fake o el modelo real."""
+    if isinstance(client, FakeLLMClient):
+        return client._extract_params_from_history(messages)
+    
+    # Si es Ollama, llamamos al modelo y extraemos los argumentos del tool_call
+    response = client.chat(messages, tools=TOOL_DEFINITIONS)
+    for tc in response.tool_calls:
+        if tc.name == "format_deployment_intent":
+            return tc.arguments
+    return {}
 
 
 @pytest.fixture
-def parser() -> FakeLLMClient:
+def parser():
+    if os.getenv("RUN_REAL_LLM") == "true":
+        # Usado para las ejecuciones documentadas en el Capítulo 7
+        return OllamaLLMClient(model=os.getenv("OLLAMA_MODEL", "qwen2.5:7b"))
     return FakeLLMClient()
 
 
@@ -30,11 +110,14 @@ def test_mr1_order_permutation(parser: FakeLLMClient) -> None:
     # Prompt B: Reversed order
     prompt_b = [{"role": "user", "content": "Con el puerto 8000 y la imagen python:3.12, necesito un servicio api-backend"}]
 
-    result_a = parser._extract_params_from_history(prompt_a)
-    result_b = parser._extract_params_from_history(prompt_b)
+    result_a = extract_params(parser, prompt_a)
+    result_b = extract_params(parser, prompt_b)
 
-    assert result_a == result_b
-    assert result_a == {"name": "api-backend", "image": "python:3.12", "internal_port": 8000}
+    # Las heurísticas del LLM real a veces deducen CPU/RAM por defecto si no se lo damos.
+    # Así que verificamos que, como mínimo, los obligatorios coinciden.
+    assert result_a.get("name") == result_b.get("name") == "api-backend"
+    assert result_a.get("image") == result_b.get("image") == "python:3.12"
+    assert int(result_a.get("internal_port", 0)) == int(result_b.get("internal_port", 0)) == 8000
 
 
 def test_mr2_noise_invariance(parser: FakeLLMClient) -> None:
@@ -46,11 +129,12 @@ def test_mr2_noise_invariance(parser: FakeLLMClient) -> None:
 
     noisy_prompt = [{"role": "user", "content": "Hola buenos dias equipo del SIC, por favor cuando tengais un hueco: Quiero desplegar mi-web con imagen nginx:latest en el puerto 80. Muchas gracias de antemano y un saludo cordial."}]
 
-    result_base = parser._extract_params_from_history(base_prompt)
-    result_noisy = parser._extract_params_from_history(noisy_prompt)
+    result_base = extract_params(parser, base_prompt)
+    result_noisy = extract_params(parser, noisy_prompt)
 
-    assert result_base == result_noisy
-    assert result_base == {"name": "mi-web", "image": "nginx:latest", "internal_port": 80}
+    assert result_base.get("name") == result_noisy.get("name") == "mi-web"
+    assert result_base.get("image") == result_noisy.get("image") == "nginx:latest"
+    assert int(result_base.get("internal_port", 0)) == int(result_noisy.get("internal_port", 0)) == 80
 
 
 def test_mr3_case_invariance(parser: FakeLLMClient) -> None:
@@ -62,11 +146,12 @@ def test_mr3_case_invariance(parser: FakeLLMClient) -> None:
 
     upper_prompt = [{"role": "user", "content": "QUIERO EL servicio redis CON IMAGEN redis:7.0 EN EL PUERTO 6379"}]
 
-    result_lower = parser._extract_params_from_history(lower_prompt)
-    result_upper = parser._extract_params_from_history(upper_prompt)
+    result_lower = extract_params(parser, lower_prompt)
+    result_upper = extract_params(parser, upper_prompt)
 
-    assert result_lower == result_upper
-    assert result_lower == {"name": "redis", "image": "redis:7.0", "internal_port": 6379}
+    assert result_lower.get("name") == result_upper.get("name") == "redis"
+    assert result_lower.get("image") == result_upper.get("image") == "redis:7.0"
+    assert int(result_lower.get("internal_port", 0)) == int(result_upper.get("internal_port", 0)) == 6379
 
 
 def test_mr4_incremental_context(parser: FakeLLMClient) -> None:
@@ -86,8 +171,9 @@ def test_mr4_incremental_context(parser: FakeLLMClient) -> None:
         {"role": "user", "content": "puerto 3000"}
     ]
 
-    result_single = parser._extract_params_from_history(single_message)
-    result_incremental = parser._extract_params_from_history(incremental_messages)
+    result_single = extract_params(parser, single_message)
+    result_incremental = extract_params(parser, incremental_messages)
 
-    assert result_single == result_incremental
-    assert result_single == {"name": "app-test", "image": "node:18", "internal_port": 3000}
+    assert result_single.get("name") == result_incremental.get("name") == "app-test"
+    assert result_single.get("image") == result_incremental.get("image") == "node:18"
+    assert int(result_single.get("internal_port", 0)) == int(result_incremental.get("internal_port", 0)) == 3000
