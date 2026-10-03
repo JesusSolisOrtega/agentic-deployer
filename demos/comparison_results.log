@@ -1,0 +1,224 @@
+=== LLAMA 3.2 ===
+2026-10-03 22:09:16.580 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 
+  [33m[1mWarning:[0m to view this Streamlit app on a browser, run it with the following
+  command:
+
+    streamlit run demos/demo_reinforcement_suffix.py [ARGUMENTS]
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Session state does not function when running a script without `streamlit run`
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.635 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.636 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:16.637 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+[10/03/26 22:09:22] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+[10/03/26 22:09:23] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+                    INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+[10/03/26 22:09:24] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+Inicializando llama3.2:latest vía Ollama...
+
+============================================================
+=== EJECUCIÓN (MODO: ESTÁNDAR (SIN SUFIJO)) ===
+============================================================
+
+[Turno 1] Usuario: Hola equipo del SIC, necesito desplegar un servicio web por favor.
+[Turno 1] IA:      {"name":"format_deployment_intent","parameters":{"cpu":"None","image":"None","internal_port":None,"name":"servicio web","ram":None,"storage":None}}
+
+[Turno 2] Usuario: Se va a llamar proyecto-web
+[Turno 2] IA:      {"name":"format_deployment_intent","parameters":{"cpu":"None","image":"None","internal_port":None,"name":"proyecto-web","ram":"None","storage":"None"}}
+
+[Turno 3] Usuario: La imagen será nginx:latest y el puerto es el 80. Con eso ya lo tendríamos.
+[Turno 3] IA:      [❌ FALLO CRÍTICO DE LLM]
+                   El modelo colapsó intentando generar la estructura.
+                   Excepción interna: 1 validation error for Message
+tool_calls.0.function.arguments
+  Input should be a valid dictionary ...
+
+============================================================
+=== EJECUCIÓN (MODO: REFORZADO (CON SUFIJO DE MITIGACIÓN)) ===
+============================================================
+
+[Turno 1] Usuario: Hola equipo del SIC, necesito desplegar un servicio web por favor.
+Traceback (most recent call last):
+  File "/home/jesus/projects/TFM/demos/demo_reinforcement_suffix.py", line 65, in <module>
+    run_incremental_dialogue(orchestrator, "REFORZADO (CON SUFIJO DE MITIGACIÓN)")
+  File "/home/jesus/projects/TFM/demos/demo_reinforcement_suffix.py", line 22, in run_incremental_dialogue
+    response, history = orchestrator.run(user_msg_1, history)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jesus/projects/TFM/app/agent_layer/agent.py", line 488, in run
+    response = self.llm.chat(chat_history, self.tool_definitions)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jesus/projects/TFM/app/agent_layer/agent.py", line 402, in chat
+    response = client.chat(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jesus/projects/TFM/.venv/lib/python3.12/site-packages/ollama/_client.py", line 393, in chat
+    messages=list(_copy_messages(messages)),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jesus/projects/TFM/.venv/lib/python3.12/site-packages/ollama/_client.py", line 1323, in _copy_messages
+    yield Message.model_validate(
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jesus/projects/TFM/.venv/lib/python3.12/site-packages/pydantic/main.py", line 732, in model_validate
+    return cls.__pydantic_validator__.validate_python(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for Message
+tool_calls.0.function.arguments
+  Input should be a valid dictionary [type=dict_type, input_value='{"name": "Nombre del ser...": "Nombre del puerto"}', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/dict_type
+Inicializando llama3.2:latest vía Ollama...
+
+============================================================
+=== MODO ESTADO DESTILADO (STATEFUL SLOT FILLING) ===
+=== Modelo: llama3.2:latest ===
+============================================================
+[ESTADO INICIAL] {'name': None, 'image': None, 'port': None}
+
+[Turno 1] Usuario: Hola equipo del SIC, necesito desplegar un servicio web por favor.
+          [ESTADO INTERNO ACTUALIZADO]: {'name': None, 'image': None, 'port': None}
+[Turno 1] IA:      ¡Hola! Me alegra ayudarte a desplegar tu servicio.
+
+Para proceder, necesito algunos detalles adicionales. Por favor, proporciona los siguientes datos:
+
+1. **Nombre del servicio**: ¿Cuál es el nombre del servicio que deseas desplegar?
+2. **Imagen del servicio**: ¿Tienes una imagen asociada con el servicio que deseas desplegar?
+3. **Puerto del servicio**: ¿En qué puerto deseas que se inicie el servicio?
+
+Con estos datos, podré ayudarte a completar el proceso de despliegue de manera segura y efectiva.
+
+[Turno 2] Usuario: Se va a llamar proyecto-web
+          [ESTADO INTERNO ACTUALIZADO]: {'name': 'null', 'image': 'null', 'port': 'null'}
+[Turno 2] Python:  ¡Plantilla completa! Ejecutando herramienta de despliegue...
+          [🛠️  JSON ENVIADO AL SISTEMA]: {
+  "name": "null",
+  "image": "null",
+  "port": "null"
+}
+[Turno 2] IA:      ¡El servicio null se ha desplegado correctamente!
+
+Fin de la demo.
+=== MISTRAL ===
+2026-10-03 22:09:27.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.877 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 
+  [33m[1mWarning:[0m to view this Streamlit app on a browser, run it with the following
+  command:
+
+    streamlit run demos/demo_reinforcement_suffix.py [ARGUMENTS]
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Session state does not function when running a script without `streamlit run`
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.943 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-03 22:09:27.944 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+[10/03/26 22:09:55] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+[10/03/26 22:10:09] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+[10/03/26 22:10:24] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  
+[10/03/26 22:10:39] INFO     HTTP Request: POST                  _client.py:1025
+                             http://localhost:11434/api/chat                    
+                             "HTTP/1.1 200 OK"                                  

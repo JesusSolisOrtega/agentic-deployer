@@ -462,10 +462,30 @@ class AgentOrchestrator:
         Returns:
             Tuple (text_response, updated_history).
         """
+        import os
+        import copy
+
         history.append({"role": "user", "content": user_message})
 
         for _ in range(max_iterations):
-            response = self.llm.chat(history, self.tool_definitions)
+            # Evaluate reinforcement suffix
+            use_suffix = os.getenv("USE_REINFORCEMENT_SUFFIX", "false").lower() == "true"
+            chat_history = history
+            
+            if use_suffix:
+                # We copy the history to avoid modifying the real conversation state
+                chat_history = copy.deepcopy(history)
+                # Find the last user message and append the suffix
+                for msg in reversed(chat_history):
+                    if msg["role"] == "user":
+                        msg["content"] += (
+                            "\n\n[SYSTEM DIRECTIVE: 1) First, explicitly list the parameters you have gathered so far (Project Name, Docker Image, Port). "
+                            "2) If any is missing, you MUST NOT invoke the tool; just ask the user for it. "
+                            "3) ONLY if you have gathered all three parameters, invoke the tool.]"
+                        )
+                        break
+
+            response = self.llm.chat(chat_history, self.tool_definitions)
 
             # No tool calls -> final response
             if not response.tool_calls:
