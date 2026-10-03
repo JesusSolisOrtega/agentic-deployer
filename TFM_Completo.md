@@ -2514,19 +2514,7 @@ Para demostrar esta interoperabilidad, se descargaron y evaluaron dos modelos ad
 
 Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente (promediando 3 iteraciones de corrección hasta lograr el éxito), **Mistral** demostró incapacidad para formatear las llamadas a herramientas (`tool_calls`), prefiriendo responder en texto plano (0 iteraciones en el bucle ReAct). **Llama 3.2** presentó un rendimiento aceptable pero errático (promediando menos de 1 iteración real de tool calls). Esto subraya la idoneidad empírica de Qwen 2.5 como motor principal del sistema, y valida el encapsulamiento arquitectónico que permitió evaluarlos libremente.
 
-### 8.4. Limitaciones del Estudio (Restricciones de Hardware y Modelos)
-
-Es imperativo desde una perspectiva académica y de ingeniería señalar las limitaciones físicas bajo las cuales se han obtenido las métricas expuestas en este capítulo. El trabajo empírico y las pruebas de concepto se han ejecutado íntegramente sobre un entorno local de consumo, concretamente utilizando una GPU de portátil NVIDIA GeForce RTX 3060 con 6 GB de memoria VRAM.
-
-Esta restricción de hardware ha condicionado el estudio en dos dimensiones fundamentales:
-
-1. **Impacto en el Tiempo de Inferencia (Latencia):** 
-   Aunque el sistema orquestador logra aprovechar la aceleración hardware local, los tiempos de inferencia (entre 9 y 47 segundos, según el número de iteraciones) son estrictamente ilustrativos de esta plataforma de entrada. En un entorno institucional o de producción, respaldado por clústeres de inferencia dedicados (ej. aceleradores NVIDIA A100 o H100) o consumiendo el LLM a través de APIs corporativas gestionadas, estas latencias se verían drásticamente minimizadas a fracciones de segundo por iteración.
-
-2. **Impacto en las Capacidades Cognitivas (Elección de Modelos):** 
-   La barrera de los 6 GB de VRAM obligó a circunscribir las pruebas a modelos de la franja de los 3 a 7 billones de parámetros (Llama 3.2 3B, Qwen 2.5 7B, Mistral 7B) y a aplicar técnicas de cuantización restrictivas (Q4) para lograr que cupieran en memoria. Esto explica el comportamiento errático de modelos como Mistral a la hora de adherirse estrictamente al formato JSON del *Tool Calling*. Si se hubiera dispuesto de hardware empresarial (ej. 80 GB de VRAM), se habría podido evaluar modelos de grado de frontera (como Llama 3.1 70B o Mixtral 8x22B), cuyas ingentes capacidades lógicas habrían solventado la sintaxis de las herramientas con una tasa de éxito casi absoluta.
-
-Por lo tanto, la elección de **Qwen 2.5 (7B)** no solo es un acierto empírico dentro de las posibilidades del estudio, sino que subraya la extraordinaria eficiencia de su *fine-tuning* para el uso de herramientas, logrando un comportamiento de agente maduro (bucle ReAct) pese a operar bajo las severas limitaciones impuestas por el hardware.
+> **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
 
 
 
@@ -2933,9 +2921,13 @@ Actualmente, el técnico SIC en el panel HITL posee una autoridad estrictamente 
 
 Las métricas de eficiencia operativa documentadas en el Capítulo 8 se basan en una ejecución forense simulada por el propio investigador. El sistema no ha sido sometido a pruebas de usabilidad estructuradas (como la métrica SUS - *System Usability Scale*) con usuarios ajenos al proyecto. La interacción de investigadores sin perfil técnico real frente a la interfaz conversacional podría revelar barreras cognitivas o requerimientos de accesibilidad no previstos en este MVP, por lo que la afirmación sobre la usabilidad universal del sistema debe interpretarse como una viabilidad técnica, sujeta a futura validación empírica en un entorno de laboratorio.
 
-### 10.2.8. Validación Empírica de Autocorrección Multi-turno
+### 10.2.8. Restricciones de Hardware y Elección de Modelos (Latencia y Capacidades)
 
-El bucle de orquestación cognitiva (ReAct Loop) descrito teóricamente en el Capítulo 5 posee la capacidad de iterar sobre errores mediante un mecanismo de *Feedback Loop*. Sin embargo, las demostraciones forenses presentadas en el Capítulo 8 resuelven los escenarios (incluso el rechazo por *Prompt Injection*) en una única iteración del modelo, decidiendo emitir una *Final Answer* directamente. En consecuencia, la capacidad del Agente para auto-corregir dinámicamente sus argumentos en un escenario multi-turno real (por ejemplo, encadenando 3 o 4 llamadas a herramientas de introspección fallidas antes de acertar) queda documentada como una capacidad arquitectónica latente, requiriendo demostraciones empíricas más extensas para certificar su fiabilidad en producción.
+Las métricas empíricas documentadas en el Capítulo 8 están fuertemente condicionadas por la infraestructura física subyacente. Todo el entorno de pruebas ha sido ejecutado localmente utilizando una GPU de portátil orientada al consumo (NVIDIA GeForce RTX 3060 con 6 GB de VRAM).
+
+Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct, **Mistral (7B)** fracasó estructuralmente al intentar invocar herramientas. En un entorno institucional sin este cuello de botella de memoria (ej. clústeres A100/H100), se habrían podido desplegar modelos de frontera (ej. Llama 3.1 70B o Mixtral), cuya capacidad lógica superior habría resuelto la sintaxis de las herramientas de manera trivial.
+
+Del mismo modo, las latencias observadas (que alcanzan los 47 segundos en casos de multi-iteración ReAct) son un artefacto directo de la falta de ancho de banda y capacidad de cómputo del hardware portátil. En un entorno productivo con aceleración dedicada o *endpoints* gestionados corporativos, estos tiempos de inferencia se colapsarían a escasos segundos, ofreciendo una experiencia en tiempo casi real.
 
 ## 10.3. Trabajo Futuro
 

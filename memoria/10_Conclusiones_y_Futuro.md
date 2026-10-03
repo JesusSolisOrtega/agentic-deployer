@@ -92,9 +92,13 @@ Actualmente, el técnico SIC en el panel HITL posee una autoridad estrictamente 
 
 Las métricas de eficiencia operativa documentadas en el Capítulo 8 se basan en una ejecución forense simulada por el propio investigador. El sistema no ha sido sometido a pruebas de usabilidad estructuradas (como la métrica SUS - *System Usability Scale*) con usuarios ajenos al proyecto. La interacción de investigadores sin perfil técnico real frente a la interfaz conversacional podría revelar barreras cognitivas o requerimientos de accesibilidad no previstos en este MVP, por lo que la afirmación sobre la usabilidad universal del sistema debe interpretarse como una viabilidad técnica, sujeta a futura validación empírica en un entorno de laboratorio.
 
-### 10.2.8. Validación Empírica de Autocorrección Multi-turno
+### 10.2.8. Restricciones de Hardware y Elección de Modelos (Latencia y Capacidades)
 
-El bucle de orquestación cognitiva (ReAct Loop) descrito teóricamente en el Capítulo 5 posee la capacidad de iterar sobre errores mediante un mecanismo de *Feedback Loop*. Sin embargo, las demostraciones forenses presentadas en el Capítulo 8 resuelven los escenarios (incluso el rechazo por *Prompt Injection*) en una única iteración del modelo, decidiendo emitir una *Final Answer* directamente. En consecuencia, la capacidad del Agente para auto-corregir dinámicamente sus argumentos en un escenario multi-turno real (por ejemplo, encadenando 3 o 4 llamadas a herramientas de introspección fallidas antes de acertar) queda documentada como una capacidad arquitectónica latente, requiriendo demostraciones empíricas más extensas para certificar su fiabilidad en producción.
+Las métricas empíricas documentadas en el Capítulo 8 están fuertemente condicionadas por la infraestructura física subyacente. Todo el entorno de pruebas ha sido ejecutado localmente utilizando una GPU de portátil orientada al consumo (NVIDIA GeForce RTX 3060 con 6 GB de VRAM).
+
+Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct, **Mistral (7B)** fracasó estructuralmente al intentar invocar herramientas. En un entorno institucional sin este cuello de botella de memoria (ej. clústeres A100/H100), se habrían podido desplegar modelos de frontera (ej. Llama 3.1 70B o Mixtral), cuya capacidad lógica superior habría resuelto la sintaxis de las herramientas de manera trivial.
+
+Del mismo modo, las latencias observadas (que alcanzan los 47 segundos en casos de multi-iteración ReAct) son un artefacto directo de la falta de ancho de banda y capacidad de cómputo del hardware portátil. En un entorno productivo con aceleración dedicada o *endpoints* gestionados corporativos, estos tiempos de inferencia se colapsarían a escasos segundos, ofreciendo una experiencia en tiempo casi real.
 
 ## 10.3. Trabajo Futuro
 
