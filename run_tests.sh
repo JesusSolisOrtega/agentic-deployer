@@ -102,6 +102,22 @@ ${PYTHON} -m pytest app/tests/ -v --cov=app --cov-report=term-missing --cov-repo
 pass "Hypothesis PBT + Coverage: completado"
 
 # ===========================================================================
+# PASO 4.5 — Pruebas Metamórficas contra IA Real (Solo si Ollama está disponible)
+# ===========================================================================
+if command -v ollama >/dev/null 2>&1; then
+    step "PASO 4.5/6 — Evaluación Cognitiva (Pruebas Metamórficas Reales)"
+    echo "  Detectado demonio de Ollama en el sistema. Ejecutando tests cognitivos..."
+    mkdir -p demos/metamorphic_results
+    RUN_REAL_LLM=true ${PYTHON} -m pytest app/tests/test_metamorphic.py -v > demos/metamorphic_results/report_real_llm.txt || {
+        echo -e "${RED}Error en las pruebas metamórficas reales. Revisa el reporte.${RESET}"
+    }
+    pass "Pruebas Metamórficas (Real LLM): reporte guardado en demos/metamorphic_results/report_real_llm.txt"
+else
+    echo ""
+    echo "  (Saltando PASO 4.5: 'ollama' no está instalado en este sistema de CI)"
+fi
+
+# ===========================================================================
 # PASO 5 — Pruebas de Mutación (Mutmut)
 # ===========================================================================
 step "PASO 5/6 — Mutation Testing con mutmut"
