@@ -417,9 +417,9 @@ El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos 
 
 | Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
 | :--- | :--- | :--- | :--- |
-| **Qwen 2.5 (7B)** | ❌ Fallo Lógico (Obediencia ciega en Turno 2, alucina parámetros) | ❌ Colapso Sintáctico (Turno 3, `ValidationError` al mezclar texto y JSON) | ✅ **Éxito 100%** (Extracción pasiva perfecta, orquestación por Python) |
-| **Llama 3.2 (3B)** | ❌ Fallo Sintáctico (Turno 3, `ValidationError` al intentar inyectar variables faltantes como "None") | ❌ Colapso Inmediato (Turno 1, `ValidationError` severo al ser incapaz de generar la estructura base) | ⚠️ **Éxito Parcial** (Arquitectura no rompe, pero extrae la string `"null"` en vez del booleano `null`, rompiendo la lógica en Python) |
-| **Mistral (7B)** | ❌ Fallo Lógico/Degradación (Incapaz de seguir el formato tras varios turnos de contexto) | ❌ Colapso por Timeout / Bucle (Alucinación de tokens repetitivos intentando razonar) | ✅ **Éxito 100%** (Logra aislar la extracción semántica, aunque con mayor latencia de inferencia que Qwen) |
+| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2, alucina parámetros) |  Colapso Sintáctico (Turno 3, `ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Extracción pasiva perfecta, orquestación por Python) |
+| **Llama 3.2 (3B)** | Fallo Sintáctico (Turno 3, `ValidationError` al intentar inyectar variables faltantes como "None") |  Colapso Inmediato (Turno 1, `ValidationError` severo al ser incapaz de generar la estructura base) |  **Éxito Parcial** (Arquitectura no rompe, pero extrae la string `"null"` en vez del booleano `null`, rompiendo la lógica en Python) |
+| **Mistral (7B)** | Fallo Lógico/Degradación (Incapaz de seguir el formato tras varios turnos de contexto) |  Colapso por Timeout / Bucle (Alucinación de tokens repetitivos intentando razonar) |  **Éxito 100%** (Logra aislar la extracción semántica, aunque con mayor latencia de inferencia que Qwen) |
 
 **Conclusión Final de los Experimentos: El Rescate Cognitivo**
 

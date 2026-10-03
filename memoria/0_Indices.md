@@ -41,6 +41,7 @@
   - 8.1. Despliegue Convencional vs. Orquestación Agéntica
   - 8.2. Caso de Estudio: Resiliencia ante Ataques (*Prompt Injection*)
   - 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
+  - 8.4. Experimentos Arquitectónicos: Superando el Límite Cognitivo (7B)
 - **Capítulo 9. Gestión y Viabilidad del Proyecto**
   - 9.1. Plan de Proyecto — Contexto y Restricciones
   - 9.2. Estructura de Sprints y Estimación de Esfuerzo

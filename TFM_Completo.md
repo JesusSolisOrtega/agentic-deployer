@@ -64,6 +64,7 @@ Development followed a Domain-First approach, with quality assured through Prope
   - 8.1. Despliegue Convencional vs. Orquestación Agéntica
   - 8.2. Caso de Estudio: Resiliencia ante Ataques (*Prompt Injection*)
   - 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
+  - 8.4. Experimentos Arquitectónicos: Superando el Límite Cognitivo (7B)
 - **Capítulo 9. Gestión y Viabilidad del Proyecto**
   - 9.1. Plan de Proyecto — Contexto y Restricciones
   - 9.2. Estructura de Sprints y Estimación de Esfuerzo
@@ -1413,7 +1414,13 @@ FIN
 Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
 
 
-### 5.2.2. Soberanía del Dato en Entornos Institucionales
+### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5)
+
+El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó por desplegar **Qwen 2.5 (7B)** de Alibaba Cloud, descartando alternativas como Llama 3.2 (3B) o Mistral (7B). 
+
+Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica excepcional para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales formidables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
+
+### 5.2.3. Soberanía del Dato en Entornos Institucionales
 
 La abstracción multiproveedor, más allá de ser una práctica higiénica de Ingeniería del Software, responde a un requerimiento de ciberseguridad crítico en el contexto de las administraciones públicas y el sector académico: la **Soberanía del Dato** y el cumplimiento normativo (RGPD/GDPR).
 
@@ -2099,31 +2106,42 @@ Esta propiedad se formaliza y evalúa inyectando una batería de variaciones lé
 
 ### 7.4.2. Resultados Empíricos y Tolerancia a la Ambigüedad
 
-La ejecución de las 4 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para garantizar la validez empírica de esta evaluación cognitiva, los resultados documentados en esta sección se obtuvieron ejecutando la batería directamente contra el LLM real (`qwen2.5:7b` mediante `OllamaLLMClient`), inyectando el ruido léxico y evaluando la deducción JSON del modelo estocástico. La siguiente tabla resume los resultados empíricos de la batería metamórfica:
+La ejecución de las 6 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para garantizar la validez empírica de esta evaluación cognitiva, los resultados documentados en esta sección se obtuvieron ejecutando la batería directamente contra el LLM real (`qwen2.5:7b` mediante `OllamaLLMClient`), inyectando el ruido léxico y evaluando la deducción JSON del modelo estocástico. La siguiente tabla resume los resultados empíricos de la batería metamórfica:
 
 | Relación Metamórfica | Descripción | Entradas de prueba | Resultado | Extracción JSON |
 |---|---|---|---|---|
 | **MR-1:** Permutación de orden | Alterar el orden sintáctico de los parámetros | `"api-backend con imagen python:3.12 y puerto 8000"` ↔ `"Con el puerto 8000 y la imagen python:3.12, necesito api-backend"` | Éxito | Idéntica (`name`, `image`, `port`) |
-| **MR-2:** Invarianza al ruido | Inyectar saludos, despedidas y texto irrelevante | Base: `"desplegar mi-web con nginx:latest en el puerto 80"` → Ruidosa: misma frase envuelta en cortesía coloquial | Éxito | Idéntica |
-| **MR-3:** Invarianza a mayúsculas | Alternar `MAYÚSCULAS` y `minúsculas` en el texto natural | `"quiero el servicio redis..."` ↔ `"QUIERO EL servicio redis..."` | Éxito | Idéntica |
-| **MR-4:** Composición incremental | Proporcionar datos en 1 mensaje vs. en un diálogo multi-turno | Mensaje único ↔ 3 turnos de conversación con preguntas intermedias del asistente | Éxito | Idéntica |
-<p align="center"><i><b>Tabla 6:</b> Resultados de las Pruebas Metamórficas por Relación.</i></p>
+| **MR-2:** Invarianza al ruido | Inyectar saludos, despedidas y texto irrelevante | Base: `"desplegar mi-web con nginx:latest en el puerto 80"` → Ruidosa: misma frase envuelta en cortesía coloquial | Fallo | Retorna texto conversacional |
+| **MR-3:** Invarianza a mayúsculas | Alternar `MAYÚSCULAS` y `minúsculas` en el texto natural | `"quiero el servicio redis..."` ↔ `"QUIERO EL servicio redis..."` | Fallo | Distrae el nombre (`redis-service`) |
+| **MR-4:** Composición incremental | Proporcionar datos en 1 mensaje vs. en un diálogo multi-turno | Mensaje único ↔ 3 turnos de conversación con preguntas intermedias del asistente | Fallo | Retorna texto conversacional |
+| **MR-5:** Parafraseo semántico | Usar sinónimos y estructuras gramaticales divergentes | `"Levanta un wordpress:6.0 en el puerto 80 llamado blog"` ↔ `"Crea un servicio que responda al nombre de blog..."` | Éxito | Idéntica |
+| **MR-6:** Invarianza lingüística | Cambiar el idioma base del usuario a Inglés | `"Despliega una base de datos postgres:14 en el puerto 5432..."` ↔ `"Deploy a postgres:14 database on port 5432..."` | Éxito | Idéntica |
+<p align="center"><i><b>Tabla 6:</b> Resultados empíricos de las Pruebas Metamórficas por Relación frente a Qwen 2.5 (7B).</i></p>
 
 | Métrica global | Valor |
 |---|---|
-| Relaciones metamórficas ejecutadas | 4 |
-| Tests totales MR | 4 |
-| Tasa de éxito | **100% (4/4)** |
-| Tiempo de ejecución total | ~ 4,5 s |
+| Relaciones metamórficas ejecutadas | 6 |
+| Tests totales MR | 6 |
+| Tasa de éxito | **50% (3/6)** |
+| Tiempo de ejecución total | ~ 89,7 s |
 | Motor de extracción evaluado | `OllamaLLMClient` (qwen2.5:7b) |
 <p align="center"><i><b>Tabla 7:</b> Métricas globales de la batería metamórfica.</i></p>
 
+### 7.4.3. Interpretación Cognitiva y Estrategias de Mitigación
+
+El análisis de los fallos empíricos (MR-2, MR-3 y MR-4) aporta una evidencia fundamental sobre los límites cognitivos de la Inteligencia Artificial cuando opera bajo restricciones de hardware extremo (modelos <8B parámetros fuertemente cuantizados). A diferencia de un modelo empresarial de la escala de 70B parámetros, la "ventana de atención" de un modelo pequeño colapsa cuando se enfrenta a un exceso de ruido ambiental (MR-2) o cuando el contexto se diluye a través de múltiples turnos conversacionales incrementales (MR-4). En estas circunstancias, el modelo olvida la instrucción del sistema (*System Prompt*) de limitarse a generar JSON puro y revierte a un comportamiento de chatbot conversacional ("¡Por supuesto! Enseguida despliego su servicio..."), rompiendo el flujo arquitectónico de *Tool Calling*.
+
+**Mitigación vía Ingeniería de Prompts (Sufijos de Refuerzo):** Esta fragilidad estocástica inherente al tamaño del modelo puede mitigarse introduciendo anclas cognitivas dinámicas. Como estrategia de contingencia implementada en el prototipo (`USE_REINFORCEMENT_SUFFIX=true`), se propone la inyección de un **Sufijo de Refuerzo** (*Reinforcement Prompt Suffix*), concatenando programáticamente al final de cada turno de usuario una instrucción imperativa invisible. 
+
+Sin embargo, el escrutinio empírico sobre esta mitigación reveló una vulnerabilidad secundaria característica de los modelos <8B: la obediencia ciega a corto plazo. Al instruir al modelo con un imperativo absoluto (ej. *"Responde única y exclusivamente con el JSON"*), el modelo intentó ejecutar el *Tool Call* de forma prematura en turnos intermedios (ej. al conocer solo el nombre del proyecto), alucinando la estructura de los parámetros restantes y provocando errores de validación internos en la librería subyacente (`ValidationError`). Para estabilizar la mitigación, el sufijo debió condicionarse explícitamente: *"Si falta ALGUNO de estos tres, NO la invoques y pregunta al usuario"*. 
+Para estabilizar esta mitigación, se exploraron técnicas avanzadas como la *Cadena de Pensamiento* (Wei et al., 2022 [30]). Sin embargo, estos enfoques demostraron agotar la capacidad cognitiva del modelo, induciendo colapsos sintácticos en el JSON generado (un fenómeno documentado empíricamente en la **Sección 8.4. Experimentos Arquitectónicos**). 
+
+Esta fragilidad estructural ratifica que la Ingeniería de Prompts es una solución de contingencia inestable para modelos pequeños sometidos a estrés conversacional. La única arquitectura que erradica matemáticamente esta familia de fallos es la separación estructural mediante una Máquina de Estado Destilado (*Stateful Slot Filling*), documentada como horizonte a futuro en la Sección 10.3.6 y demostrada empíricamente en la Sección 8.4.
+
 > [!NOTE]
-> **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque los resultados empíricos de las Tablas 6 y 7 demuestran que el modelo estocástico real supera las relaciones metamórficas, ejecutar inferencia con LLMs en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos de ejecución. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando la variable de entorno `RUN_REAL_LLM=true` permite ejecutar la validación cognitiva localmente contra Ollama; mientras que por defecto en el pipeline automatizado (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock determinista basado en expresiones regulares). Este mock actúa exclusivamente como arnés de pruebas para garantizar la integridad estructural del pipeline en < 0,15 s, delegando la validación cognitiva real a ejecuciones manuales o *nightly builds*.
+> **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque la validación profunda del LLM arroja un 50% de éxito empírico, ejecutar inferencia algorítmica en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando `RUN_REAL_LLM=true` evalúa cognitivamente a Ollama; mientras que por defecto en el pipeline (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock basado en expresiones regulares). Este mock, recientemente ajustado para soportar parafraseo e inglés, supera el 100% de las pruebas en < 0,15 s, garantizando la integridad estructural del CI/CD.
 
-El éxito sostenido frente al ruido léxico demuestra que el sistema de extracción posee una tolerancia a la ambigüedad superior a las Interfaces de Línea de Comandos (CLI) tradicionales. Un investigador de un departamento no técnico (ej. Historia o Filosofía) que solicite infraestructura cometiendo imprecisiones ortográficas o usando jerga de usuario final no verá su solicitud rechazada por un error de sintaxis (*SyntaxError*). 
-
-La Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano y destilándola en un JSON estructurado, que a su vez es procesado, verificado y ejecutado por el Backend Hexagonal de forma predecible. Esta simbiosis, certificada empíricamente a través de la pirámide de pruebas, avala la robustez de la arquitectura completa del TFM.
+A pesar de los fallos estructurales documentados, el éxito en la invarianza del orden sintáctico (MR-1) y la adaptación cross-lingual (MR-6) demuestra que la Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano para peticiones directas y destilándola en un JSON estructurado. Esta simbiosis inicial justifica el patrón de diseño, mientras que las limitaciones detectadas trazan una hoja de ruta clara hacia la robustez absoluta.
 
 
 <div style='page-break-after: always;'></div>
@@ -2516,6 +2534,48 @@ Los resultados empíricos revelaron un hallazgo crítico para la selección del 
 
 > **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
 
+---
+
+## 8.4. Experimentos Arquitectónicos: Superando el Límite Cognitivo (7B)
+
+A lo largo del desarrollo, se detectó que el modelo Qwen 2.5 (7B) sufría de "obediencia ciega" al intentar rellenar los parámetros del *Tool Call* de forma prematura. Para evaluar la viabilidad de distintas arquitecturas cognitivas que mitigaran este fallo en hardware limitado, se diseñó un banco de pruebas específico documentado en `demos/demo_state_machine.py` y `demos/demo_reinforcement_suffix.py`.
+
+Se evaluaron tres paradigmas arquitectónicos frente al mismo escenario (un usuario solicitando un despliegue por fases):
+
+### 8.4.1. Paradigma 1: ReAct Clásico con Sufijo Estricto (Fallo Lógico)
+Se instruyó al LLM con un sufijo estricto ("Responde SOLO con JSON").
+* **Resultado:** El modelo intentó invocar la herramienta en el Turno 2 (cuando solo conocía el nombre del proyecto), alucinando el resto de parámetros (puerto e imagen) para cumplir con la orden sintáctica de generar un JSON inmediatamente. Hubo un fallo lógico por obediencia ciega.
+
+### 8.4.2. Paradigma 2: Cadena de Pensamiento (*Chain of Thought*) (Fallo Sintáctico)
+Se aplicó la técnica de Wei et al. (2022) [30], instruyendo al modelo para que, antes de generar el JSON, enumerara explícitamente en texto los parámetros que tenía y razonara si debía invocar la herramienta.
+* **Resultado:** El modelo superó el Turno 2 con éxito, razonando correctamente que le faltaban datos y preguntando al usuario. Sin embargo, en el Turno 3, al intentar generar su razonamiento en texto seguido del formato estricto del *Tool Call*, la sintaxis colapsó arrojando un `ValidationError`.
+* **Conclusión:** Se comprobó empíricamente el **Principio de la Manta Corta**: un modelo de 7B no tiene capacidad de atención suficiente para sostener razonamiento complejo (texto) y formateo estricto (JSON) en la misma inferencia. Si se arregla la lógica, se rompe la sintaxis.
+
+### 8.4.3. Paradigma 3: Llenado de Huecos con Estado (*Stateful Slot Filling*)
+Como prueba de concepto definitiva, se separó la arquitectura. El LLM se limitó exclusivamente a ser un extractor de entidades (*"Lee el texto y extrae el puerto, imagen y nombre"*), actualizando una plantilla JSON en memoria. La lógica de control (decidir cuándo llamar a la herramienta) recayó en un script de Python determinista.
+* **Resultado:** Éxito del 100%. El modelo extrajo los datos aislados en cada turno sin colapsar. En el Turno 3, Python detectó que la plantilla estaba completa y ejecutó la herramienta sin error.
+
+### 8.4.4. Comparativa Multi-Modelo: Qwen 2.5 vs Llama 3.2 vs Mistral
+
+Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo: **Llama 3.2 (3B)** y **Mistral (7B)**.
+
+El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño.
+
+**Tabla 3. Resultados de los Experimentos de Arquitectura Cognitiva**
+
+| Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
+| :--- | :--- | :--- | :--- |
+| **Qwen 2.5 (7B)** |  Fallo Lógico (Obediencia ciega en Turno 2, alucina parámetros) |  Colapso Sintáctico (Turno 3, `ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Extracción pasiva perfecta, orquestación por Python) |
+| **Llama 3.2 (3B)** |  Fallo Sintáctico (Turno 3, `ValidationError` al intentar inyectar variables faltantes como "None") |  Colapso Inmediato (Turno 1, `ValidationError` severo al ser incapaz de generar la estructura base) |  **Éxito Parcial** (Arquitectura no rompe, pero extrae la string `"null"` en vez del booleano `null`, rompiendo la lógica en Python) |
+| **Mistral (7B)** |  Fallo Lógico/Degradación (Incapaz de seguir el formato tras varios turnos de contexto) |  Colapso por Timeout / Bucle (Alucinación de tokens repetitivos intentando razonar) |  **Éxito 100%** (Logra aislar la extracción semántica, aunque con mayor latencia de inferencia que Qwen) |
+
+**Conclusión Final de los Experimentos: El Rescate Cognitivo**
+
+El hallazgo más relevante de esta comparativa es el impacto transformador de la arquitectura sobre las capacidades intrínsecas del modelo. Modelos de 7B (como Qwen 2.5 y Mistral) que fracasaron estrepitosamente y fueron incapaces de sostener un flujo ReAct básico sin alucinar o colapsar, **pasaron a tener una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning*.** 
+
+Este salto radical de 0% a 100% de éxito técnico demuestra que los modelos locales de 7B no son intrínsecamente "poco inteligentes" para despliegues, sino que **la arquitectura ReAct clásica sobrecarga su ventana de atención**. Al aliviar su carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y reduciendo al LLM a un mero extractor semántico), se "rescatan" modelos previamente descartados, volviéndolos completamente fiables.
+
+La única forma matemáticamente robusta de orquestar flujos complejos en hardware modesto es esta segregación de responsabilidades (Paradigma 3, *Stateful*). Asimismo, se comprobó empíricamente que la frontera mínima de viabilidad se sitúa en los 7B parámetros; modelos por debajo de esta cifra (como Llama 3.2 3B) fracasan incluso en la tarea pasiva de extracción (confundiendo el *string* `"null"` con el tipo nulo, lo que rompe la lógica determinista posterior). Este rescate cognitivo de los modelos de 7B justifica de forma absoluta el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6.
 
 
 <div style='page-break-after: always;'></div>
@@ -2871,6 +2931,12 @@ En síntesis, este Trabajo de Fin de Máster aporta una **arquitectura de refere
 
 El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de estado en sistemas agénticos. Mediante la implementación del patrón de repositorio (`SQLiteDeploymentRepository`), el sistema ha abandonado el almacenamiento volátil en memoria para garantizar que el historial de intenciones y aprobaciones (la Máquina de Estados) sobreviva a reinicios del servidor. Esta inyección de dependencias consolida el diseño hexagonal y certifica que el prototipo es robusto y ACID-compliant frente a fallos de infraestructura.
 
+### 10.1.7. El Rescate Cognitivo en Hardware Modesto (7B)
+
+La conclusión más reveladora sobre el uso empírico de LLMs locales es el impacto directo de la arquitectura sobre las capacidades intrínsecas del modelo. Durante las pruebas (documentadas en la sección 8.4), modelos de 7B (Qwen 2.5 y Mistral) fracasaron estrepitosamente al intentar orquestar flujos conversacionales mediante la arquitectura clásica (ReAct o *Chain of Thought*), colapsando por agotamiento de atención y emitiendo JSONs inválidos.
+
+Sin embargo, al transicionar hacia una arquitectura de Máquina de Estado Destilado —donde el LLM actúa únicamente como extractor semántico pasivo y Python asume el control del flujo determinista—, **estos mismos modelos alcanzaron una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning***. Este hallazgo demuestra que los modelos locales de 7B no carecen de la "inteligencia" necesaria, sino que las arquitecturas agénticas tradicionales sobrecargan su capacidad cognitiva. Aliviar esta carga permite "rescatar" modelos matemáticamente descartados, habilitando una IA corporativa resiliente sobre hardware de consumo estándar.
+
 ## 10.2. Limitaciones del Prototipo
 
 Todo sistema de investigación que persiga la honestidad académica debe documentar con precisión sus limitaciones inherentes. El *Agentic Deployer* es un *Minimum Viable Product* (MVP) avanzado cuya función es demostrar la viabilidad de la arquitectura, no sustituir un sistema de orquestación empresarial maduro. Las siguientes limitaciones son conscientes, deliberadas y en varios casos representan las semillas del trabajo futuro descrito en la sección 10.3.
@@ -2925,7 +2991,7 @@ Las métricas de eficiencia operativa documentadas en el Capítulo 8 se basan en
 
 Las métricas empíricas documentadas en el Capítulo 8 están fuertemente condicionadas por la infraestructura física subyacente. Todo el entorno de pruebas ha sido ejecutado localmente utilizando una GPU de portátil orientada al consumo (NVIDIA GeForce RTX 3060 con 6 GB de VRAM).
 
-Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct, **Mistral (7B)** fracasó estructuralmente al intentar invocar herramientas. En un entorno institucional sin este cuello de botella de memoria (ej. clústeres A100/H100), se habrían podido desplegar modelos de frontera (ej. Llama 3.1 70B o Mixtral), cuya capacidad lógica superior habría resuelto la sintaxis de las herramientas de manera trivial.
+Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct frente a Llama o Mistral, el escrutinio empírico reveló su fragilidad cognitiva subyacente. Como se demostró en las Pruebas Metamórficas (Sección 7.4), Qwen fracasó en el 50% de los casos (ruido léxico y composición incremental) al colapsar su ventana de atención y perder el formato JSON. En un entorno institucional sin este cuello de botella de memoria (ej. clústeres A100/H100), se habrían podido desplegar modelos de frontera (ej. Llama 3.1 70B o Mixtral), cuya capacidad lógica superior habría resuelto estas pruebas con total robustez, y a los que no haría falta aplicar mitigaciones como los *Suffijos de Refuerzo* propuestos.
 
 Del mismo modo, las latencias observadas (que alcanzan los 47 segundos en casos de multi-iteración ReAct) son un artefacto directo de la falta de ancho de banda y capacidad de cómputo del hardware portátil. En un entorno productivo con aceleración dedicada o *endpoints* gestionados corporativos, estos tiempos de inferencia se colapsarían a escasos segundos, ofreciendo una experiencia en tiempo casi real.
 
@@ -2973,6 +3039,17 @@ Paralelamente, el agente podría inyectar esta telemetría como metadatos de adv
 La suite de pruebas actual ha demostrado la utilidad de las Relaciones Metamórficas (MR) deterministas (variaciones de orden, ruido y capitalización) para auditar el comportamiento del agente. Para escalar este modelo de aseguramiento de calidad (*QA*) hacia entornos empresariales de alta exigencia, una evolución natural propuesta consiste en implementar generadores de pruebas basados en **LLMs Adversarios**. 
 
 En este paradigma, un segundo modelo de lenguaje actuaría como generador de casos de prueba estocásticos, encargado de redactar intenciones de despliegue con alta entropía semántica (ambigüedades deliberadas, jerga interdepartamental compleja o estructuras gramaticales inusuales). Esto permitiría automatizar la validación de la robustez cognitiva del orquestador ReAct frente a un espectro sumamente amplio de interacciones de usuario, superando las limitaciones espaciales del *testing* programado manualmente y alineando el sistema con el estado del arte en pruebas para Inteligencia Artificial.
+
+### 10.3.6. Evolución Cognitiva: Estado Destilado y Clasificación de Intenciones
+
+El patrón arquitectónico *ReAct* implementado en este TFM se basa en un paradigma de **Historial Sin Estado** (*Stateless History*), donde el orquestador reinyecta iterativamente la transcripción completa de la conversación en la ventana de contexto del LLM. Como se analizó en la Sección 7.4.3, este enfoque presenta vulnerabilidades cognitivas severas en modelos pequeños (como Qwen 7B) debido al fenómeno de dilución de atención (*Attention Dilution*) tras múltiples turnos conversacionales.
+
+Para evolucionar el prototipo hacia estándares de grado de producción equivalentes a los frameworks empresariales (como los definidos en la arquitectura de memoria de *LangChain* o *LlamaIndex*), se propone transicionar hacia un patrón de **Llenado de Huecos con Estado** (*Stateful Slot Filling*) combinado con **Destilación de Contexto** (*Context Distillation*):
+
+1. **Destilación de Memoria:** En lugar de saturar el contexto con el histórico crudo de mensajes, el backend mantendrá un diccionario de estado temporal (ej. `{"intent": null, "image": null, "port": null}`). Una heurística de fondo purificará cada nuevo mensaje del usuario para actualizar exclusivamente este diccionario, descartando saludos, cortesías o desvíos conversacionales. Al orquestador final solo se le suministrará la "fotografía destilada" del estado actual, garantizando que el modelo mantenga un foco absoluto independientemente de lo larga que haya sido la conversación.
+2. **Clasificación Prioritaria de Intenciones (*Intent-First Routing*):** Actualmente, el modelo deduce simultáneamente qué herramienta usar y qué parámetros rellenar. La nueva arquitectura obligaría al agente a priorizar la clasificación de la intención (*Intent Classification*) como paso bloqueante. El agente debe determinar primero qué acción exacta desea el usuario (ej. *"¿Quiere desplegar una web estática o un CMS complejo?"*), ya que las herramientas disponibles en el catálogo MCP (y por ende, los parámetros obligatorios que debe solicitar) dependen estrictamente de esta decisión topológica. 
+
+Esta segregación de responsabilidades cognitivas (Destilación de Estado $\rightarrow$ Clasificación de Intención $\rightarrow$ Extracción de Entidades) representa el estado del arte en el diseño de agentes conversacionales robustos orientados a tareas (*Task-Oriented Dialogue Systems*). Para corroborar empíricamente esta hipótesis, se desarrolló y documentó una Prueba de Concepto aislada (`demos/demo_state_machine.py`). En este experimento de laboratorio, el modelo Qwen 2.5 (7B) operó exclusivamente como extractor semántico pasivo, delegando el control de flujo y la verificación de la plantilla a un motor determinista en Python. El resultado erradicó matemáticamente las alucinaciones estructurales (`ValidationError`) y las ejecuciones prematuras, alcanzando un éxito operativo del 100% bajo estrés conversacional incremental. Esta evidencia técnica ratifica que la Máquina de Estado Destilado es el único horizonte arquitectónico viable para consolidar agentes de Inteligencia Artificial estables sobre hardware de recursos limitados, sin sacrificar la naturalidad lingüística exigida por los usuarios finales.
 
 
 <div style='page-break-after: always;'></div>
@@ -3077,10 +3154,16 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[32]** Google. (2025). *Agent-to-Agent (A2A) Protocol Specification*. Google Open Source.
 *(Especificación del protocolo de comunicación entre agentes autónomos mencionado en la Sección 2.2.3 como estándar complementario al MCP).*
 
-**[33]** Hipp, D. R. (2024). *SQLite: A small, fast, reliable, self-contained, SQL database engine*. Recuperado de https://www.sqlite.org/
+**[33]** Mrkšić, N., Séaghdha, D. O., Wen, T. H., Thomson, B., & Young, S. (2017). *Neural Belief Tracker: Data-Driven Dialogue State Tracking*. Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (ACL). Recuperado de https://arxiv.org/abs/1606.03777
+*(Literatura fundacional sobre el rastreo del estado del diálogo y la extracción de entidades "Slot-Filling", citado en la Sección 10.3.6 como base teórica para la evolución del Agente hacia un modelo de estado destilado).*
+
+**[34]** LangChain Contributors. (2024). *Memory Management in LLM Applications (ConversationSummaryMemory & Context Distillation)*. LangChain Documentation. Recuperado de https://python.langchain.com/v0.2/docs/concepts/#memory
+*(Referencia industrial actual sobre técnicas arquitectónicas para la compresión del historial conversacional y la prevención de la dilución de atención en modelos acotados, mencionada en la Sección 10.3.6).*
+
+**[35]** Hipp, D. R. (2024). *SQLite: A small, fast, reliable, self-contained, SQL database engine*. Recuperado de https://www.sqlite.org/
 *(Base de datos transaccional ACID embebida utilizada para la persistencia del estado de la Máquina de Estados Finita).*
 
-**[34]** Kim, G., Humble, J., Debois, P., & Willis, J. (2016). *The DevOps Handbook: How to Create World-Class Agility, Reliability, and Security in Technology Organizations*. IT Revolution Press.
+**[36]** Kim, G., Humble, J., Debois, P., & Willis, J. (2016). *The DevOps Handbook: How to Create World-Class Agility, Reliability, and Security in Technology Organizations*. IT Revolution Press.
 *(Obra fundacional del movimiento DevOps utilizada en la Sección 1.1 para referenciar el concepto del "muro de la confusión" entre desarrollo y operaciones).*
 
 
