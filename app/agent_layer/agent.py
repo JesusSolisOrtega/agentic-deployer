@@ -173,17 +173,26 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
             params["image"] = img_match.group(1)
 
         # Port: number after "puerto" (we keep "puerto" since the UI is in Spanish)
-        port_match = re.search(r"puerto\s+(\d+)", all_text)
+        port_match = re.search(r"(?:puerto|port)\s+(\d+)", all_text)
         if port_match:
             params["internal_port"] = int(port_match.group(1))
 
         # Service name
-        name_match = re.search(
-            r"(?:servicio|nombre|llamad[oa]|desplegar|deploy)\s+[\"']?([\w\-]+)",
-            all_text,
-        )
+        # Try explicit naming first
+        name_match = re.search(r"(?:llamad[oa]|nombre de|nombre|name)[\s:\"']+([\w\-]+)", all_text)
+        if not name_match:
+            # Fallback to general verbs
+            name_match = re.search(r"(?:servicio|desplegar|deploy)[\s:\"']+([\w\-]+)", all_text)
+
         if name_match:
-            params["name"] = name_match.group(1)
+            val = name_match.group(1)
+            if val in ("un", "una", "el", "la", "a", "an", "the"):
+                # fallback attempt, match after the stop word
+                name_match2 = re.search(rf"{val}\s+([\w\-]+)", all_text[name_match.end(0)-len(val)-1:])
+                if name_match2:
+                    params["name"] = name_match2.group(1)
+            else:
+                params["name"] = val
 
         # Users
         users_match = re.search(r"(\d+)\s*usuarios", all_text)

@@ -253,28 +253,34 @@ Esta propiedad se formaliza y evalúa inyectando una batería de variaciones lé
 
 ### 7.4.2. Resultados Empíricos y Tolerancia a la Ambigüedad
 
-La ejecución de las 4 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para garantizar la validez empírica de esta evaluación cognitiva, los resultados documentados en esta sección se obtuvieron ejecutando la batería directamente contra el LLM real (`qwen2.5:7b` mediante `OllamaLLMClient`), inyectando el ruido léxico y evaluando la deducción JSON del modelo estocástico. La siguiente tabla resume los resultados empíricos de la batería metamórfica:
+La ejecución de las 6 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para garantizar la validez empírica de esta evaluación cognitiva, los resultados documentados en esta sección se obtuvieron ejecutando la batería directamente contra el LLM real (`qwen2.5:7b` mediante `OllamaLLMClient`), inyectando el ruido léxico y evaluando la deducción JSON del modelo estocástico. La siguiente tabla resume los resultados empíricos de la batería metamórfica:
 
 | Relación Metamórfica | Descripción | Entradas de prueba | Resultado | Extracción JSON |
 |---|---|---|---|---|
 | **MR-1:** Permutación de orden | Alterar el orden sintáctico de los parámetros | `"api-backend con imagen python:3.12 y puerto 8000"` ↔ `"Con el puerto 8000 y la imagen python:3.12, necesito api-backend"` | Éxito | Idéntica (`name`, `image`, `port`) |
-| **MR-2:** Invarianza al ruido | Inyectar saludos, despedidas y texto irrelevante | Base: `"desplegar mi-web con nginx:latest en el puerto 80"` → Ruidosa: misma frase envuelta en cortesía coloquial | Éxito | Idéntica |
-| **MR-3:** Invarianza a mayúsculas | Alternar `MAYÚSCULAS` y `minúsculas` en el texto natural | `"quiero el servicio redis..."` ↔ `"QUIERO EL servicio redis..."` | Éxito | Idéntica |
-| **MR-4:** Composición incremental | Proporcionar datos en 1 mensaje vs. en un diálogo multi-turno | Mensaje único ↔ 3 turnos de conversación con preguntas intermedias del asistente | Éxito | Idéntica |
-<p align="center"><i><b>Tabla 6:</b> Resultados de las Pruebas Metamórficas por Relación.</i></p>
+| **MR-2:** Invarianza al ruido | Inyectar saludos, despedidas y texto irrelevante | Base: `"desplegar mi-web con nginx:latest en el puerto 80"` → Ruidosa: misma frase envuelta en cortesía coloquial | Fallo | Retorna texto conversacional |
+| **MR-3:** Invarianza a mayúsculas | Alternar `MAYÚSCULAS` y `minúsculas` en el texto natural | `"quiero el servicio redis..."` ↔ `"QUIERO EL servicio redis..."` | Fallo | Distrae el nombre (`redis-service`) |
+| **MR-4:** Composición incremental | Proporcionar datos en 1 mensaje vs. en un diálogo multi-turno | Mensaje único ↔ 3 turnos de conversación con preguntas intermedias del asistente | Fallo | Retorna texto conversacional |
+| **MR-5:** Parafraseo semántico | Usar sinónimos y estructuras gramaticales divergentes | `"Levanta un wordpress:6.0 en el puerto 80 llamado blog"` ↔ `"Crea un servicio que responda al nombre de blog..."` | Éxito | Idéntica |
+| **MR-6:** Invarianza lingüística | Cambiar el idioma base del usuario a Inglés | `"Despliega una base de datos postgres:14 en el puerto 5432..."` ↔ `"Deploy a postgres:14 database on port 5432..."` | Éxito | Idéntica |
+<p align="center"><i><b>Tabla 6:</b> Resultados empíricos de las Pruebas Metamórficas por Relación frente a Qwen 2.5 (7B).</i></p>
 
 | Métrica global | Valor |
 |---|---|
-| Relaciones metamórficas ejecutadas | 4 |
-| Tests totales MR | 4 |
-| Tasa de éxito | **100% (4/4)** |
-| Tiempo de ejecución total | ~ 4,5 s |
+| Relaciones metamórficas ejecutadas | 6 |
+| Tests totales MR | 6 |
+| Tasa de éxito | **50% (3/6)** |
+| Tiempo de ejecución total | ~ 89,7 s |
 | Motor de extracción evaluado | `OllamaLLMClient` (qwen2.5:7b) |
 <p align="center"><i><b>Tabla 7:</b> Métricas globales de la batería metamórfica.</i></p>
 
+### 7.4.3. Interpretación Cognitiva y Estrategias de Mitigación
+
+El análisis de los fallos empíricos (MR-2, MR-3 y MR-4) aporta una evidencia fundamental sobre los límites cognitivos de la Inteligencia Artificial cuando opera bajo restricciones de hardware extremo (modelos <8B parámetros fuertemente cuantizados). A diferencia de un modelo empresarial de la escala de 70B parámetros, la "ventana de atención" de un modelo pequeño colapsa cuando se enfrenta a un exceso de ruido ambiental (MR-2) o cuando el contexto se diluye a través de múltiples turnos conversacionales incrementales (MR-4). En estas circunstancias, el modelo olvida la instrucción del sistema (*System Prompt*) de limitarse a generar JSON puro y revierte a un comportamiento de chatbot conversacional ("¡Por supuesto! Enseguida despliego su servicio..."), rompiendo el flujo arquitectónico de *Tool Calling*.
+
+**Mitigación vía Ingeniería de Prompts:** Esta fragilidad estocástica inherente al tamaño del modelo puede mitigarse introduciendo anclas cognitivas dinámicas. Como trabajo futuro para robustecer implementaciones en hardware modesto, se propone la inyección de un **Sufijo de Refuerzo** (*Reinforcement Prompt Suffix*), concatenando programáticamente al final de cada turno de usuario una instrucción imperativa invisible (ej. *"Responde única y exclusivamente con el JSON de la herramienta, sin texto conversacional previo ni posterior"*). Esta técnica acorrala la atención del modelo y previene el desvío hacia el texto plano.
+
 > [!NOTE]
-> **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque los resultados empíricos de las Tablas 6 y 7 demuestran que el modelo estocástico real supera las relaciones metamórficas, ejecutar inferencia con LLMs en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos de ejecución. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando la variable de entorno `RUN_REAL_LLM=true` permite ejecutar la validación cognitiva localmente contra Ollama; mientras que por defecto en el pipeline automatizado (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock determinista basado en expresiones regulares). Este mock actúa exclusivamente como arnés de pruebas para garantizar la integridad estructural del pipeline en < 0,15 s, delegando la validación cognitiva real a ejecuciones manuales o *nightly builds*.
+> **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque la validación profunda del LLM arroja un 50% de éxito empírico, ejecutar inferencia algorítmica en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando `RUN_REAL_LLM=true` evalúa cognitivamente a Ollama; mientras que por defecto en el pipeline (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock basado en expresiones regulares). Este mock, recientemente ajustado para soportar parafraseo e inglés, supera el 100% de las pruebas en < 0,15 s, garantizando la integridad estructural del CI/CD.
 
-El éxito sostenido frente al ruido léxico demuestra que el sistema de extracción posee una tolerancia a la ambigüedad superior a las Interfaces de Línea de Comandos (CLI) tradicionales. Un investigador de un departamento no técnico (ej. Historia o Filosofía) que solicite infraestructura cometiendo imprecisiones ortográficas o usando jerga de usuario final no verá su solicitud rechazada por un error de sintaxis (*SyntaxError*). 
-
-La Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano y destilándola en un JSON estructurado, que a su vez es procesado, verificado y ejecutado por el Backend Hexagonal de forma predecible. Esta simbiosis, certificada empíricamente a través de la pirámide de pruebas, avala la robustez de la arquitectura completa del TFM.
+A pesar de los fallos estructurales documentados, el éxito en la invarianza del orden sintáctico (MR-1) y la adaptación cross-lingual (MR-6) demuestra que la Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano para peticiones directas y destilándola en un JSON estructurado. Esta simbiosis inicial justifica el patrón de diseño, mientras que las limitaciones detectadas trazan una hoja de ruta clara hacia la robustez absoluta.

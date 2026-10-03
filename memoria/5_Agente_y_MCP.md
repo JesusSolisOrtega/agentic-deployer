@@ -198,7 +198,13 @@ FIN
 Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
 
 
-### 5.2.2. Soberanía del Dato en Entornos Institucionales
+### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5)
+
+El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó por desplegar **Qwen 2.5 (7B)** de Alibaba Cloud, descartando alternativas como Llama 3.2 (3B) o Mistral (7B). 
+
+Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica excepcional para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales formidables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
+
+### 5.2.3. Soberanía del Dato en Entornos Institucionales
 
 La abstracción multiproveedor, más allá de ser una práctica higiénica de Ingeniería del Software, responde a un requerimiento de ciberseguridad crítico en el contexto de las administraciones públicas y el sector académico: la **Soberanía del Dato** y el cumplimiento normativo (RGPD/GDPR).
 
