@@ -1,0 +1,7 @@
+
+--- RESULTADOS FINALES ---
+| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Éxito |
+|---|---|---|---|---|
+| **qwen2.5:7b** | 7B | 3.0 | 47.33 s | 100% |
+| **llama3.2** | 3B | 0.8 | 9.44 s | 100% |
+| **mistral** | 7B | 0.0 | 15.93 s | 100% |

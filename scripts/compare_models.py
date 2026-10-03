@@ -80,16 +80,22 @@ async def main():
             "success_rate": (successes / len(SCENARIOS)) * 100
         }
         
-    print("\n--- RESULTADOS FINALES ---")
-    print("| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Éxito |")
-    print("|---|---|---|---|---|")
+    log_content = "\n--- RESULTADOS FINALES ---\n"
+    log_content += "| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Éxito |\n"
+    log_content += "|---|---|---|---|---|\n"
     for model, res in results.items():
         # Hardcode tamaño
         size = "7B"
         if "llama" in model:
             size = "3B"
             
-        print(f"| **{model}** | {size} | {res['avg_iterations']:.1f} | {res['avg_time']:.2f} s | {res['success_rate']:.0f}% |")
+        log_content += f"| **{model}** | {size} | {res['avg_iterations']:.1f} | {res['avg_time']:.2f} s | {res['success_rate']:.0f}% |\n"
+
+    print(log_content)
+
+    os.makedirs("demos", exist_ok=True)
+    with open("demos/benchmark_results.log", "w") as f:
+        f.write(log_content)
 
 if __name__ == "__main__":
     asyncio.run(main())

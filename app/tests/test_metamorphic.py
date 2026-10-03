@@ -177,3 +177,36 @@ def test_mr4_incremental_context(parser: FakeLLMClient) -> None:
     assert result_single.get("name") == result_incremental.get("name") == "app-test"
     assert result_single.get("image") == result_incremental.get("image") == "node:18"
     assert int(result_single.get("internal_port", 0)) == int(result_incremental.get("internal_port", 0)) == 3000
+
+
+def test_mr5_paraphrasing(parser: FakeLLMClient) -> None:
+    """
+    MR-5: Paraphrasing.
+    Using synonymous verbs or different grammatical structures should yield the same parameters.
+    """
+    base_prompt = [{"role": "user", "content": "Necesito que levantes un wordpress:6.0 en el puerto 80 llamado blog"}]
+    paraphrase_prompt = [{"role": "user", "content": "Por favor, crea un servicio que responda al nombre de blog, utilizando para ello la imagen de contenedor wordpress:6.0 y publicándolo internamente a través del puerto 80."}]
+    
+    result_base = extract_params(parser, base_prompt)
+    result_para = extract_params(parser, paraphrase_prompt)
+    
+    assert result_base.get("name") == result_para.get("name") == "blog"
+    assert result_base.get("image") == result_para.get("image") == "wordpress:6.0"
+    assert int(result_base.get("internal_port", 0)) == int(result_para.get("internal_port", 0)) == 80
+
+
+def test_mr6_language_invariance(parser: FakeLLMClient) -> None:
+    """
+    MR-6: Language invariance.
+    Providing the request in a different language (e.g., English) should yield the same extraction,
+    demonstrating the LLM's cross-lingual semantic understanding.
+    """
+    spanish_prompt = [{"role": "user", "content": "Despliega una base de datos postgres:14 en el puerto 5432 con el nombre db-prod"}]
+    english_prompt = [{"role": "user", "content": "Deploy a postgres:14 database on port 5432 with the name db-prod"}]
+    
+    result_es = extract_params(parser, spanish_prompt)
+    result_en = extract_params(parser, english_prompt)
+    
+    assert result_es.get("name") == result_en.get("name") == "db-prod"
+    assert result_es.get("image") == result_en.get("image") == "postgres:14"
+    assert int(result_es.get("internal_port", 0)) == int(result_en.get("internal_port", 0)) == 5432
