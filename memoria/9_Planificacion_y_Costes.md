@@ -30,6 +30,7 @@ Esta aproximación es coherente con las recomendaciones de gestión ágil de pro
 | **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
 | **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia ACID (SQLite), catálogo MCP extendido (7 herramientas), evidencias empíricas (MCP Inspector) | Completado |
 | **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
+<p align="center"><i><b>Tabla 16:</b> Módulos de desarrollo y jerarquía de prioridades.</i></p>
 
 Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de excelencia técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Sección 10.3).
 
@@ -43,51 +44,60 @@ La planificación se estructura en **5 sprints temáticos** más una fase transv
 
 ```mermaid
 gantt
-  title Plan de Proyecto — Agentic Deployer (referencia orientativa)
+  title Plan de Proyecto — Sprints de Desarrollo (Fase Core y Agéntica)
   dateFormat YYYY-MM-DD
   axisFormat %b
 
-  section P0 · Sprint 1 — Núcleo Hexagonal
+  section P0 · Sprint 1<br>- Núcleo Hexagonal
   Modelado de Entidades (DeploymentIntent)    :s1a, 2026-03-02, 5d
   SecurityContextValidator (Algoritmo 1)     :s1b, after s1a, 5d
   Ports y Contratos (DeployPort)         :s1c, after s1b, 4d
   Tests Unitarios y Property-Based (Hypothesis) :s1d, after s1c, 7d
 
-  section P0 · Sprint 2 — Backend HITL y FSM
+  section P0 · Sprint 2<br>- Backend HITL y FSM
   API REST FastAPI (endpoints MCP + HITL)    :s2a, 2026-03-23, 6d
   FSM y transiciones de estado          :s2b, after s2a, 4d
   Dashboard HTML (polling asíncrono)       :s2c, after s2b, 5d
   Tests de integración (use_cases)        :s2d, after s2c, 6d
 
-  section P1 · Sprint 3 — Golden Paths y FakeK8s
+  section P1 · Sprint 3<br>- Golden Paths y FakeK8s
   FakeK8sAdapter (YAML Deployment+Service+Ingress):s3a, 2026-04-13, 7d
   Herramientas MCP (Golden Paths)        :s3b, after s3a, 5d
   Pipeline CI local (run_tests.sh)        :s3c, after s3b, 3d
   Linting Ruff + Type-checking Mypy       :s3d, after s3c, 3d
 
-  section P1 · Sprint 4 — Agente ReAct y MCP SDK
+  section P1 · Sprint 4<br>- Agente ReAct y MCP SDK
   Integración SDK MCP oficial          :s4a, 2026-05-04, 6d
   LLMClient ABC + OllamaLLMClient        :s4b, after s4a, 5d
   AgentOrchestrator (bucle ReAct)        :s4c, after s4b, 5d
   Chat Streamlit + System Prompt SIC       :s4d, after s4c, 5d
+```
+<p align="center"><i><b>Figura 16:</b> Diagrama de Gantt (Parte 1). Planificación orientativa de los Sprints 1 a 4 (núcleo y agente).</i></p>
 
-  section P1 · Sprint 5 — QA Avanzado
+```mermaid
+gantt
+  title Plan de Proyecto — QA Avanzado y Consolidación Técnica
+  dateFormat YYYY-MM-DD
+  axisFormat %b
+
+  section P1 · Sprint 5<br>- QA Avanzado
   Mutation Testing (mutmut)           :s5a, 2026-05-25, 7d
   Pruebas Metamórficas (MR)           :s5b, after s5a, 5d
   Pruebas de carga (Locust)           :s5c, after s5b, 4d
   E2E Playwright (Dashboard HITL)        :s5d, after s5c, 3d
 
-  section P2 · Fase 6 — Redacción y Cierre
+  section P2 · Fase 6<br>- Redacción y Cierre
   Redacción de Capítulos 1-5           :s6a, 2026-06-15, 21d
   Redacción de Capítulos 6-9           :s6b, after s6a, 14d
   Revisión tutor + correcciones iterativas    :s6c, after s6b, 28d
   Acabado P2 (costes, evidencias, anexos)    :s6d, after s6c, 14d
 
-  section P2 · Fase 7 — Excelencia Técnica
+  section P2 · Fase 7<br>- Excelencia Técnica
   Persistencia ACID (SQLite) e Inyección de Dep. :s7a, after s6d, 7d
   Ampliación MCP a 7 herramientas operativas   :s7b, after s7a, 5d
   QA 360: Mutmut + Pruebas Integración      :s7c, after s7b, 4d
 ```
+<p align="center"><i><b>Figura 17:</b> Diagrama de Gantt (Parte 2). Planificación orientativa del QA avanzado y las fases de cierre/consolidación.</i></p>
 
 ### 9.2.2. Estimación de Esfuerzo por Sprint
 
@@ -103,6 +113,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
 | Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
 | **Total estimado** | | **~300h** | **~255–345h** | |
+<p align="center"><i><b>Tabla 17:</b> Estimación de esfuerzo neto por Sprint.</i></p>
 
 > [!NOTE]
 > La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de *scaffolding*, generación de código *boilerplate*, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
@@ -127,6 +138,7 @@ La siguiente tabla resume las desviaciones por fase:
 | Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
 | Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | Inyección dependencias SQLite y QA final |
 | **Total** | **~300** | **~340** | **~+13%** | |
+<p align="center"><i><b>Tabla 18:</b> Resumen de desviaciones de tiempo por fase.</i></p>
 
 > [!NOTE]
 > Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control. El desglose pormenorizado por sprint con las retrospectivas detalladas, incluyendo los hitos completados y las lecciones aprendidas, se documenta en el **Anexo B**.
@@ -144,6 +156,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
 | **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
 | **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
+<p align="center"><i><b>Tabla 19:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
 
 > **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
 
@@ -160,6 +173,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
 | OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
 | **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
+<p align="center"><i><b>Tabla 20:</b> Costes de Infraestructura y Herramientas (Fase de Desarrollo).</i></p>
 
 ### 9.4.3. Costes Totales de Desarrollo
 
@@ -169,6 +183,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | Infraestructura y herramientas | ~261 € |
 | **Coste Total del Proyecto** | **~9.541 €** |
 | **Coste por hora efectiva** | **~26,2 €/h** |
+<p align="center"><i><b>Tabla 21:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
 
 ---
 
@@ -183,6 +198,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
 | **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
 | **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
+<p align="center"><i><b>Tabla 22:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
 
 ### 9.5.2. Costes de Implantación (CAPEX — Inversión Inicial)
 
@@ -193,6 +209,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
 | **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
 | **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
+<p align="center"><i><b>Tabla 23:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
 
 ### 9.5.3. Costes Operativos Anuales (OPEX)
 
@@ -202,6 +219,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 |---|---|---|---|
 | Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
 | Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
+<p align="center"><i><b>Tabla 24:</b> Costes Operativos Anuales de Infraestructura (OPEX).</i></p>
 
 #### Motor LLM — La Variable Determinante del OPEX
 
@@ -212,6 +230,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
 | `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
 | `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
+<p align="center"><i><b>Tabla 25:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud).</i></p>
 
 **Opción 2 — API en la nube**
 
@@ -221,6 +240,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
 | Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
 | Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
+<p align="center"><i><b>Tabla 26:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
 
 > *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
 
@@ -235,10 +255,11 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
 | **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
 | **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
+<p align="center"><i><b>Tabla 27:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
 
 ### 9.5.4. Análisis de Retorno de Inversión (ROI)
 
-El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8 (Tabla 1).
+El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8 (Tabla 8).
 
 **Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
 
@@ -248,6 +269,9 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
 | Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
 | **Ahorro total anual** | | | | **~20.320 €** |
+<p align="center"><i><b>Tabla 27:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
+
+> **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
 
 **ROI a 3 años — Perfil B con Ollama**
 
@@ -259,6 +283,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
 | **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
 | **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
+<p align="center"><i><b>Tabla 28:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
 
 > **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
 > **ROI a 3 años: ~464%**

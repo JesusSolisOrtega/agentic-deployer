@@ -38,7 +38,7 @@ flowchart BT
 ```
 
 </div>
-<p align="center"><i><b>Figura 14:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
+<p align="center"><i><b>Figura 15:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
 ## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
 
@@ -62,7 +62,7 @@ Junto a la topología de red, el segundo vector de riesgo es la inyección de co
 
 La batería de *Testing* ejecuta simulaciones inyectando intenciones sintácticamente engañosas, como `ubuntu:latest`, `nginx:LATEST` o el uso de imágenes implícitas (por ejemplo, proporcionar `redis` asumiendo que el clúster inferirá el *tag*). En todos los escenarios, la suite de aserción certifica que la tubería de ejecución arroja un `SecurityViolationError` trazable.
 
-Esta capa base de pruebas (de ejecución sub-milisegundo) actúa como el cimiento matemático. Demuestra, con una cobertura de código del 100% sobre el módulo Hexagonal, que el *Backend* es determinista y se comporta exactamente igual que una cerradura criptográfica: sin la llave correcta (una petición válida que cumpla con ITIL y las normativas universitarias), el paso físico a la infraestructura es sistemáticamente bloqueado, sin importar cuán persuasivo o agresivo sea el *prompt* originado por el Modelo de Lenguaje.
+Esta capa base de pruebas (de ejecución sub-milisegundo) actúa como el cimiento matemático. Demuestra, con una cobertura de líneas del 100% sobre el módulo Hexagonal —si bien no de aserciones, como revelará el *Mutation Testing* posterior (Sección 7.3)—, que el *Backend* es determinista y se comporta exactamente igual que una cerradura criptográfica: sin la llave correcta (una petición válida que cumpla con ITIL y las normativas universitarias), el paso físico a la infraestructura es sistemáticamente bloqueado, sin importar cuán persuasivo o agresivo sea el *prompt* originado por el Modelo de Lenguaje.
 
 ### 7.1.3. Pruebas de la Capa de Consulta de Estado (Canal del Investigador)
 
@@ -78,6 +78,7 @@ La batería de pruebas cubre seis escenarios:
 | `test_rejected_status_after_rejection` | Tras `POST /hitl/reject/{id}`, el estado refleja `REJECTED` |
 | `test_response_includes_deployment_metadata` | La respuesta incluye `name`, `image` y `port` correctos |
 | `test_status_endpoint_does_not_mutate_state` | 3 llamadas consecutivas mantienen `PENDING_APPROVAL` inalterado |
+<p align="center"><i><b>Tabla 4:</b> Cobertura de pruebas unitarias por componente.</i></p>
 
 El último test es el más crítico desde el punto de vista de la integridad del sistema: garantiza que la operación de *lectura* del canal del investigador no interfiere con la *escritura* exclusiva del canal del técnico SIC (el dashboard), preservando la separación de responsabilidades entre ambas interfaces de usuario.
 
@@ -103,8 +104,6 @@ La integración empírica de este paradigma se ha materializado haciendo uso de 
 A nivel algorítmico, el procedimiento de prueba que defiende al núcleo `DeploymentIntent` adopta la siguiente forma estructural:
 
 ```text
-ALGORITMO 5: Property-Based Test para Invariantes Hexagonales (Fuzzing)
-
 PROPIEDAD_A_DEFENDER: "Cualquier intento de inyectar cadenas vacías o puertos 
 ilegales debe colapsar en un error controlado, JAMÁS en un Kernel Panic 
 o corrupción de memoria."
@@ -135,6 +134,7 @@ INICIO
   FIN PARA
 FIN
 ```
+<p align="center"><i><b>Algoritmo 5:</b> Property-Based Test para Invariantes Hexagonales (Fuzzing).</i></p>
 
 Mediante este asedio algorítmico, el sistema se enfrenta a mutaciones que un programador jamás probaría manualmente (por ejemplo, intentar desplegar un contenedor cuyo nombre sea una novela entera de 1 millón de caracteres o intentar asignar el puerto $-42$). El éxito en estas pruebas avala que el *Frontend* puede estar completamente expuesto a las decisiones del LLM, ya que el sistema absorbe el impacto de las anomalías de manera elegante.
 
@@ -177,8 +177,6 @@ Una vez generado el ejército de clones mutantes, el *framework* ejecuta la suit
 
 La siguiente tabla recoge los resultados reales de la ejecución de `mutmut` sobre el proyecto, con la configuración definida en `test_mutmut.ini` (scope: `app/application/` y `app/domain/`).
 
-**Tabla 2. Resultados del Mutation Testing por módulo.**
-
 | Módulo auditado | Supervivientes | Naturaleza de la brecha | Criticidad para la seguridad |
 |---|---|---|---|
 | `domain.exceptions` | 2 | Mutaciones en el constructor de `SecurityViolationError` (mensaje de error) | Baja — afecta al mensaje, no a la lógica |
@@ -191,6 +189,7 @@ La siguiente tabla recoge los resultados reales de la ejecución de `mutmut` sob
 | `agent.AgentOrchestrator` | 45 | Lógica cognitiva: testar código LLM-dependiente con aserciones deterministas es conceptualmente inviable | No aplicable |
 | `agent_layer.tools` | 14 | Herramientas MCP que requieren mocks de red | Baja |
 | **Total general** | **143** | | |
+<p align="center"><i><b>Tabla 5:</b> Resultados del Mutation Testing por módulo.</i></p>
 
 **Interpretación del resultado:**
 
@@ -201,7 +200,10 @@ Sobre el **núcleo hexagonal** (el scope declarado en `test_mutmut.ini`), los 30
 - No existe ningún test que valide el comportamiento de `_parse_ram("2Gi")`, `_parse_cpu("1000m")` o cadenas malformadas.
 - Los 3 supervivientes en `validate` corresponden a condiciones límite en reglas compuestas (cuando múltiples violaciones se producen simultáneamente).
 
-La detección de estas brechas es precisamente el valor de la metodología: la cobertura de código reportaba un **100% en los módulos del dominio**, ocultando estas ausencias de asertos específicos sobre las funciones auxiliares.
+La detección de estas brechas es precisamente el valor de la metodología: la cobertura de líneas reportaba un **100% en los módulos del dominio**, ocultando estas ausencias de asertos específicos sobre las funciones auxiliares.
+
+> [!NOTE]
+> **Reconciliación con el Anexo B.5:** El Anexo B documenta la mitigación de *12 mutantes* supervivientes específicos del módulo `mcp_server.py`, que fueron eliminados mediante la creación del test focalizado `test_mcp_server.py`. Esta cifra se refiere a un subconjunto concreto detectado durante el Sprint 5. Los **30 supervivientes del núcleo hexagonal** y los **99 del agente cognitivo** (143 totales) documentados en esta tabla representan la fotografía completa de la auditoría final, incluyendo los módulos excluidos del scope por razones arquitectónicas. Ambas cifras son compatibles: los 12 del Anexo se mitigaron con tests nuevos; los 30 restantes del núcleo constituyen la deuda de cobertura activa documentada en la Sección 7.3.4.
 
 > Los resultados completos (1.685 líneas de salida categorizada) están disponibles en [`demos/mutmut_results/mutmut_results_raw.txt`](../demos/mutmut_results/mutmut_results_raw.txt) y el análisis en [`demos/mutmut_results/mutmut_report.md`](../demos/mutmut_results/mutmut_report.md).
 
@@ -249,10 +251,30 @@ Esta propiedad se formaliza y evalúa inyectando una batería de variaciones lé
   - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
   - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
 
-### 7.4.2. Tolerancia a la Ambigüedad
+### 7.4.2. Resultados Empíricos y Tolerancia a la Ambigüedad
 
-La ejecución automatizada de esta suite metamórfica sobre el agente arroja conclusiones vitales para la adopción del sistema en un entorno de producción universitario. 
+La ejecución de las 4 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py), ejecutándose de forma automatizada en cada ciclo del *pipeline* CI (`run_tests.sh`). La siguiente tabla resume los resultados empíricos de la batería metamórfica:
 
-El éxito sostenido frente al ruido léxico demuestra que el *AgentOrchestrator* posee una tolerancia a la ambigüedad muy superior a las Interfaces de Línea de Comandos (CLI) tradicionales. Un investigador de un departamento no técnico (ej. Historia o Filosofía) que solicite infraestructura cometiendo imprecisiones ortográficas o usando jerga de usuario final no verá su solicitud rechazada por un error de sintaxis (*SyntaxError*). 
+| Relación Metamórfica | Descripción | Entradas de prueba | Resultado | Extracción JSON |
+|---|---|---|---|---|
+| **MR-1:** Permutación de orden | Alterar el orden sintáctico de los parámetros | `"api-backend con imagen python:3.12 y puerto 8000"` ↔ `"Con el puerto 8000 y la imagen python:3.12, necesito api-backend"` | Éxito | Idéntica (`name`, `image`, `port`) |
+| **MR-2:** Invarianza al ruido | Inyectar saludos, despedidas y texto irrelevante | Base: `"desplegar mi-web con nginx:latest en el puerto 80"` → Ruidosa: misma frase envuelta en cortesía coloquial | Éxito | Idéntica |
+| **MR-3:** Invarianza a mayúsculas | Alternar `MAYÚSCULAS` y `minúsculas` en el texto natural | `"quiero el servicio redis..."` ↔ `"QUIERO EL servicio redis..."` | Éxito | Idéntica |
+| **MR-4:** Composición incremental | Proporcionar datos en 1 mensaje vs. en un diálogo multi-turno | Mensaje único ↔ 3 turnos de conversación con preguntas intermedias del asistente | Éxito | Idéntica |
+<p align="center"><i><b>Tabla 6:</b> Resultados de las Pruebas Metamórficas por Relación.</i></p>
 
-La Inteligencia Artificial actúa como un **transformador de impedancia**, absorbiendo la entropía lingüística del ser humano y destilándola en un JSON puramente matemático, que a su vez es procesado, verificado y ejecutado por el Backend Hexagonal de forma predecible. Esta simbiosis, certificada empíricamente a través de la pirámide de pruebas, avala la robustez de la arquitectura completa del TFM.
+| Métrica global | Valor |
+|---|---|
+| Relaciones metamórficas ejecutadas | 4 |
+| Tests totales MR | 4 |
+| Tasa de éxito | **100% (4/4)** |
+| Tiempo de ejecución total | < 0,15 s |
+| Motor de extracción evaluado | `FakeLLMClient` (determinista) |
+<p align="center"><i><b>Tabla 7:</b> Métricas globales de la batería metamórfica.</i></p>
+
+> [!NOTE]
+> **Alcance y limitaciones de la evaluación metamórfica.** Las 4 relaciones metamórficas se ejecutan contra el `FakeLLMClient`, un parser determinista basado en expresiones regulares que emula la extracción de entidades del LLM. Este enfoque garantiza **reproducibilidad** y **ejecución en CI sin coste de inferencia**, pero no evalúa la resiliencia cognitiva de un modelo estocástico real (como `qwen2.5:7b`). La validación con modelos reales se realizó de forma manual durante el desarrollo (Cap. 8.3), confirmando que los modelos de 7B parámetros producen resultados correctos ante variaciones léxicas equivalentes. La extensión de esta suite metamórfica a modelos LLM reales mediante generación estocástica de inputs (LLMs Adversarios) se propone como línea de trabajo futuro en la Sección 10.3.5.
+
+El éxito sostenido frente al ruido léxico demuestra que el sistema de extracción posee una tolerancia a la ambigüedad superior a las Interfaces de Línea de Comandos (CLI) tradicionales. Un investigador de un departamento no técnico (ej. Historia o Filosofía) que solicite infraestructura cometiendo imprecisiones ortográficas o usando jerga de usuario final no verá su solicitud rechazada por un error de sintaxis (*SyntaxError*). 
+
+La Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano y destilándola en un JSON estructurado, que a su vez es procesado, verificado y ejecutado por el Backend Hexagonal de forma predecible. Esta simbiosis, certificada empíricamente a través de la pirámide de pruebas, avala la robustez de la arquitectura completa del TFM.

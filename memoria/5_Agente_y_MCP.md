@@ -19,8 +19,6 @@ Para mitigar este riesgo, el Servidor MCP implementado en el *Agentic Deployer* 
 El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilustra cómo el sistema transforma una función Python pura en una representación semántica universal (*Tool Definition*) inteligible para cualquier LLM:
 
 ```text
-ALGORITMO 2: Introspección Dinámica de Contratos de Herramientas
-
 ENTRADA:
  funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
 
@@ -59,6 +57,7 @@ INICIO
   RETORNAR esquema
 FIN
 ```
+<p align="center"><i><b>Algoritmo 2:</b> Introspección Dinámica de Contratos de Herramientas.</i></p>
 
 La adopción de este algoritmo garantiza que la base de código posea una **Única Fuente de Verdad (*Single Source of Truth*)**. El desarrollador del SIC simplemente anota sus funciones de infraestructura con *Type Hints* (ej. `puerto: int`) y *Docstrings*. El servidor MCP, al inicializarse, barre el código, extrae la semántica, genera el esquema JSON dinámico y lo inyecta en el orquestador. Esta capacidad autorreflexiva reduce la deuda técnica prácticamente a cero.
 
@@ -103,7 +102,7 @@ sequenceDiagram
     Orch->>LLM: [Observation: resultado de la herramienta]
     LLM-->>Orch: Respuesta final en lenguaje natural
 ```
-<p align="center"><i><b>Figura 10:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
+<p align="center"><i><b>Figura 11:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
 
 > **Nota de implementación (modos de transporte):** El servidor MCP desarrollado soporta dos modos operativos. En el **modo Cliente Externo** (proceso externo), el Agente y el Servidor MCP se comunican vía `stdio` tal y como se describe, beneficiándose de la latencia sub-milisegundo de las *Pipes* IPC del kernel. En el **modo Streamlit integrado** (el utilizado en este MVP), las herramientas MCP se importan directamente como módulos Python (`TOOL_REGISTRY`, `TOOL_DEFINITIONS`) y se invocan en el mismo proceso, lo que elimina incluso el overhead del `stdio`. Ambas modalidades son intercambiables gracias al diseño del `AgentOrchestrator`, que acepta cualquier registro de herramientas independientemente del transporte subyacente.
 
@@ -228,7 +227,7 @@ El patrón ReAct altera la topología conversacional subyacente. En lugar de pro
 
 El modelo reevalúa el estado global tras la observación y decide si necesita ejecutar una nueva acción o si la tarea ha concluido. Cuando dictamina que el objetivo se ha cumplido, transiciona a la fase final (*Final Answer*), devolviendo el control al usuario humano.
 
-Como se ilustra en la **Figura 11**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
+Como se ilustra en la **Figura 12**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
 <div style="max-width: 10cm; margin: 0 auto;">
 
@@ -254,13 +253,11 @@ flowchart TD
 ```
 
 </div>
-<p align="center"><i><b>Figura 11:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
+<p align="center"><i><b>Figura 12:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
 
 ```text
-ALGORITMO 3: Bucle de Orquestación Cognitiva (ReAct Loop)
-
 ENTRADA: 
  peticion_usuario -> Cadena de texto natural
  contexto_historico -> Memoria de la sesión actual
@@ -305,8 +302,9 @@ INICIO
   LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
 FIN
 ```
+<p align="center"><i><b>Algoritmo 3:</b> Bucle de Orquestación Cognitiva (ReAct Loop).</i></p>
 
-La inclusión matemática de la constante `MAX_TURNOS` es un mecanismo de *Fail-Safe* crítico en sistemas autónomos, garantizando que un LLM confundido no agote las cuotas de facturación de la API externa (consumo masivo de tokens) iterando eternamente sobre un fallo irresoluble.
+La inclusión matemática de la constante `MAX_TURNOS` es un mecanismo de *Fail-Safe* crítico en sistemas autónomos, garantizando que un LLM confundido no agote las cuotas de facturación de la API externa (consumo masivo de tokens) iterando indefinidamente sobre un fallo irresoluble.
 
 ### 5.3.2. *Feedback Loop* de Seguridad y Autocorrección
 
@@ -320,4 +318,4 @@ Este flujo produce un comportamiento cibernético emergente:
 2. Su capa estocástica razona (*Thought*) que el puerto 22 está prohibido por políticas de seguridad institucionales.
 3. De forma autónoma, el Agente omite lanzar una excepción al usuario. En su lugar, itera una nueva *Action*, recalculando un puerto lícito (ej. el puerto 8000), o bien genera una *Final Answer* informando diplomáticamente al usuario del rechazo técnico y solicitándole alternativas.
 
-Este *Feedback Loop* transforma una máquina frágil (propensa a alucinaciones) en un ecosistema auto-regulado. Traslada la responsabilidad de la depuración de errores (*debugging*) desde el investigador humano hacia el propio modelo de inteligencia artificial. Así, la Arquitectura Hexagonal y el bucle ReAct no solo conviven, sino que se necesitan mutuamente: el Hexágono actúa como la jaula determinista, y el ReAct permite que el Agente rebote pacíficamente contra los barrotes hasta encontrar el *Golden Path* correcto.
+Este *Feedback Loop* transforma un sistema estocástico (propenso a alucinaciones) en un ecosistema auto-regulado. Traslada la responsabilidad de la depuración de errores (*debugging*) desde el investigador humano hacia el propio modelo de inteligencia artificial. Así, la Arquitectura Hexagonal y el bucle ReAct no solo conviven, sino que se necesitan mutuamente: el Hexágono actúa como la jaula determinista, y el ReAct permite que el Agente itere sobre las restricciones hasta encontrar el *Golden Path* correcto.

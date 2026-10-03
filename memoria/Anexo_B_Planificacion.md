@@ -11,6 +11,7 @@
 | Horas dedicadas | 50h | ~55h | +10% |
 | Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
 | Cobertura dominio | 90% | 100% | +10pp |
+<p align="center"><i><b>Tabla 30:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
 
 **Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
 
@@ -25,6 +26,7 @@
 | Horas dedicadas | 45h | ~45h | 0% |
 | Endpoints REST | 4 | 5 (+`/hitl/reject`) | +25% |
 | Estados FSM | 4 | 6 (+`FAILED`, `DELETED`) | +50% |
+<p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
 
 **Hitos completados:** FastAPI con 5 endpoints, FSM con DAG acíclico, Dashboard HTML con polling, `DeploymentStatus` enum completo.
 
@@ -39,6 +41,7 @@
 | Horas dedicadas | 40h | ~46h | +15% |
 | Herramientas MCP | 3 | 4 | +33% |
 | Templates YAML | 2 tipos | 3 tipos | +50% |
+<p align="center"><i><b>Tabla 32:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
 
 **Hitos completados:** `FakeK8sAdapter` con templates f-string + `textwrap.dedent`, 4 herramientas MCP con `@mcp_server.tool()`, Pipeline CI `run_tests.sh` (6 pasos fail-fast), Ruff + Mypy integrados.
 
@@ -53,6 +56,7 @@
 | Horas dedicadas | 55h | ~62h | +13% |
 | Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
 | Iteraciones ReAct máximas | 5 | 5 | 0% |
+<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
 
 **Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (`httpx` directo a la API REST de Ollama), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
 
@@ -68,6 +72,7 @@
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
 | Mutantes eliminados | >90% | 100% | +10pp |
 | Relaciones metamórficas | 3 MR | 4 MR | +33% |
+<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 
 **Hitos completados:** Pipeline de QA integral implantado en `run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
 
@@ -82,6 +87,7 @@
 | Horas de redacción | 55h | ~64h | +16% |
 | Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
 | Iteraciones de revisión | 2–3 | 5 | +67% |
+<p align="center"><i><b>Tabla 35:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
 
 **Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (14 figuras), Anexos YAML y de Planificación.
 
@@ -96,6 +102,7 @@
 | Horas dedicadas | 10h | ~18h | +80% |
 | Herramientas MCP totales | 4 | 7 | +75% |
 | Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
+<p align="center"><i><b>Tabla 36:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
 
 **Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos.
 

@@ -21,7 +21,7 @@ En el ecosistema universitario en el que se enmarca este proyecto, se han identi
 #### 4.1.1.1. Actores Humanos Interactuantes
 
 1. **El Investigador / Usuario Final (Vector de Entrada):** Representa al personal docente, investigador o administrativo de la universidad. Su principal característica arquitectónica es la **asimetría de conocimiento técnico**. Este actor comprende claramente sus necesidades operativas (por ejemplo, "Necesito publicar la página web del congreso de Biología Celular para la próxima semana"), pero desconoce por completo las herramientas declarativas subyacentes, la topología de la red de la universidad o los estándares de seguridad de contenedores. Su interacción con el sistema se restringe exclusivamente al uso de lenguaje natural no estructurado. Críticamente, por políticas de seguridad, este usuario carece de credenciales de red, accesos VPN o permisos de escritura directos contra la infraestructura de servidores de la institución.
-2. **El Técnico de Operaciones / SIC (Vector de Gobierno):** Representa al ingeniero de sistemas del Servicio de Informática y Comunicaciones. En contraposición al investigador, este actor posee la autoridad técnica e institucional para alterar el estado del centro de datos. Su rol en el sistema no es la provisión manual, sino la auditoría. Actúa como el cortafuegos humano en el paradigma *Human-In-The-Loop* (HITL). Requiere una interfaz gráfica determinista, rápida y libre de ambigüedades lingüísticas para validar o rechazar en bloque las operaciones sugeridas por la Inteligencia Artificial.
+2. **El Técnico de Operaciones / SIC (Vector de Gobierno):** Representa al ingeniero de sistemas del Servicio de Informática y Comunicaciones. En contraposición al investigador, este actor posee la autoridad técnica e institucional para alterar el estado del centro de datos. Su rol en el sistema no es la provisión manual, sino la auditoría. Actúa como el garante de seguridad en el paradigma *Human-In-The-Loop* (HITL). Requiere una interfaz gráfica determinista, rápida y libre de ambigüedades lingüísticas para validar o rechazar en bloque las operaciones sugeridas por la Inteligencia Artificial.
 
 #### 4.1.1.2. Sistemas Externos de Caja Negra
 
@@ -114,9 +114,84 @@ La arquitectura interna se sustenta sobre tres pilares de ejecución:
 
 Esta división tricolor (Frontend heurístico, Catálogo universal MCP y Backend restrictivo) fundamenta el éxito del *Agentic Deployer*. Garantiza que un error imprevisible en la red neuronal de la IA, o un desbordamiento en la interfaz gráfica del usuario, jamás pueda comprometer la estabilidad matemática de las reglas de infraestructura gobernadas por el Backend Core.
 
+### 4.1.3. Nivel 3: Diagrama de Clases UML (Micro-Arquitectura)
+
+Para formalizar la relación orientada a objetos entre las entidades del dominio y los adaptadores descritos, se proporciona a continuación el diagrama de clases unificado del sistema (Figura 5), ilustrando los patrones de herencia, interfaces (`ABC` en Python) y composición.
+
+```mermaid
+classDiagram
+    class DeploymentIntent {
+        +String name
+        +DeploymentAction action
+        +String image
+        +Integer internal_port
+        +String cpu
+        +String ram
+        +dict env_vars
+        +_validate_create_fields()
+    }
+
+    class DeploymentRecord {
+        +String id
+        +DeploymentIntent intent
+        +DeploymentStatus status
+        +String result_url
+    }
+
+    class LLMClient {
+        <<Abstract>>
+        +chat(messages, tools)*
+    }
+
+    class OllamaLLMClient {
+        -String model_name
+        +chat(messages, tools)
+    }
+
+    class OpenAILLMClient {
+        -String api_key
+        +chat(messages, tools)
+    }
+
+    class AgentOrchestrator {
+        -LLMClient llm
+        -dict tool_registry
+        +run(user_message, history, max_iterations)
+    }
+
+    class DeployPort {
+        <<Interface>>
+        +apply_manifest(yaml)*
+    }
+
+    class FakeK8sAdapter {
+        +apply_manifest(yaml)
+    }
+
+    class RealK8sAdapter {
+        -KubeClient client
+        +apply_manifest(yaml)
+    }
+
+    class SecurityContextValidator {
+        +validate(DeploymentIntent intent)
+        -_parse_cpu(cpu_str)
+        -_parse_ram(ram_str)
+    }
+
+    LLMClient <|-- OllamaLLMClient
+    LLMClient <|-- OpenAILLMClient
+    AgentOrchestrator o-- LLMClient
+    DeployPort <|-- FakeK8sAdapter
+    DeployPort <|-- RealK8sAdapter
+    DeploymentIntent <.. SecurityContextValidator : validates
+    DeploymentRecord *-- DeploymentIntent
+```
+<p align="center"><i><b>Figura 5:</b> Diagrama de Clases (UML) resumiendo las principales entidades y contratos del núcleo lógico, destacando el uso del polimorfismo para la inyección de dependencias (LLMClient, DeployPort).</i></p>
+
 ## 4.2. Adopción de la Arquitectura Hexagonal (Ports and Adapters)
 
-El diseño del Contenedor Backend (el núcleo del sistema) requiere una fundamentación arquitectónica robusta. Como se exploró en el Estado del Arte (Capítulo 2), conceder autonomía operativa a un ente estocástico exige el establecimiento de fronteras deterministas inquebrantables. Para satisfacer este requisito, el núcleo del sistema se ha diseñado siguiendo el patrón arquitectónico de Puertos y Adaptadores (*Ports and Adapters*), comúnmente conocido como **Arquitectura Hexagonal** (propuesta formalmente por Alistair Cockburn) [2].
+El diseño del Contenedor Backend (el núcleo del sistema) requiere una fundamentación arquitectónica robusta. Como se exploró en el Estado del Arte (Capítulo 2), conceder autonomía operativa a un ente estocástico exige el establecimiento de fronteras deterministas estrictas. Para satisfacer este requisito, el núcleo del sistema se ha diseñado siguiendo el patrón arquitectónico de Puertos y Adaptadores (*Ports and Adapters*), comúnmente conocido como **Arquitectura Hexagonal** (propuesta formalmente por Alistair Cockburn) [2].
 
 Este patrón se fundamenta en estructurar el software en capas concéntricas, imponiendo un único sentido de dependencia: desde el exterior (tecnologías volátiles, bases de datos, APIs de IA) hacia el interior (lógica de negocio inmutable).
 
@@ -202,7 +277,7 @@ flowchart TD
     class REST,Dash,K8S,DB adapter;
     class DeployP,StoreP,AppUse port;
 ```
-<p align="center"><i><b>Figura 5:</b> Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión).</i></p>
+<p align="center"><i><b>Figura 6:</b> Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión).</i></p>
 
 ## 4.3. Algoritmia de Validación de Seguridad Institucional
 
@@ -217,7 +292,6 @@ El `SecurityContextValidator` opera bajo el principio de "Confianza Cero" (*Zero
 Para abstraer la lógica subyacente de la sintaxis específica del lenguaje Python, el comportamiento central de este cortafuegos se describe a continuación mediante notación algorítmica formal. 
 
 ```text
-ALGORITMO 1: Validación del Contexto de Seguridad (SecurityContextValidator)
 
 ENTRADA: 
  intencion -> Objeto de tipo DeploymentIntent (Invariantes básicos garantizados)
@@ -293,6 +367,7 @@ INICIO
   RETORNAR VERDADERO
 FIN
 ```
+<p align="center"><i><b>Algoritmo 1:</b> Validación Estricta de Entidades de Dominio Hexagonal (SecurityContextValidator).</i></p>
 
 La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(N) de complejidad temporal, donde N es el número de repositorios confiables), certifica que la creatividad de la Inteligencia Artificial queda confinada dentro de un subespacio matemático determinista. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
 
@@ -311,7 +386,7 @@ flowchart TD
 ```
 
 </div>
-<p align="center"><i><b>Figura 6:</b> Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija.</i></p>
+<p align="center"><i><b>Figura 7:</b> Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija.</i></p>
 
 ### 4.3.2. Gestión de Excepciones y Ciclo de Vida del Error
 
@@ -336,7 +411,7 @@ Sin embargo, desde la perspectiva de la Ingeniería de Fiabilidad del Sitio (*Si
 
 ### 4.4.1. Definición Teórica del *Golden Path*
 
-Para erradicar este riesgo de raíz, el diseño arquitectónico adopta el patrón *Golden Path* (Camino Dorado). Un *Golden Path* se define formalmente como una plantilla de infraestructura estandarizada, fuertemente securizada, y auditada previamente por el equipo senior de Operaciones de IT. 
+Para mitigar este riesgo, el diseño arquitectónico adopta el patrón *Golden Path* (Camino Dorado). Un *Golden Path* se define formalmente como una plantilla de infraestructura estandarizada, fuertemente securizada, y auditada previamente por el equipo senior de Operaciones de IT. 
 
 En este paradigma, la Inteligencia Artificial no redacta código. Su capacidad generativa queda **asimétricamente restringida**. La topología del clúster (el "cómo" se despliega) es un axioma dictaminado por el humano en la plantilla, mientras que el LLM actúa únicamente como un extractor de entidades, proveyendo los valores atómicos (el "qué" se despliega) que el humano ha negociado en lenguaje natural.
 
@@ -351,7 +426,7 @@ A nivel topológico, una simple solicitud cognitiva ("necesito una base de datos
 2. Un **`Service`**, autoconfigurado como `ClusterIP` para evitar la exposición accidental de la base de datos a redes públicas externas.
 3. Un **`PersistentVolumeClaim`** (PVC), dimensionado dinámicamente según el tamaño de disco inferido.
 
-Esta garantía de homogeneidad algorítmica asegura que el 100% de los servicios orquestados por el *Agentic Deployer* heredan idéntica postura de seguridad, permitiendo al Servicio de Informática (SIC) escalar la provisión de recursos con absoluta predictibilidad matemática.
+Esta garantía de homogeneidad algorítmica asegura que el 100% de los servicios orquestados por el *Agentic Deployer* heredan idéntica postura de seguridad, permitiendo al Servicio de Informática (SIC) escalar la provisión de recursos con alta predictibilidad.
 
 > **Nota de alcance del MVP:** La plantilla actual del `FakeK8sAdapter` genera los tres recursos base del *Golden Path* de aplicación web: `Deployment`, `Service` e `Ingress`. La inclusión de un `PersistentVolumeClaim` (PVC) para servicios con estado (como bases de datos) queda fuera del alcance del presente prototipo y se contempla como primera evolución en el Horizonte a Corto Plazo (Sección 9.2.1).
 
@@ -381,7 +456,7 @@ sequenceDiagram
     LLM-->>Orch: Thought + ToolCall(name, arguments)
   end
 ```
-<p align="center"><i><b>Figura 7:</b> Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención.</i></p>
+<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención.</i></p>
 
 ### 4.5.2. Fase 2: Frontera de Intercepción Determinista (Validación)
 
@@ -433,7 +508,7 @@ sequenceDiagram
   MCP-->>Orch: Observación: {error: 422}
   Orch->>LLM: [error 422] → autocorrección
 ```
-<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
+<p align="center"><i><b>Figura 9:</b> Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
 
 ### 4.5.3. Fase 3: Ejecución Autoritaria (Ciclo HITL)
 
@@ -482,6 +557,6 @@ sequenceDiagram
     end
   end
 ```
-<p align="center"><i><b>Figura 9:</b> Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución.</i></p>
+<p align="center"><i><b>Figura 10:</b> Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución.</i></p>
 
 El diseño *End-to-End* expuesto garantiza la separación irrompible de preocupaciones: la IA actúa exclusivamente como **facilitadora de la sintaxis abstracta**, mientras que la ingeniería de sistemas tradicional retiene el monopolio absoluto sobre el **acceso de escritura al estado productivo**.
