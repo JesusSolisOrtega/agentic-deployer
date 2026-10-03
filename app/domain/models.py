@@ -73,6 +73,11 @@ class DeploymentIntent(BaseModel):
         pattern=r"^\d+(Mi|Gi|Ti)$",
         description="Memory request (e.g.: 128Mi or 1Gi)",
     )
+    storage: str | None = Field(
+        default=None,
+        pattern=r"^\d+(Mi|Gi|Ti)$",
+        description="Persistent storage request (e.g.: 10Gi)",
+    )
     env_vars: dict[str, str] = Field(
         default_factory=dict,
         description="Dictionary of container environment variables",

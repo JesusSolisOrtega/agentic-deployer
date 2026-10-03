@@ -48,6 +48,7 @@ def format_deployment_intent(
     internal_port: int,
     cpu: str = "250m",
     ram: str = "128Mi",
+    storage: str | None = None,
 ) -> dict:
     """
     Packages the data into a valid JSON and sends it to the backend
@@ -66,6 +67,8 @@ def format_deployment_intent(
         "cpu": cpu,
         "ram": ram,
     }
+    if storage:
+        payload["storage"] = storage
     response = requests.post(
         f"{BACKEND_URL}/mcp/intent", json=payload, timeout=10,
     )
@@ -128,6 +131,10 @@ TOOL_DEFINITIONS = [
                     "ram": {
                         "type": "string",
                         "description": "Memory request (e.g. 128Mi).",
+                    },
+                    "storage": {
+                        "type": "string",
+                        "description": "Persistent storage request (e.g. 10Gi). Required for databases.",
                     },
                 },
                 "required": ["name", "image", "internal_port"],
