@@ -17,7 +17,7 @@ import urllib.request
 import urllib.error
 import pytest
 
-from app.agent_layer.agent import FakeLLMClient, OllamaLLMClient
+from app.agent_layer.agent import FakeLLMClient, OllamaLLMClient, OpenAILLMClient
 from app.agent_layer.tools import TOOL_DEFINITIONS
 
 
@@ -83,7 +83,7 @@ def extract_params(client, messages: list[dict]) -> dict:
     if isinstance(client, FakeLLMClient):
         return client._extract_params_from_history(messages)
     
-    # Si es Ollama, llamamos al modelo y extraemos los argumentos del tool_call
+    # Si es Ollama o Gemini, llamamos al modelo y extraemos los argumentos del tool_call
     response = client.chat(messages, tools=TOOL_DEFINITIONS)
     for tc in response.tool_calls:
         if tc.name == "format_deployment_intent":
@@ -94,6 +94,30 @@ def extract_params(client, messages: list[dict]) -> dict:
 @pytest.fixture
 def parser():
     if os.getenv("RUN_REAL_LLM") == "true":
+        provider = os.getenv("LLM_PROVIDER", "ollama")
+        if provider == "gemini":
+            return OpenAILLMClient(
+                model=os.getenv("GEMINI_MODEL", "gemini-3.5-flash"),
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+                api_key=os.getenv("GEMINI_API_KEY", "")
+            )
+        elif provider == "groq":
+            return OpenAILLMClient(
+                model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
+                base_url="https://api.groq.com/openai/v1",
+                api_key=os.getenv("GROQ_API_KEY", "")
+            )
+        elif provider == "mistral":
+            return OpenAILLMClient(
+                model=os.getenv("MISTRAL_MODEL", "mistral-large-latest"),
+                base_url="https://api.mistral.ai/v1",
+                api_key=os.getenv("MISTRAL_API_KEY", "")
+            )
+        elif provider == "cohere":
+            from app.agent_layer.agent import LiteLLMClient
+            return LiteLLMClient(
+                model=os.getenv("COHERE_MODEL", "cohere/command-r-plus-08-2024")
+            )
         # Usado para las ejecuciones documentadas en el Capítulo 7
         return OllamaLLMClient(model=os.getenv("OLLAMA_MODEL", "qwen2.5:7b"))
     return FakeLLMClient()
@@ -105,10 +129,10 @@ def test_mr1_order_permutation(parser: FakeLLMClient) -> None:
     If we provide data in a different order, the extraction must be identical.
     """
     # Prompt A: Natural order
-    prompt_a = [{"role": "user", "content": "Necesito un servicio api-backend con la imagen python:3.12 y el puerto 8000"}]
+    prompt_a = [{"role": "user", "content": "Necesito un servicio llamado api-backend con la imagen python:3.12 y el puerto 8000"}]
 
     # Prompt B: Reversed order
-    prompt_b = [{"role": "user", "content": "Con el puerto 8000 y la imagen python:3.12, necesito un servicio api-backend"}]
+    prompt_b = [{"role": "user", "content": "Con el puerto 8000 y la imagen python:3.12, necesito un servicio llamado api-backend"}]
 
     result_a = extract_params(parser, prompt_a)
     result_b = extract_params(parser, prompt_b)

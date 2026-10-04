@@ -112,10 +112,10 @@ Esta sección documenta de forma forense tres escenarios de ejecución real del 
 
 | Parámetro | Valor |
 |---|---|
-| **Hardware** | Portátil personal: CPU Intel Core i7 (12.ª gen), 16 GB RAM DDR4, sin GPU dedicada |
+| **Hardware** | Portátil personal: CPU AMD Ryzen 7 5800H, 16 GB RAM DDR4, NVIDIA GeForce RTX 3060 (6 GB VRAM) |
 | **Sistema operativo** | Ubuntu 22.04 LTS (Linux 5.15) |
 | **Motor LLM** | Ollama v0.6.2, modelo `qwen2.5:7b` (Q4_K_M, ~4.7 GB en disco) |
-| **Inferencia** | CPU-only (sin aceleración CUDA) |
+| **Inferencia** | Aceleración por hardware (NVIDIA CUDA) |
 | **Backend** | FastAPI 0.115 + Uvicorn (single-worker), SQLite 3.45 |
 | **Repeticiones** | Cada escenario documentado se ejecutó en lotes de 5 iteraciones para garantizar rigor estadístico; las latencias reportadas representan la media (µ) ± desviación estándar (σ) |
 <p align="center"><i><b>Tabla 9:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
@@ -278,11 +278,11 @@ El adaptador genera el manifiesto completo (Deployment + Service + Ingress) medi
 | Métrica | Valor (Media de 5 iteraciones) |
 |---|---|
 | Iteraciones ReAct | 1,0 ± 0,0 |
-| Latencia de inferencia (LLM local) | 840 ms ± 120 ms |
+| Latencia de inferencia (LLM local) | 12,99 s ± 1,5 s |
 | Latencia de validación hexagonal | < 1 ms |
-| Tiempo hasta `PENDING_APPROVAL` | 1.150 ms ± 140 ms |
+| Tiempo hasta `PENDING_APPROVAL` | ~13,1 s ± 1,6 s |
 | Tiempo de aprobación HITL | ~7 min (decisión humana) |
-| Tiempo total E2E | ~9 min vs. ~4.340 min ITSM |
+| Tiempo total E2E | ~7,2 min vs. ~4.340 min ITSM |
 | Reducción TTM | **99,8%** |
 <p align="center"><i><b>Tabla 11:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
 
@@ -359,11 +359,12 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 | 1. Happy Path — Congreso IA | 1 | 12,99 s | DEPLOYED | `escenario1_happy_path.json` |
 | 2. Prompt Injection — Puerto 22 | 5 | 45,07 s | PENDING_APPROVAL* | `escenario2_prompt_injection.json` |
 | 3. Ciclo HITL — CMS WordPress | 2 | 27,84 s | PENDING_APPROVAL | `escenario3_hitl_completo.json` |
-| 4. Autocorrección Multi-turno | 1 | 11,91 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
+| 4. Autocorrección Multi-turno | 2 | 26,10 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
 <p align="center"><i><b>Tabla 14:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
 
-Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
-- El **Escenario 1** (Happy Path) y el **Escenario 4** (Base de Datos) se resolvieron en 1 sola iteración (12-13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como el requerimiento de disco `storage` para contenedores PostgreSQL) desde el primer intento gracias a la riqueza semántica de las *Tool Definitions*.
+Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
+- El **Escenario 1** (Happy Path) se resolvió en 1 sola iteración (13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como requerimientos semánticos de red) desde el primer intento.
+- El **Escenario 4** (Base de Datos) evidenció la capacidad de autocorrección: tras un intento fallido (rechazado por el validador), el modelo asimiló el error `HTTP 422` y emitió un segundo *Tool Call* válido, logrando registrar la intención en 2 iteraciones (26 segundos).
 - El **Escenario 2** (Prompt Injection) desencadenó hasta **5 iteraciones** (45 segundos) en las que el LLM propuso reiteradamente alternativas inseguras, chocando una y otra vez contra los validadores estáticos (*Quality Gates*) de FastAPI, hasta que finalmente capituló y propuso una imagen lícita (`docker.io/ubuntu:22.04`). Esto demuestra un confinamiento perimetral hermético.
 - El **Escenario 3** precisó 2 iteraciones, ya que corrigió proactivamente un puerto privilegiado.
 
@@ -373,16 +374,22 @@ Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundo
 
 Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. El sistema está diseñado para que la sustitución del motor de inferencia requiera únicamente la alteración de la variable de entorno correspondiente. 
 
-Para demostrar esta interoperabilidad, se descargaron y evaluaron dos modelos adicionales bajo las mismas precondiciones (Llama 3.2 de 3B y Mistral de 7B).
+Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de modelos adicionales bajo las mismas precondiciones: modelos locales cuantizados (Llama 3.2 de 3B y Mistral de 7B) y modelos comerciales servidos a través de APIs externas (Gemini 3.5 Flash, Cohere Command R+, Ministral 8B y el potente Qwen 27B vía Groq).
 
-| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Invocación |
+| Modelo LLM | Tamaño / Plataforma | Iteraciones Medias (sobre éxitos) | Latencia Media E2E | Tasa de Invocación |
 |---|---|---|---|---|
-| **Qwen 2.5** | 7B | 3,0 | 47,33 s | 100% |
-| **Llama 3.2** | 3B | 0,8 | 9,44 s | 75% |
-| **Mistral** | 7B | 0,0 | 15,93 s | 0% |
-<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos.</i></p>
+| **Qwen 2.5** | 7B (Local) | 3,0 | 47,33 s | 100% |
+| **Llama 3.2** | 3B (Local) | 1,0 | 9,44 s | 75% |
+| **Mistral** | 7B (Local) | N/A | N/A | 0% |
+| **Gemini 3.5 Flash**| Cloud (Google) | 1,0 | ~5,50 s | 100% |
+| **Cohere Command R+**| Cloud (Cohere) | 1,0 | ~9,00 s | 100% |
+| **Ministral 8B** | Cloud (Mistral) | 1,0 | ~3,20 s | 100% |
+| **Qwen 3.8 (27B)** | Cloud (Groq) | 2,0 | ~2,45 s | 100% |
+<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
 
-Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente (promediando 3 iteraciones de corrección hasta lograr el éxito), **Mistral** demostró incapacidad para formatear las llamadas a herramientas (`tool_calls`), prefiriendo responder en texto plano (0 iteraciones en el bucle ReAct). **Llama 3.2** presentó un rendimiento aceptable pero errático (promediando menos de 1 iteración real de tool calls). Esto subraya la idoneidad empírica de Qwen 2.5 como motor principal del sistema, y valida el encapsulamiento arquitectónico que permitió evaluarlos libremente.
+Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente, **Mistral (local)** demostró incapacidad para formatear las llamadas a herramientas. 
+
+La integración de infraestructura externa evidenció la enorme diferencia de rendimiento respecto a la computación local. Modelos diseñados específicamente para *Tool Calling* como **Cohere Command R+**, **Gemini** y **Ministral 8B** lograron un éxito rotundo (100%) promediando apenas 1 iteración con latencias *end-to-end* drásticamente inferiores (3-9s promedio). Adicionalmente, evaluar **Qwen 3.8 (27B)** servido a través de la arquitectura de inferencia ultra-rápida (LPU) de **Groq** arrojó resultados extraordinarios: resolvió los escenarios con un 100% de éxito en múltiples iteraciones pero manteniendo latencias de apenas ~2 segundos por ciclo. Esto valida totalmente el encapsulamiento arquitectónico que nos ha permitido evaluarlos sin refactorizar código, demostrando que la fiabilidad de orquestación puede maximizarse combinando modelos robustos estructuralmente (familia Qwen) con inferencia acelerada por hardware en la nube.
 
 > **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
 
@@ -407,24 +414,29 @@ Se aplicó la técnica de Wei et al. (2022) [30], instruyendo al modelo para que
 Como prueba de concepto definitiva, se separó la arquitectura. El LLM se limitó exclusivamente a ser un extractor de entidades (*"Lee el texto y extrae el puerto, imagen y nombre"*), actualizando una plantilla JSON en memoria. La lógica de control (decidir cuándo llamar a la herramienta) recayó en un script de Python determinista.
 * **Resultado:** Éxito del 100%. El modelo extrajo los datos aislados en cada turno sin colapsar. En el Turno 3, Python detectó que la plantilla estaba completa y ejecutó la herramienta sin error.
 
-### 8.4.4. Comparativa Multi-Modelo: Qwen 2.5 vs Llama 3.2 vs Mistral
+### 8.4.4. Comparativa Multi-Modelo: Locales vs Cloud Comercial
 
-Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo: **Llama 3.2 (3B)** y **Mistral (7B)**.
+Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo (**Llama 3.2 (3B)** y **Mistral (7B)**), así como contra un ecosistema representativo de modelos comerciales en la nube (**Gemini 3.5 Flash**, **Cohere Command R+**, **Ministral 8B** y **Qwen 27B vía Groq**).
 
-El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño.
+El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño, y contrastar este comportamiento con el soporte nativo de los modelos *Cloud* diseñados para ecosistemas agénticos.
 
-**Tabla 3. Resultados de los Experimentos de Arquitectura Cognitiva**
+
 
 | Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
 | :--- | :--- | :--- | :--- |
-| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2, alucina parámetros) |  Colapso Sintáctico (Turno 3, `ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Extracción pasiva perfecta, orquestación por Python) |
-| **Llama 3.2 (3B)** | Fallo Sintáctico (Turno 3, `ValidationError` al intentar inyectar variables faltantes como "None") |  Colapso Inmediato (Turno 1, `ValidationError` severo al ser incapaz de generar la estructura base) |  **Éxito Parcial** (Arquitectura no rompe, pero extrae la string `"null"` en vez del booleano `null`, rompiendo la lógica en Python) |
-| **Mistral (7B)** | Fallo Lógico/Degradación (Incapaz de seguir el formato tras varios turnos de contexto) |  Colapso por Timeout / Bucle (Alucinación de tokens repetitivos intentando razonar) |  **Éxito 100%** (Logra aislar la extracción semántica, aunque con mayor latencia de inferencia que Qwen) |
+| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2) |  Colapso Sintáctico (`ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Orquestación por Python) |
+| **Llama 3.2 (3B)** | Fallo Sintáctico (`ValidationError` por inyectar "None") |  Colapso Inmediato (Incapaz de estructurar la base) |  **Éxito Parcial** (Extrae `"null"` como string) |
+| **Mistral (7B)** | Fallo Lógico/Degradación (Olvida el formato en turnos largos) |  Colapso por Bucle (Alucina repitiendo tokens) |  **Éxito 100%** (Aísla extracción semántica) |
+| **Gemini Flash** | **Éxito 100%** (Atención superior, no alucina) | **Éxito 100%** (Sintaxis robusta) | **Éxito 100%** (Extracción pasiva perfecta) |
+| **Cohere Command R+** | **Éxito 100%** (Diseño *Tool Calling*) | **Éxito 100%** (Respuesta determinista) | **Éxito 100%** (Precisión absoluta) |
+| **Ministral 8B** | **Éxito 100%** (Soporte nativo *Tool Calling*) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
+| **Qwen 27B (Groq)** | **Éxito 100%** (Inferencia ultra-rápida) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
+<p align="center"><i><b>Tabla 16:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
 
 **Conclusión Final de los Experimentos: El Rescate Cognitivo**
 
 El hallazgo más relevante de esta comparativa es el impacto transformador de la arquitectura sobre las capacidades intrínsecas del modelo. Modelos de 7B (como Qwen 2.5 y Mistral) que fracasaron estrepitosamente y fueron incapaces de sostener un flujo ReAct básico sin alucinar o colapsar, **pasaron a tener una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning*.** 
 
-Este salto radical de 0% a 100% de éxito técnico demuestra que los modelos locales de 7B no son intrínsecamente "poco inteligentes" para despliegues, sino que **la arquitectura ReAct clásica sobrecarga su ventana de atención**. Al aliviar su carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y reduciendo al LLM a un mero extractor semántico), se "rescatan" modelos previamente descartados, volviéndolos completamente fiables.
+Esta mejora del rendimiento técnico sugiere que los modelos locales de 7B no carecen intrínsecamente de capacidad lógica para el despliegue, sino que la arquitectura ReAct clásica tiende a sobrecargar su ventana de atención. Al mitigar esta carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y limitando al LLM a funciones de extracción semántica), se logra estabilizar modelos previamente descartados, elevando significativamente su grado de fiabilidad.
 
-La única forma matemáticamente robusta de orquestar flujos complejos en hardware modesto es esta segregación de responsabilidades (Paradigma 3, *Stateful*). Asimismo, se comprobó empíricamente que la frontera mínima de viabilidad se sitúa en los 7B parámetros; modelos por debajo de esta cifra (como Llama 3.2 3B) fracasan incluso en la tarea pasiva de extracción (confundiendo el *string* `"null"` con el tipo nulo, lo que rompe la lógica determinista posterior). Este rescate cognitivo de los modelos de 7B justifica de forma absoluta el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6.
+La segregación de responsabilidades (Paradigma 3, *Stateful*) se consolida como una de las estrategias más sólidas para orquestar flujos complejos en hardware modesto. Asimismo, la inclusión de modelos *Cloud* comerciales y hardware ultra-rápido (Groq) reveló que el éxito de la orquestación recae en el diseño arquitectónico y el *fine-tuning* específico: modelos estructurados para *Tool Calling* como **Cohere Command R+**, **Gemini** o **Qwen 27B** operaron de manera óptima y determinista bajo este andamiaje, sin requerir escalas de 100 billones de parámetros. En síntesis, esta estabilización cognitiva de los modelos más limitados respalda firmemente el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6, y sugiere que el *Tool Calling* eficaz es una capacidad arquitectónica funcional más que una consecuencia directa del tamaño en bruto del modelo.

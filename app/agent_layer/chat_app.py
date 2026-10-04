@@ -232,6 +232,12 @@ if "agent" not in st.session_state:
         llm = OllamaLLMClient(model=model, host=host)
     elif provider == "openai":
         llm = OpenAILLMClient(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY", ""))
+    elif provider == "gemini":
+        llm = OpenAILLMClient(
+            model=os.getenv("GEMINI_MODEL", "gemini-3.1-pro-preview"),
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key=os.getenv("GEMINI_API_KEY", "")
+        )
     else:
         llm = SICFakeLLMClient()
 
@@ -245,6 +251,7 @@ if "agent" not in st.session_state:
 provider_label = {
     "ollama": f"🤖 Ollama · {os.getenv('OLLAMA_MODEL', 'qwen2.5:7b')}",
     "openai": "🌐 OpenAI · GPT-4o-mini",
+    "gemini": f"✨ Gemini · {os.getenv('GEMINI_MODEL', 'gemini-3.1-pro-preview')}",
     "fake": "🔧 Modo Demo (sin IA real)",
 }.get(os.getenv("LLM_PROVIDER", "fake").lower(), "🔧 Modo Demo")
 

@@ -9,6 +9,7 @@ streamlit>=1.45,<2
 mcp>=2,<3
 ollama>=0.6,<1    # Native Ollama client (Zero Data Retention, free local LLM)
 openai>=1.12.0,<2  # OpenAI API + Ollama /v1 compatibility
+litellm>=1.40.0    # Universal Proxy for Cohere, Anthropic, etc.
 
 # Testing
 pytest>=8,<9

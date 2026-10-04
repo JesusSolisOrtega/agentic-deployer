@@ -54,3 +54,8 @@ Thumbs.db
 !/TFM_Completo.md
 memoria/diagrams_cache/
 TFM_Completo.pdf
+
+# Bases de datos SQLite
+*.db
+*.sqlite
+*.sqlite3

@@ -227,7 +227,13 @@ Este fracaso se debe al **Problema del Oráculo (*The Oracle Problem*)**: en Ing
 
 Para auditar el estrato cognitivo del *Agentic Deployer*, el TFM abandona los asertos tradicionales en favor del paradigma emergente de las **Pruebas Metamórficas (*Metamorphic Testing*)** [12].
 
-### 7.4.1. Definición de Relaciones Metamórficas (MR)
+### 7.4.1. Pruebas Metamórficas vs Casos Prácticos (Stress Testing)
+
+Es crucial distinguir entre la evaluación metamórfica y la ejecución de casos prácticos a través del bucle ReAct del `AgentOrchestrator`. En un caso práctico real, el modelo está apoyado por un extenso *System Prompt*, cuenta con contexto conversacional, y si se equivoca, la Máquina de Estados intercepta el fallo y se lo devuelve para que iterativamente aplique correcciones.
+
+Por el contrario, **las Pruebas Metamórficas están diseñadas como un mecanismo riguroso de prueba de esfuerzo (*Stress Testing*)**. Eliminan la red de seguridad interactiva, suprimen el *System Prompt* y exigen una extracción estructural `JSON` (*Zero-Shot*) pura frente a entradas altamente distorsionadas. Este aislamiento revela la resiliencia estructural intrínseca del modelo. Como se ha demostrado empíricamente durante el desarrollo, modelos especializados en código (como *Codestral*) o modelos de gran escala de 120 billones de parámetros presentan altas tasas de fallo ante el test metamórfico por carecer de *fine-tuning* estricto para *Tool Calling*, pero logran estabilizar la ejecución cuando la Arquitectura Hexagonal y el bucle ReAct los guían en un caso práctico. Las Pruebas Metamórficas constituyen, por tanto, evidencias empíricas de la vulnerabilidad estocástica cruda que justifican la necesidad de la arquitectura de orquestación desarrollada en el presente TFM.
+
+### 7.4.2. Definición de Relaciones Metamórficas (MR)
 
 El *Metamorphic Testing* postula que, aunque es imposible predecir el texto exacto que generará la Inteligencia Artificial, sí es posible predecir cómo debería cambiar (o mantenerse) la salida si alteramos la entrada de una forma matemáticamente conocida. A esta transformación se le denomina **Relación Metamórfica (MR)**.
 
@@ -288,4 +294,22 @@ Esta fragilidad estructural ratifica que la Ingeniería de Prompts es una soluci
 > [!NOTE]
 > **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque la validación profunda del LLM arroja un 50% de éxito empírico, ejecutar inferencia algorítmica en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando `RUN_REAL_LLM=true` evalúa cognitivamente a Ollama; mientras que por defecto en el pipeline (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock basado en expresiones regulares). Este mock, recientemente ajustado para soportar parafraseo e inglés, supera el 100% de las pruebas en < 0,15 s, garantizando la integridad estructural del CI/CD.
 
-A pesar de los fallos estructurales documentados, el éxito en la invarianza del orden sintáctico (MR-1) y la adaptación cross-lingual (MR-6) demuestra que la Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano para peticiones directas y destilándola en un JSON estructurado. Esta simbiosis inicial justifica el patrón de diseño, mientras que las limitaciones detectadas trazan una hoja de ruta clara hacia la robustez absoluta.
+### 7.4.4. Comparativa Cloud y LPU: El Colapso Zero-Shot
+
+Para contrastar las limitaciones del hardware local, la batería metamórfica fue ejecutada contra un abanico de modelos comerciales alojados en la nube y en clústeres LPU (Groq), configurando el orquestador con un mecanismo de *Backoff* asíncrono para sortear la estricta gobernanza de la capa gratuita (*HTTP 429 Rate Limit Exceeded*).
+
+| Modelo | Entorno | Tasa de Éxito | Observaciones en Stress-Test Metamórfico |
+|---|---|---|---|
+| **Gemini 3.5 Flash** | Cloud | **66% (4/6)** | Resiste ruido léxico (MR-2) y contexto diluido (MR-4). Falla en invarianza a mayúsculas (MR-3) y cruce lingüístico (MR-6). |
+| **Cohere Command R+** | Cloud | **66% (4/6)** | Empata técnicamente con Gemini. Pese a estar diseñado para *Tool Calling*, colapsa ante ruido léxico coloquial (MR-2) y cruce lingüístico (MR-6). |
+| **Qwen 2.5 (7B)** | Local | **50% (3/6)** | Colapso de atención ante ruido (MR-2) y turnos múltiples (MR-4), revirtiendo a formato de texto conversacional. |
+| **Llama 3.2 (3B)** | Local | **0% (0/6)** | Incapaz de sostener la extracción *zero-shot*. Falla al mapear campos nulos (`"None"` en lugar de `null`). |
+| **Mistral (7B)** | Local | **0% (0/6)** | Colapso absoluto. Olvida la estructura y el formato JSON en cuanto se introduce la más mínima perturbación léxica. |
+| **Ministral 8B** | Cloud | **0% (0/6)** | Colapso total *zero-shot*. Incapaz de emitir el *Tool Call* sin el apoyo estructural del *System Prompt*. |
+| **Codestral** | Cloud | **0% (0/6)** | Carece de *fine-tuning* estricto para herramientas. Responde con texto libre ignorando el esquema JSON. |
+| **Qwen 3.8 (27B)** | Groq (LPU) | **50% (3/6)** | Rendimiento idéntico a su variante local de 7B: Falla ante inyección de ruido coloquial y memoria a largo plazo. |
+<p align="center"><i><b>Tabla 8:</b> Resultados comparativos del stress-test metamórfico (Zero-Shot puro).</i></p>
+
+Este hallazgo empírico es uno de los más reveladores del estudio. Sugiere que la delegación cognitiva a la nube, el incremento de parámetros y el *fine-tuning* corporativo especializado (Cohere) no son soluciones definitivas contra la naturaleza estocástica de los modelos. Ningún modelo evaluado superó el umbral del 66% de éxito en un entorno no guiado de alta entropía (*Zero-Shot* puro). 
+
+Aunque, como se demostrará en el Capítulo 8, los modelos comerciales logran una elevada eficacia en escenarios prácticos convencionales, los resultados de este *stress-test* revelan una vulnerabilidad estructural subyacente ante anomalías de formato o idioma. Esta dualidad anticipa la justificación del diseño de la **Máquina de Estado Destilado** en dos vertientes: por un lado, actuará como una capa de mitigación robusta para ecosistemas *Cloud*; y por otro, se presentará como un requisito crítico para viabilizar despliegues soberanos (**Zero Data Retention**) sobre hardware local. Al separar la lógica de la extracción, este andamiaje estabilizará la entropía del lenguaje y optimizará el rendimiento de los modelos locales, permitiéndoles alcanzar cotas de fiabilidad cercanas a las alternativas comerciales. En definitiva, estos datos preliminares apoyan la tesis de que la Inteligencia Artificial requiere del apoyo de la ingeniería de software tradicional, premisa que se validará íntegramente en la siguiente sección.

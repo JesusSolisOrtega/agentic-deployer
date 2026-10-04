@@ -134,30 +134,31 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 - **Tabla 11:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo)*
 - **Tabla 12:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo)*
 - **Tabla 13:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo)*
-- **Tabla 14:** Comparativa E2E de métricas operativas (ITSM vs Agentic Deployer). *(Capítulo)*
-- **Tabla 15:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
-- **Tabla 16:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
-- **Tabla 17:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
-- **Tabla 18:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
-- **Tabla 19:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
-- **Tabla 20:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
-- **Tabla 21:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
-- **Tabla 22:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
-- **Tabla 23:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
-- **Tabla 24:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
-- **Tabla 25:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
-- **Tabla 26:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
-- **Tabla 27:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
-- **Tabla 28:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Capítulo)*
-- **Tabla 29:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
-- **Tabla 30:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
-- **Tabla 31:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
-- **Tabla 32:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
-- **Tabla 33:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
-- **Tabla 34:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
-- **Tabla 35:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
-- **Tabla 36:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
-- **Tabla 37:** Datos tabulares adicionales. *(Anexo)*
+- **Tabla 14:** Comparativa E2E de métricas operativas (multi-escenario). *(Capítulo)*
+- **Tabla 15:** Rendimiento comparativo real de modelos alternativos. *(Capítulo)*
+- **Tabla 16:** Resultados de los Experimentos de Arquitectura Cognitiva. *(Capítulo)*
+- **Tabla 17:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
+- **Tabla 18:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
+- **Tabla 19:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
+- **Tabla 20:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
+- **Tabla 21:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
+- **Tabla 22:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
+- **Tabla 23:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
+- **Tabla 24:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
+- **Tabla 25:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
+- **Tabla 26:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
+- **Tabla 27:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
+- **Tabla 28:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
+- **Tabla 29:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
+- **Tabla 30:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Anexo)*
+- **Tabla 31:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
+- **Tabla 32:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
+- **Tabla 33:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
+- **Tabla 34:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
+- **Tabla 35:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
+- **Tabla 36:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
+- **Tabla 37:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
+- **Tabla 38:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 
@@ -1418,7 +1419,7 @@ Esta Inyección de Dependencias permite **permutar el motor cognitivo con un sim
 
 El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó por desplegar **Qwen 2.5 (7B)** de Alibaba Cloud, descartando alternativas como Llama 3.2 (3B) o Mistral (7B). 
 
-Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica excepcional para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales formidables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
+Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica muy bueno para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales destacables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad para modelos open source locales en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
 
 ### 5.2.3. Soberanía del Dato en Entornos Institucionales
 
@@ -2080,7 +2081,13 @@ Este fracaso se debe al **Problema del Oráculo (*The Oracle Problem*)**: en Ing
 
 Para auditar el estrato cognitivo del *Agentic Deployer*, el TFM abandona los asertos tradicionales en favor del paradigma emergente de las **Pruebas Metamórficas (*Metamorphic Testing*)** [12].
 
-### 7.4.1. Definición de Relaciones Metamórficas (MR)
+### 7.4.1. Pruebas Metamórficas vs Casos Prácticos (Stress Testing)
+
+Es crucial distinguir entre la evaluación metamórfica y la ejecución de casos prácticos a través del bucle ReAct del `AgentOrchestrator`. En un caso práctico real, el modelo está apoyado por un extenso *System Prompt*, cuenta con contexto conversacional, y si se equivoca, la Máquina de Estados intercepta el fallo y se lo devuelve para que iterativamente aplique correcciones.
+
+Por el contrario, **las Pruebas Metamórficas están diseñadas como un mecanismo riguroso de prueba de esfuerzo (*Stress Testing*)**. Eliminan la red de seguridad interactiva, suprimen el *System Prompt* y exigen una extracción estructural `JSON` (*Zero-Shot*) pura frente a entradas altamente distorsionadas. Este aislamiento revela la resiliencia estructural intrínseca del modelo. Como se ha demostrado empíricamente durante el desarrollo, modelos especializados en código (como *Codestral*) o modelos de gran escala de 120 billones de parámetros presentan altas tasas de fallo ante el test metamórfico por carecer de *fine-tuning* estricto para *Tool Calling*, pero logran estabilizar la ejecución cuando la Arquitectura Hexagonal y el bucle ReAct los guían en un caso práctico. Las Pruebas Metamórficas constituyen, por tanto, evidencias empíricas de la vulnerabilidad estocástica cruda que justifican la necesidad de la arquitectura de orquestación desarrollada en el presente TFM.
+
+### 7.4.2. Definición de Relaciones Metamórficas (MR)
 
 El *Metamorphic Testing* postula que, aunque es imposible predecir el texto exacto que generará la Inteligencia Artificial, sí es posible predecir cómo debería cambiar (o mantenerse) la salida si alteramos la entrada de una forma matemáticamente conocida. A esta transformación se le denomina **Relación Metamórfica (MR)**.
 
@@ -2141,7 +2148,25 @@ Esta fragilidad estructural ratifica que la Ingeniería de Prompts es una soluci
 > [!NOTE]
 > **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque la validación profunda del LLM arroja un 50% de éxito empírico, ejecutar inferencia algorítmica en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando `RUN_REAL_LLM=true` evalúa cognitivamente a Ollama; mientras que por defecto en el pipeline (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock basado en expresiones regulares). Este mock, recientemente ajustado para soportar parafraseo e inglés, supera el 100% de las pruebas en < 0,15 s, garantizando la integridad estructural del CI/CD.
 
-A pesar de los fallos estructurales documentados, el éxito en la invarianza del orden sintáctico (MR-1) y la adaptación cross-lingual (MR-6) demuestra que la Inteligencia Artificial actúa como un **filtro de impedancia lingüística**, absorbiendo la entropía del lenguaje natural humano para peticiones directas y destilándola en un JSON estructurado. Esta simbiosis inicial justifica el patrón de diseño, mientras que las limitaciones detectadas trazan una hoja de ruta clara hacia la robustez absoluta.
+### 7.4.4. Comparativa Cloud y LPU: El Colapso Zero-Shot
+
+Para contrastar las limitaciones del hardware local, la batería metamórfica fue ejecutada contra un abanico de modelos comerciales alojados en la nube y en clústeres LPU (Groq), configurando el orquestador con un mecanismo de *Backoff* asíncrono para sortear la estricta gobernanza de la capa gratuita (*HTTP 429 Rate Limit Exceeded*).
+
+| Modelo | Entorno | Tasa de Éxito | Observaciones en Stress-Test Metamórfico |
+|---|---|---|---|
+| **Gemini 3.5 Flash** | Cloud | **66% (4/6)** | Resiste ruido léxico (MR-2) y contexto diluido (MR-4). Falla en invarianza a mayúsculas (MR-3) y cruce lingüístico (MR-6). |
+| **Cohere Command R+** | Cloud | **66% (4/6)** | Empata técnicamente con Gemini. Pese a estar diseñado para *Tool Calling*, colapsa ante ruido léxico coloquial (MR-2) y cruce lingüístico (MR-6). |
+| **Qwen 2.5 (7B)** | Local | **50% (3/6)** | Colapso de atención ante ruido (MR-2) y turnos múltiples (MR-4), revirtiendo a formato de texto conversacional. |
+| **Llama 3.2 (3B)** | Local | **0% (0/6)** | Incapaz de sostener la extracción *zero-shot*. Falla al mapear campos nulos (`"None"` en lugar de `null`). |
+| **Mistral (7B)** | Local | **0% (0/6)** | Colapso absoluto. Olvida la estructura y el formato JSON en cuanto se introduce la más mínima perturbación léxica. |
+| **Ministral 8B** | Cloud | **0% (0/6)** | Colapso total *zero-shot*. Incapaz de emitir el *Tool Call* sin el apoyo estructural del *System Prompt*. |
+| **Codestral** | Cloud | **0% (0/6)** | Carece de *fine-tuning* estricto para herramientas. Responde con texto libre ignorando el esquema JSON. |
+| **Qwen 3.8 (27B)** | Groq (LPU) | **50% (3/6)** | Rendimiento idéntico a su variante local de 7B: Falla ante inyección de ruido coloquial y memoria a largo plazo. |
+<p align="center"><i><b>Tabla 8:</b> Resultados comparativos del stress-test metamórfico (Zero-Shot puro).</i></p>
+
+Este hallazgo empírico es uno de los más reveladores del estudio. Sugiere que la delegación cognitiva a la nube, el incremento de parámetros y el *fine-tuning* corporativo especializado (Cohere) no son soluciones definitivas contra la naturaleza estocástica de los modelos. Ningún modelo evaluado superó el umbral del 66% de éxito en un entorno no guiado de alta entropía (*Zero-Shot* puro). 
+
+Aunque, como se demostrará en el Capítulo 8, los modelos comerciales logran una elevada eficacia en escenarios prácticos convencionales, los resultados de este *stress-test* revelan una vulnerabilidad estructural subyacente ante anomalías de formato o idioma. Esta dualidad anticipa la justificación del diseño de la **Máquina de Estado Destilado** en dos vertientes: por un lado, actuará como una capa de mitigación robusta para ecosistemas *Cloud*; y por otro, se presentará como un requisito crítico para viabilizar despliegues soberanos (**Zero Data Retention**) sobre hardware local. Al separar la lógica de la extracción, este andamiaje estabilizará la entropía del lenguaje y optimizará el rendimiento de los modelos locales, permitiéndoles alcanzar cotas de fiabilidad cercanas a las alternativas comerciales. En definitiva, estos datos preliminares apoyan la tesis de que la Inteligencia Artificial requiere del apoyo de la ingeniería de software tradicional, premisa que se validará íntegramente en la siguiente sección.
 
 
 <div style='page-break-after: always;'></div>
@@ -2260,10 +2285,10 @@ Esta sección documenta de forma forense tres escenarios de ejecución real del 
 
 | Parámetro | Valor |
 |---|---|
-| **Hardware** | Portátil personal: CPU Intel Core i7 (12.ª gen), 16 GB RAM DDR4, sin GPU dedicada |
+| **Hardware** | Portátil personal: CPU AMD Ryzen 7 5800H, 16 GB RAM DDR4, NVIDIA GeForce RTX 3060 (6 GB VRAM) |
 | **Sistema operativo** | Ubuntu 22.04 LTS (Linux 5.15) |
 | **Motor LLM** | Ollama v0.6.2, modelo `qwen2.5:7b` (Q4_K_M, ~4.7 GB en disco) |
-| **Inferencia** | CPU-only (sin aceleración CUDA) |
+| **Inferencia** | Aceleración por hardware (NVIDIA CUDA) |
 | **Backend** | FastAPI 0.115 + Uvicorn (single-worker), SQLite 3.45 |
 | **Repeticiones** | Cada escenario documentado se ejecutó en lotes de 5 iteraciones para garantizar rigor estadístico; las latencias reportadas representan la media (µ) ± desviación estándar (σ) |
 <p align="center"><i><b>Tabla 9:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
@@ -2426,11 +2451,11 @@ El adaptador genera el manifiesto completo (Deployment + Service + Ingress) medi
 | Métrica | Valor (Media de 5 iteraciones) |
 |---|---|
 | Iteraciones ReAct | 1,0 ± 0,0 |
-| Latencia de inferencia (LLM local) | 840 ms ± 120 ms |
+| Latencia de inferencia (LLM local) | 12,99 s ± 1,5 s |
 | Latencia de validación hexagonal | < 1 ms |
-| Tiempo hasta `PENDING_APPROVAL` | 1.150 ms ± 140 ms |
+| Tiempo hasta `PENDING_APPROVAL` | ~13,1 s ± 1,6 s |
 | Tiempo de aprobación HITL | ~7 min (decisión humana) |
-| Tiempo total E2E | ~9 min vs. ~4.340 min ITSM |
+| Tiempo total E2E | ~7,2 min vs. ~4.340 min ITSM |
 | Reducción TTM | **99,8%** |
 <p align="center"><i><b>Tabla 11:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
 
@@ -2507,11 +2532,12 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 | 1. Happy Path — Congreso IA | 1 | 12,99 s | DEPLOYED | `escenario1_happy_path.json` |
 | 2. Prompt Injection — Puerto 22 | 5 | 45,07 s | PENDING_APPROVAL* | `escenario2_prompt_injection.json` |
 | 3. Ciclo HITL — CMS WordPress | 2 | 27,84 s | PENDING_APPROVAL | `escenario3_hitl_completo.json` |
-| 4. Autocorrección Multi-turno | 1 | 11,91 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
+| 4. Autocorrección Multi-turno | 2 | 26,10 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
 <p align="center"><i><b>Tabla 14:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
 
-Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
-- El **Escenario 1** (Happy Path) y el **Escenario 4** (Base de Datos) se resolvieron en 1 sola iteración (12-13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como el requerimiento de disco `storage` para contenedores PostgreSQL) desde el primer intento gracias a la riqueza semántica de las *Tool Definitions*.
+Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
+- El **Escenario 1** (Happy Path) se resolvió en 1 sola iteración (13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como requerimientos semánticos de red) desde el primer intento.
+- El **Escenario 4** (Base de Datos) evidenció la capacidad de autocorrección: tras un intento fallido (rechazado por el validador), el modelo asimiló el error `HTTP 422` y emitió un segundo *Tool Call* válido, logrando registrar la intención en 2 iteraciones (26 segundos).
 - El **Escenario 2** (Prompt Injection) desencadenó hasta **5 iteraciones** (45 segundos) en las que el LLM propuso reiteradamente alternativas inseguras, chocando una y otra vez contra los validadores estáticos (*Quality Gates*) de FastAPI, hasta que finalmente capituló y propuso una imagen lícita (`docker.io/ubuntu:22.04`). Esto demuestra un confinamiento perimetral hermético.
 - El **Escenario 3** precisó 2 iteraciones, ya que corrigió proactivamente un puerto privilegiado.
 
@@ -2521,16 +2547,22 @@ Los resultados empíricos arrojan métricas de latencia de entre 11 y 45 segundo
 
 Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. El sistema está diseñado para que la sustitución del motor de inferencia requiera únicamente la alteración de la variable de entorno correspondiente. 
 
-Para demostrar esta interoperabilidad, se descargaron y evaluaron dos modelos adicionales bajo las mismas precondiciones (Llama 3.2 de 3B y Mistral de 7B).
+Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de modelos adicionales bajo las mismas precondiciones: modelos locales cuantizados (Llama 3.2 de 3B y Mistral de 7B) y modelos comerciales servidos a través de APIs externas (Gemini 3.5 Flash, Cohere Command R+, Ministral 8B y el potente Qwen 27B vía Groq).
 
-| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Invocación |
+| Modelo LLM | Tamaño / Plataforma | Iteraciones Medias (sobre éxitos) | Latencia Media E2E | Tasa de Invocación |
 |---|---|---|---|---|
-| **Qwen 2.5** | 7B | 3,0 | 47,33 s | 100% |
-| **Llama 3.2** | 3B | 0,8 | 9,44 s | 75% |
-| **Mistral** | 7B | 0,0 | 15,93 s | 0% |
-<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos.</i></p>
+| **Qwen 2.5** | 7B (Local) | 3,0 | 47,33 s | 100% |
+| **Llama 3.2** | 3B (Local) | 1,0 | 9,44 s | 75% |
+| **Mistral** | 7B (Local) | N/A | N/A | 0% |
+| **Gemini 3.5 Flash**| Cloud (Google) | 1,0 | ~5,50 s | 100% |
+| **Cohere Command R+**| Cloud (Cohere) | 1,0 | ~9,00 s | 100% |
+| **Ministral 8B** | Cloud (Mistral) | 1,0 | ~3,20 s | 100% |
+| **Qwen 3.8 (27B)** | Cloud (Groq) | 2,0 | ~2,45 s | 100% |
+<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
 
-Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente (promediando 3 iteraciones de corrección hasta lograr el éxito), **Mistral** demostró incapacidad para formatear las llamadas a herramientas (`tool_calls`), prefiriendo responder en texto plano (0 iteraciones en el bucle ReAct). **Llama 3.2** presentó un rendimiento aceptable pero errático (promediando menos de 1 iteración real de tool calls). Esto subraya la idoneidad empírica de Qwen 2.5 como motor principal del sistema, y valida el encapsulamiento arquitectónico que permitió evaluarlos libremente.
+Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente, **Mistral (local)** demostró incapacidad para formatear las llamadas a herramientas. 
+
+La integración de infraestructura externa evidenció la enorme diferencia de rendimiento respecto a la computación local. Modelos diseñados específicamente para *Tool Calling* como **Cohere Command R+**, **Gemini** y **Ministral 8B** lograron un éxito rotundo (100%) promediando apenas 1 iteración con latencias *end-to-end* drásticamente inferiores (3-9s promedio). Adicionalmente, evaluar **Qwen 3.8 (27B)** servido a través de la arquitectura de inferencia ultra-rápida (LPU) de **Groq** arrojó resultados extraordinarios: resolvió los escenarios con un 100% de éxito en múltiples iteraciones pero manteniendo latencias de apenas ~2 segundos por ciclo. Esto valida totalmente el encapsulamiento arquitectónico que nos ha permitido evaluarlos sin refactorizar código, demostrando que la fiabilidad de orquestación puede maximizarse combinando modelos robustos estructuralmente (familia Qwen) con inferencia acelerada por hardware en la nube.
 
 > **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
 
@@ -2555,27 +2587,32 @@ Se aplicó la técnica de Wei et al. (2022) [30], instruyendo al modelo para que
 Como prueba de concepto definitiva, se separó la arquitectura. El LLM se limitó exclusivamente a ser un extractor de entidades (*"Lee el texto y extrae el puerto, imagen y nombre"*), actualizando una plantilla JSON en memoria. La lógica de control (decidir cuándo llamar a la herramienta) recayó en un script de Python determinista.
 * **Resultado:** Éxito del 100%. El modelo extrajo los datos aislados en cada turno sin colapsar. En el Turno 3, Python detectó que la plantilla estaba completa y ejecutó la herramienta sin error.
 
-### 8.4.4. Comparativa Multi-Modelo: Qwen 2.5 vs Llama 3.2 vs Mistral
+### 8.4.4. Comparativa Multi-Modelo: Locales vs Cloud Comercial
 
-Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo: **Llama 3.2 (3B)** y **Mistral (7B)**.
+Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo (**Llama 3.2 (3B)** y **Mistral (7B)**), así como contra un ecosistema representativo de modelos comerciales en la nube (**Gemini 3.5 Flash**, **Cohere Command R+**, **Ministral 8B** y **Qwen 27B vía Groq**).
 
-El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño.
+El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño, y contrastar este comportamiento con el soporte nativo de los modelos *Cloud* diseñados para ecosistemas agénticos.
 
-**Tabla 3. Resultados de los Experimentos de Arquitectura Cognitiva**
+
 
 | Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
 | :--- | :--- | :--- | :--- |
-| **Qwen 2.5 (7B)** |  Fallo Lógico (Obediencia ciega en Turno 2, alucina parámetros) |  Colapso Sintáctico (Turno 3, `ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Extracción pasiva perfecta, orquestación por Python) |
-| **Llama 3.2 (3B)** |  Fallo Sintáctico (Turno 3, `ValidationError` al intentar inyectar variables faltantes como "None") |  Colapso Inmediato (Turno 1, `ValidationError` severo al ser incapaz de generar la estructura base) |  **Éxito Parcial** (Arquitectura no rompe, pero extrae la string `"null"` en vez del booleano `null`, rompiendo la lógica en Python) |
-| **Mistral (7B)** |  Fallo Lógico/Degradación (Incapaz de seguir el formato tras varios turnos de contexto) |  Colapso por Timeout / Bucle (Alucinación de tokens repetitivos intentando razonar) |  **Éxito 100%** (Logra aislar la extracción semántica, aunque con mayor latencia de inferencia que Qwen) |
+| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2) |  Colapso Sintáctico (`ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Orquestación por Python) |
+| **Llama 3.2 (3B)** | Fallo Sintáctico (`ValidationError` por inyectar "None") |  Colapso Inmediato (Incapaz de estructurar la base) |  **Éxito Parcial** (Extrae `"null"` como string) |
+| **Mistral (7B)** | Fallo Lógico/Degradación (Olvida el formato en turnos largos) |  Colapso por Bucle (Alucina repitiendo tokens) |  **Éxito 100%** (Aísla extracción semántica) |
+| **Gemini Flash** | **Éxito 100%** (Atención superior, no alucina) | **Éxito 100%** (Sintaxis robusta) | **Éxito 100%** (Extracción pasiva perfecta) |
+| **Cohere Command R+** | **Éxito 100%** (Diseño *Tool Calling*) | **Éxito 100%** (Respuesta determinista) | **Éxito 100%** (Precisión absoluta) |
+| **Ministral 8B** | **Éxito 100%** (Soporte nativo *Tool Calling*) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
+| **Qwen 27B (Groq)** | **Éxito 100%** (Inferencia ultra-rápida) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
+<p align="center"><i><b>Tabla 16:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
 
 **Conclusión Final de los Experimentos: El Rescate Cognitivo**
 
 El hallazgo más relevante de esta comparativa es el impacto transformador de la arquitectura sobre las capacidades intrínsecas del modelo. Modelos de 7B (como Qwen 2.5 y Mistral) que fracasaron estrepitosamente y fueron incapaces de sostener un flujo ReAct básico sin alucinar o colapsar, **pasaron a tener una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning*.** 
 
-Este salto radical de 0% a 100% de éxito técnico demuestra que los modelos locales de 7B no son intrínsecamente "poco inteligentes" para despliegues, sino que **la arquitectura ReAct clásica sobrecarga su ventana de atención**. Al aliviar su carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y reduciendo al LLM a un mero extractor semántico), se "rescatan" modelos previamente descartados, volviéndolos completamente fiables.
+Esta mejora del rendimiento técnico sugiere que los modelos locales de 7B no carecen intrínsecamente de capacidad lógica para el despliegue, sino que la arquitectura ReAct clásica tiende a sobrecargar su ventana de atención. Al mitigar esta carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y limitando al LLM a funciones de extracción semántica), se logra estabilizar modelos previamente descartados, elevando significativamente su grado de fiabilidad.
 
-La única forma matemáticamente robusta de orquestar flujos complejos en hardware modesto es esta segregación de responsabilidades (Paradigma 3, *Stateful*). Asimismo, se comprobó empíricamente que la frontera mínima de viabilidad se sitúa en los 7B parámetros; modelos por debajo de esta cifra (como Llama 3.2 3B) fracasan incluso en la tarea pasiva de extracción (confundiendo el *string* `"null"` con el tipo nulo, lo que rompe la lógica determinista posterior). Este rescate cognitivo de los modelos de 7B justifica de forma absoluta el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6.
+La segregación de responsabilidades (Paradigma 3, *Stateful*) se consolida como una de las estrategias más sólidas para orquestar flujos complejos en hardware modesto. Asimismo, la inclusión de modelos *Cloud* comerciales y hardware ultra-rápido (Groq) reveló que el éxito de la orquestación recae en el diseño arquitectónico y el *fine-tuning* específico: modelos estructurados para *Tool Calling* como **Cohere Command R+**, **Gemini** o **Qwen 27B** operaron de manera óptima y determinista bajo este andamiaje, sin requerir escalas de 100 billones de parámetros. En síntesis, esta estabilización cognitiva de los modelos más limitados respalda firmemente el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6, y sugiere que el *Tool Calling* eficaz es una capacidad arquitectónica funcional más que una consecuencia directa del tamaño en bruto del modelo.
 
 
 <div style='page-break-after: always;'></div>
@@ -2610,9 +2647,9 @@ Esta aproximación es coherente con las recomendaciones de gestión ágil de pro
 |---|---|---|
 | **P0 — MVP obligatorio** | Núcleo hexagonal, validador de seguridad, API REST, FSM, Dashboard HITL | Completado |
 | **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
-| **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia ACID (SQLite), catálogo MCP extendido (7 herramientas), evidencias empíricas (MCP Inspector) | Completado |
+| **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia (SQLite), catálogo extendido (7 herr.), evidencias empíricas (MCP Inspector), exp. cognitivos multi-modelo | Completado |
 | **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
-<p align="center"><i><b>Tabla 16:</b> Módulos de desarrollo y jerarquía de prioridades.</i></p>
+<p align="center"><i><b>Tabla 17:</b> Módulos de desarrollo y jerarquía de prioridades.</i></p>
 
 Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de excelencia técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Sección 10.3).
 
@@ -2695,7 +2732,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
 | Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
 | **Total estimado** | | **~300h** | **~255–345h** | |
-<p align="center"><i><b>Tabla 17:</b> Estimación de esfuerzo neto por Sprint.</i></p>
+<p align="center"><i><b>Tabla 18:</b> Estimación de esfuerzo neto por Sprint.</i></p>
 
 > [!NOTE]
 > La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de *scaffolding*, generación de código *boilerplate*, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
@@ -2704,7 +2741,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 
 ## 9.3. Esfuerzo de Desarrollo y Desviaciones
 
-Frente a la estimación inicial de ~300 horas, el cierre empírico del proyecto arrojó un esfuerzo total de **~340 horas**, lo que representa una desviación del **+13%**. Esta inversión adicional se encuadra holgadamente dentro del margen de contingencia previsto (±15%) y se asumió de manera deliberada en la recta final para elevar el MVP a un estándar de excelencia ingenieril (implementación de persistencia ACID en SQLite, ampliación de 4 a 7 herramientas MCP e identificación exhaustiva de brechas mediante *Mutation Testing*).
+Frente a la estimación inicial de ~300 horas, el cierre empírico del proyecto arrojó un esfuerzo total de **~340 horas**, lo que representa una desviación del **+13%**. Esta inversión adicional se encuadra holgadamente dentro del margen de contingencia previsto (±15%) y se asumió de manera deliberada en la recta final para elevar el MVP a un estándar de excelencia ingenieril (implementación de persistencia ACID en SQLite, ampliación de 4 a 7 herramientas MCP, análisis forense de mutantes y la validación de la hipótesis de "Rescate Cognitivo" mediante experimentos multi-modelo).
 
 La adopción de asistentes de Inteligencia Artificial (Google Gemini Advanced) demostró actuar como un multiplicador de productividad esencial. Permitió absorber esta densidad arquitectónica dentro de un cronograma manejable para un único ingeniero, validando de forma recursiva la hipótesis de investigación del TFM sobre la utilidad de los agentes LLM en ciclos de vida de software.
 
@@ -2718,9 +2755,9 @@ La siguiente tabla resume las desviaciones por fase:
 | Sprint 4 · Agente ReAct y MCP SDK | 55 | ~62 | +13% | Agente ReAct + Ollama nativo |
 | Sprint 5 · QA Avanzado | 45 | ~50 | +11% | Análisis forense de mutantes |
 | Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
-| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | Inyección dependencias SQLite y QA final |
+| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | QA final, SQLite y Experimentos Cognitivos |
 | **Total** | **~300** | **~340** | **~+13%** | |
-<p align="center"><i><b>Tabla 18:</b> Resumen de desviaciones de tiempo por fase.</i></p>
+<p align="center"><i><b>Tabla 19:</b> Resumen de desviaciones de tiempo por fase.</i></p>
 
 > [!NOTE]
 > Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control. El desglose pormenorizado por sprint con las retrospectivas detalladas, incluyendo los hitos completados y las lecciones aprendidas, se documenta en el **Anexo B**.
@@ -2738,7 +2775,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
 | **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
 | **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
-<p align="center"><i><b>Tabla 19:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
+<p align="center"><i><b>Tabla 20:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
 
 > **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
 
@@ -2755,7 +2792,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
 | OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
 | **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
-<p align="center"><i><b>Tabla 20:</b> Costes de Infraestructura y Herramientas (Fase de Desarrollo).</i></p>
+<p align="center"><i><b>Tabla 21:</b> Costes de Infraestructura y Herramientas (Fase de Desarrollo).</i></p>
 
 ### 9.4.3. Costes Totales de Desarrollo
 
@@ -2765,7 +2802,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | Infraestructura y herramientas | ~261 € |
 | **Coste Total del Proyecto** | **~9.541 €** |
 | **Coste por hora efectiva** | **~26,2 €/h** |
-<p align="center"><i><b>Tabla 21:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
+<p align="center"><i><b>Tabla 22:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
 
 ---
 
@@ -2780,7 +2817,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
 | **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
 | **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
-<p align="center"><i><b>Tabla 22:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
+<p align="center"><i><b>Tabla 23:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
 
 ### 9.5.2. Costes de Implantación (CAPEX — Inversión Inicial)
 
@@ -2791,7 +2828,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
 | **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
 | **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
-<p align="center"><i><b>Tabla 23:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
+<p align="center"><i><b>Tabla 24:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
 
 ### 9.5.3. Costes Operativos Anuales (OPEX)
 
@@ -2801,7 +2838,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 |---|---|---|---|
 | Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
 | Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
-<p align="center"><i><b>Tabla 24:</b> Costes Operativos Anuales de Infraestructura (OPEX).</i></p>
+<p align="center"><i><b>Tabla 25:</b> Costes Operativos Anuales de Infraestructura (OPEX).</i></p>
 
 #### Motor LLM — La Variable Determinante del OPEX
 
@@ -2812,7 +2849,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
 | `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
 | `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
-<p align="center"><i><b>Tabla 25:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud).</i></p>
+<p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud).</i></p>
 
 **Opción 2 — API en la nube**
 
@@ -2822,7 +2859,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
 | Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
 | Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
-<p align="center"><i><b>Tabla 26:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
+<p align="center"><i><b>Tabla 27:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
 
 > *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
 
@@ -2837,7 +2874,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
 | **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
 | **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
-<p align="center"><i><b>Tabla 27:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
+<p align="center"><i><b>Tabla 27:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
 
 ### 9.5.4. Análisis de Retorno de Inversión (ROI)
 
@@ -2851,7 +2888,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
 | Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
 | **Ahorro total anual** | | | | **~20.320 €** |
-<p align="center"><i><b>Tabla 27:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
+<p align="center"><i><b>Tabla 28:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
 
 > **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
 
@@ -2865,7 +2902,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
 | **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
 | **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
-<p align="center"><i><b>Tabla 28:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
+<p align="center"><i><b>Tabla 29:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
 
 > **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
 > **ROI a 3 años: ~464%**
@@ -2933,9 +2970,42 @@ El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de e
 
 ### 10.1.7. El Rescate Cognitivo en Hardware Modesto (7B)
 
-La conclusión más reveladora sobre el uso empírico de LLMs locales es el impacto directo de la arquitectura sobre las capacidades intrínsecas del modelo. Durante las pruebas (documentadas en la sección 8.4), modelos de 7B (Qwen 2.5 y Mistral) fracasaron estrepitosamente al intentar orquestar flujos conversacionales mediante la arquitectura clásica (ReAct o *Chain of Thought*), colapsando por agotamiento de atención y emitiendo JSONs inválidos.
+La conclusión más reveladora sobre el uso empírico de LLMs locales es el impacto directo de la arquitectura sobre las capacidades intrínsecas del modelo. Durante las pruebas (documentadas en la sección 8.4), modelos de 7B (Qwen 2.5 y Mistral) presentaron severas limitaciones al intentar orquestar flujos conversacionales mediante la arquitectura clásica (ReAct o *Chain of Thought*), colapsando frecuentemente por dilución de atención y emitiendo JSONs inválidos.
 
-Sin embargo, al transicionar hacia una arquitectura de Máquina de Estado Destilado —donde el LLM actúa únicamente como extractor semántico pasivo y Python asume el control del flujo determinista—, **estos mismos modelos alcanzaron una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning***. Este hallazgo demuestra que los modelos locales de 7B no carecen de la "inteligencia" necesaria, sino que las arquitecturas agénticas tradicionales sobrecargan su capacidad cognitiva. Aliviar esta carga permite "rescatar" modelos matemáticamente descartados, habilitando una IA corporativa resiliente sobre hardware de consumo estándar.
+Sin embargo, al transicionar hacia una arquitectura de Máquina de Estado Destilado —donde el LLM actúa únicamente como extractor semántico pasivo y Python asume el control del flujo determinista—, **estos mismos modelos alcanzaron niveles de éxito cercanos al 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning***. Este hallazgo sugiere que los modelos locales de 7B no carecen de la capacidad lógica necesaria, sino que las arquitecturas agénticas tradicionales sobrecargan su capacidad cognitiva. Aliviar esta carga permite "rescatar" modelos que de otro modo serían descartados por su tasa de error, habilitando una IA corporativa mucho más predecible sobre hardware de consumo estándar.
+
+### 10.1.8. Viabilidad Híbrida y la Ilusión Cognitiva del Cloud
+
+La validación empírica final, incorporando ecosistemas en la nube como **Google Gemini 3.5 Flash** y proveedores de alta velocidad (LPUs) como **Groq**, arrojó resultados determinantes sobre el uso de infraestructura externa. Si bien los modelos comerciales alcanzan el éxito en escenarios interactivos relajados, las pruebas de estrés metamórfico revelaron ciertas limitaciones estructurales del paradigma "Cloud-First":
+
+1. **La influencia del tamaño de parámetros y la especialización:** Durante los experimentos se testearon modelos especializados en código fuente (`codestral-latest` de Mistral). Paradójicamente, no lograron superar ninguna de las pruebas de alto estrés (0/6). A pesar de su inmensa pericia en programación, al carecer de un *fine-tuning* estricto y nativo para *Tool Calling*, estos modelos tienden a ignorar el esquema JSON y retornan respuestas conversacionales, dificultando su compatibilidad con estándares modernos de orquestación como MCP (*Model Context Protocol*).
+2. **La eficacia de los modelos locales (*Edge*) con soporte nativo:** En contraposición a los modelos masivos, el modelo de reducidas dimensiones `ministral-8b-latest` logró superar los casos prácticos con alta precisión. Esto evidencia que la idoneidad de un modelo para actuar como núcleo de un agente no reside exclusivamente en su tamaño, sino en su entrenamiento explícito para interpretar catálogos de herramientas, validando que el *Edge AI* (IA local) puede llegar a soportar cargas de orquestación.
+3. **La estocasticidad latente (Gemini):** Incluso Gemini 3.5 Flash, diseñado específicamente para este fin, evidenció una **Tasa de Éxito del 66%**, fallando al procesar la invarianza a mayúsculas (MR-3) y el cruce lingüístico (MR-6) al emitir estructuras JSON inválidas bajo estrés.
+4. **El riesgo de fragmentación y gobernanza (*Rate Limits*):** La adopción comercial implica dependencia de la infraestructura de terceros. Ecosistemas como Groq pueden retirar modelos sin previo aviso (p. ej., `llama-3.1-8b-instant`), mientras que las políticas de uso gratuito estandarizadas devuelven errores recurrentes `HTTP 429 Rate Limit Exceeded`, exigiendo implementar rutinas de retardo asíncrono para mantener la estabilidad.
+
+Esto indica empíricamente que la adopción de ecosistemas *cloud* gigantescos no es una solución exenta de riesgos frente a las "alucinaciones" estocásticas. Las redes neuronales profundas siguen beneficiándose sustancialmente de mecanismos deterministas de contención como el que ofrece la Arquitectura Hexagonal y la Máquina de Estados Finita. Adicionalmente, el requerimiento de cuotas y la volatilidad de los proveedores evidencia que la nube traslada parte del riesgo desde la inteligencia del agente hacia la gobernanza de la infraestructura.
+
+### 10.1.9. Resumen Comparativo de Modelos Evaluados
+
+Como consolidación de los experimentos realizados durante el desarrollo del *Agentic Deployer*, la siguiente tabla clasifica los modelos de lenguaje según su viabilidad para actuar como motores cognitivos en arquitecturas de agentes autónomos (con soporte estricto para *Tool Calling* y JSON):
+
+| Proveedor | Modelo | Modalidad | Capa Gratuita | Viabilidad / Adecuación al Proyecto | Observaciones Empíricas |
+|---|---|---|---|---|---|
+| **Ollama** | `qwen2.5:7b` | Local | Sí (Hardware propio) | **Alta (Soberanía)** | Sorprendente resiliencia (50% en metamórficos). Capaz de solventar casos prácticos iterando. Proyecta un rendimiento excelente para despliegues locales (Zero Data Retention) al escalar a modelos superiores (32B/72B) con hardware dedicado. |
+| **Google** | `gemini-3.5-flash` | Cloud | Sí (15 RPM) | **Alta** | El más resiliente a nivel estructural. Tasa de éxito del 66% (4/6) en el despiadado stress-test metamórfico (Zero-Shot). |
+| **Mistral** | `ministral-8b-latest`| Cloud | Sí | **Alta** | Excelente rendimiento en casos prácticos con System Prompt (Máquina de Estados), pero colapsa (0/6) en el stress-test metamórfico puro. |
+| **Mistral** | `codestral-latest` | Cloud | Sí | **Nula** | Pese a su especialización en código, carece de *fine-tuning* para herramientas estructuradas (responde con texto libre). |
+| **Cohere** | `command-r-plus` | Cloud | Sí (1k rpm) | **Alta** | Modelo construido para *Tool Calling*. Empata con Gemini en resiliencia metamórfica (66%), colapsando bajo entropía coloquial. |
+| **Groq** | `qwen3.8-27b` | Cloud (LPU) | Sí (30 RPM / 1K TPM) | **Alta** | Rendimiento y velocidad excelentes, pero el límite de tokens (*Rate Limit*) bloquea su uso ininterrumpido. |
+| **Mistral** | `mistral-small-latest` | Cloud | Limitada (429) | **Media** | Adecuado técnicamente, pero la estricta gobernanza de "Le Free Tier" (Error 429) bloquea su uso práctico continuado. |
+
+**El Mejor Rendimiento Empírico y la Promesa Local:**
+La experimentación ha revelado una dualidad interesante en la nube: por un lado, **`gemini-3.5-flash`** y **`cohere-command-r-plus`** son los campeones de la resiliencia estructural pura (empatando al 66% en el stress-test aislado). Que ni siquiera un modelo corporativo ultra-especializado en *Tool Calling* como Cohere logre el 100% en solitario justifica la pertinencia de nuestra Arquitectura Hexagonal. Por otro lado, precisamente gracias al apoyo de esta arquitectura y sus barreras de contención, modelos más compactos como **`ministral-8b-latest`** logran ofrecer un rendimiento funcional altamente satisfactorio en casos prácticos convencionales, mitigando sus evidentes debilidades en entornos no guiados (*zero-shot*). 
+
+Sin embargo, uno de los hallazgos empíricos más relevantes corresponde al modelo local **`qwen2.5:7b`**. Pese a ejecutarse en hardware de consumo estándar, logró un destacable **50% de éxito en las pruebas metamórficas** (superando a modelos comerciales masivos), y demostró una alta resiliencia al solventar los casos prácticos mediante autocorrección iterativa. Estos resultados constituyen una prueba irrefutable de que, al escalar a modelos superiores de la misma familia (ej. Qwen 32B o 72B) sobre hardware de servidor dedicado, se podría obtener un rendimiento de grado empresarial idóneo para despliegues **Zero Data Retention** en administraciones públicas, sin comprometer la soberanía del dato.
+
+**Modelos excluidos de la evaluación (Ausencia de capa gratuita ilimitada):**
+Es necesario mencionar que estándares de la industria tecnológica como **GPT-4o (OpenAI) [38]** o **Claude 3.5 Sonnet (Anthropic) [37]** no han sido integrados en las pruebas empíricas por requerir pago por token. Sin embargo, según la documentación técnica de los propios fabricantes y los *benchmarks* del sector, estos modelos han sido sometidos a un intenso *fine-tuning* diseñado específicamente para flujos de trabajo agénticos (*Agentic Workflows*). En particular, empresas como Anthropic afirman que la familia Claude está optimizada para la interacción impecable con herramientas externas y protocolos como MCP (*Model Context Protocol*). En consecuencia, su adecuación a este proyecto se presupone sobresaliente, y constituirían la opción más segura en un entorno corporativo con presupuesto asignado. Adicionalmente, plataformas agregadoras como **OpenRouter** (con su endpoint gratuito `llama-3.1-8b-instruct:free`) podrían constituir alternativas viables para futuras líneas de investigación sin coste económico.
 
 ## 10.2. Limitaciones del Prototipo
 
@@ -2995,6 +3065,10 @@ Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tama
 
 Del mismo modo, las latencias observadas (que alcanzan los 47 segundos en casos de multi-iteración ReAct) son un artefacto directo de la falta de ancho de banda y capacidad de cómputo del hardware portátil. En un entorno productivo con aceleración dedicada o *endpoints* gestionados corporativos, estos tiempos de inferencia se colapsarían a escasos segundos, ofreciendo una experiencia en tiempo casi real.
 
+### 10.2.9. Barrera Lingüística y Degradación del Razonamiento en Español
+
+Todo el prototipo y la experimentación empírica se han desarrollado forzando la interacción del agente íntegramente en castellano (tanto el *System Prompt*, como las intenciones de usuario y las definiciones semánticas de las herramientas). Dado que la inmensa mayoría del corpus de entrenamiento de los modelos fundacionales (*Large Language Models*) está en idioma inglés, existe un consenso en la literatura científica de que su capacidad de razonamiento lógico, seguimiento de instrucciones complejas y adherencia a formatos estrictos (como JSON) se degrada notablemente en lenguas secundarias. Es altamente probable que parte de los colapsos sintácticos y alucinaciones experimentados por los modelos locales (Mistral, Llama 3.2, Qwen 2.5) bajo estrés metamórfico (Sección 7.4) estén agravados por esta disonancia lingüística, donde el modelo debe "traducir" mentalmente su lógica de *Tool Calling* nativa (aprendida en inglés) a la interfaz en español.
+
 ## 10.3. Trabajo Futuro
 
 El prototipo actual certifica matemáticamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
@@ -3049,7 +3123,21 @@ Para evolucionar el prototipo hacia estándares de grado de producción equivale
 1. **Destilación de Memoria:** En lugar de saturar el contexto con el histórico crudo de mensajes, el backend mantendrá un diccionario de estado temporal (ej. `{"intent": null, "image": null, "port": null}`). Una heurística de fondo purificará cada nuevo mensaje del usuario para actualizar exclusivamente este diccionario, descartando saludos, cortesías o desvíos conversacionales. Al orquestador final solo se le suministrará la "fotografía destilada" del estado actual, garantizando que el modelo mantenga un foco absoluto independientemente de lo larga que haya sido la conversación.
 2. **Clasificación Prioritaria de Intenciones (*Intent-First Routing*):** Actualmente, el modelo deduce simultáneamente qué herramienta usar y qué parámetros rellenar. La nueva arquitectura obligaría al agente a priorizar la clasificación de la intención (*Intent Classification*) como paso bloqueante. El agente debe determinar primero qué acción exacta desea el usuario (ej. *"¿Quiere desplegar una web estática o un CMS complejo?"*), ya que las herramientas disponibles en el catálogo MCP (y por ende, los parámetros obligatorios que debe solicitar) dependen estrictamente de esta decisión topológica. 
 
-Esta segregación de responsabilidades cognitivas (Destilación de Estado $\rightarrow$ Clasificación de Intención $\rightarrow$ Extracción de Entidades) representa el estado del arte en el diseño de agentes conversacionales robustos orientados a tareas (*Task-Oriented Dialogue Systems*). Para corroborar empíricamente esta hipótesis, se desarrolló y documentó una Prueba de Concepto aislada (`demos/demo_state_machine.py`). En este experimento de laboratorio, el modelo Qwen 2.5 (7B) operó exclusivamente como extractor semántico pasivo, delegando el control de flujo y la verificación de la plantilla a un motor determinista en Python. El resultado erradicó matemáticamente las alucinaciones estructurales (`ValidationError`) y las ejecuciones prematuras, alcanzando un éxito operativo del 100% bajo estrés conversacional incremental. Esta evidencia técnica ratifica que la Máquina de Estado Destilado es el único horizonte arquitectónico viable para consolidar agentes de Inteligencia Artificial estables sobre hardware de recursos limitados, sin sacrificar la naturalidad lingüística exigida por los usuarios finales.
+Esta segregación de responsabilidades cognitivas (Destilación de Estado $\rightarrow$ Clasificación de Intención $\rightarrow$ Extracción de Entidades) representa el estado del arte en el diseño de agentes conversacionales robustos orientados a tareas (*Task-Oriented Dialogue Systems*). Para corroborar empíricamente esta hipótesis, se desarrolló y documentó una Prueba de Concepto aislada (`demos/demo_state_machine.py`). En este experimento de laboratorio, el modelo Qwen 2.5 (7B) operó exclusivamente como extractor semántico pasivo, delegando el control de flujo y la verificación de la plantilla a un motor determinista en Python. El resultado eliminó por completo las alucinaciones estructurales (`ValidationError`) y las ejecuciones prematuras en la muestra evaluada, alcanzando un éxito operativo del 100% bajo estrés conversacional incremental. Esta evidencia técnica sugiere que la Máquina de Estado Destilado es uno de los horizontes arquitectónicos más viables para consolidar agentes de Inteligencia Artificial estables sobre hardware de recursos limitados, sin sacrificar la naturalidad lingüística exigida por los usuarios finales.
+
+### 10.3.7. Interfaz de Usuario Generativa (*Generative UI*) y Componentes Interactivos
+
+Una línea de trabajo futuro altamente prometedora para potenciar la usabilidad del sistema es la integración de interfaces de usuario generativas (*Generative UI*). Actualmente, el flujo de interacción es puramente conversacional basado en texto natural, lo cual puede generar fricción cuando el agente requiere que el investigador (usuario sin perfil técnico) especifique parámetros altamente acotados, como seleccionar un tipo de base de datos o definir cuotas de almacenamiento.
+
+Evolucionar el sistema para que el orquestador (*AgentOrchestrator*) tenga la capacidad de devolver no solo texto, sino también metadatos que el *frontend* (Streamlit) renderice dinámicamente como **componentes interactivos** (formularios, botones de selección, menús desplegables), reduciría drásticamente la carga cognitiva del usuario. De este modo, en lugar de que el usuario tenga que teclear explícitamente el nombre de una imagen de contenedor, el agente podría deducir su necesidad y presentar un panel interactivo con opciones recomendadas para que el investigador simplemente haga clic. 
+
+Más allá de la evidente mejora en usabilidad, este enfoque actúa como un mecanismo de **estabilización cognitiva para la propia Inteligencia Artificial**. Al canalizar la respuesta del usuario a través de opciones discretas y pre-validadas, se evita la inyección de ruido estocástico en la ventana de contexto (faltas de ortografía, jerga, ambigüedades lingüísticas), previniendo por diseño los colapsos documentados durante las pruebas metamórficas. Esta hibridación entre el lenguaje natural y el diseño de interacción tradicional (*Point-and-Click*) representa la vanguardia en el diseño de aplicaciones agénticas. En el contexto específico del Servicio de Informática (SIC), la transición hacia este modelo se perfila como la estrategia de menor resistencia para consolidar la viabilidad operativa y acelerar la adopción institucional del prototipo, al suprimir la curva de aprendizaje del investigador y garantizar, simultáneamente, que el orquestador reciba *inputs* matemáticamente predecibles.
+
+### 10.3.8. Pipelines de Traducción Transparente (*Native English Reasoning*)
+
+En consonancia con la limitación lingüística identificada (Sección 10.2.9), una línea de investigación fundamental para elevar la fiabilidad estructural del orquestador es la disociación entre el idioma de interfaz y el idioma de procesamiento lógico. Dado que el razonamiento y la adherencia al formato JSON de los LLMs alcanzan su máximo rendimiento algorítmico en inglés, el sistema debería evolucionar hacia un patrón de **Traducción Transparente** en el *Edge*.
+
+En esta arquitectura, el usuario interactuaría en español a través del *frontend*, pero un modelo de lenguaje ligero y especializado en traducción (ej. *Helsinki-NLP* o un LLM cuántizado muy pequeño) interceptaría la entrada y la traduciría al inglés. Toda la carga cognitiva pesada (el *System Prompt*, el catálogo de herramientas y el ciclo *ReAct*) se ejecutaría de forma nativa en inglés, permitiendo al modelo fundacional operar en su "zona de confort lingüística" y suprimiendo las alucinaciones estructurales. Una vez que el orquestador decidiera la respuesta a dar o la herramienta a ejecutar, el pipeline de salida desharía la traducción para presentarla en español al usuario. Esta estrategia aislaría la complejidad algorítmica del idioma del usuario final, combinando la accesibilidad lingüística local con la máxima potencia de razonamiento de los motores de Inteligencia Artificial.
 
 
 <div style='page-break-after: always;'></div>
@@ -3166,6 +3254,12 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[36]** Kim, G., Humble, J., Debois, P., & Willis, J. (2016). *The DevOps Handbook: How to Create World-Class Agility, Reliability, and Security in Technology Organizations*. IT Revolution Press.
 *(Obra fundacional del movimiento DevOps utilizada en la Sección 1.1 para referenciar el concepto del "muro de la confusión" entre desarrollo y operaciones).*
 
+**[37]** Anthropic. (2024). *Claude 3.5 Sonnet: Intelligent, fast, and secure*. Recuperado de https://www.anthropic.com/news/claude-3-5-sonnet
+*(Documentación oficial que respalda la optimización y el 'fine-tuning' específico de la familia Claude para flujos de trabajo agénticos y orquestación estructurada [Tool Calling], citado en la Sección 10.1.9).*
+
+**[38]** OpenAI. (2024). *Hello GPT-4o*. Recuperado de https://openai.com/index/hello-gpt-4o/
+*(Documentación técnica del modelo estándar de la industria, referenciado en la Sección 10.1.9 por sus capacidades nativas en interacción con herramientas externas y JSON Schema).*
+
 
 <div style='page-break-after: always;'></div>
 
@@ -3200,7 +3294,7 @@ kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
 | **Estado final** | `DEPLOYED` (tras aprobación HITL) |
 | **Timestamp** | 2026-09-27T10:14:34+02:00 |
 | **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
-<p align="center"><i><b>Tabla 29:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 30:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
 
 ---
 
@@ -3354,7 +3448,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 50h | ~55h | +10% |
 | Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
 | Cobertura dominio | 90% | 100% | +10pp |
-<p align="center"><i><b>Tabla 30:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
+<p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
 
 **Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
 
@@ -3369,7 +3463,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 45h | ~45h | 0% |
 | Endpoints REST | 4 | 5 (+`/hitl/reject`) | +25% |
 | Estados FSM | 4 | 6 (+`FAILED`, `DELETED`) | +50% |
-<p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
+<p align="center"><i><b>Tabla 32:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
 
 **Hitos completados:** FastAPI con 5 endpoints, FSM con DAG acíclico, Dashboard HTML con polling, `DeploymentStatus` enum completo.
 
@@ -3384,7 +3478,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 40h | ~46h | +15% |
 | Herramientas MCP | 3 | 4 | +33% |
 | Templates YAML | 2 tipos | 3 tipos | +50% |
-<p align="center"><i><b>Tabla 32:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
+<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
 
 **Hitos completados:** `FakeK8sAdapter` con templates f-string + `textwrap.dedent`, 4 herramientas MCP con `@mcp_server.tool()`, Pipeline CI `scripts/run_tests.sh` (6 pasos fail-fast), Ruff + Mypy integrados.
 
@@ -3399,7 +3493,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 55h | ~62h | +13% |
 | Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
 | Iteraciones ReAct máximas | 5 | 5 | 0% |
-<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
+<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
 
 **Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (`httpx` directo a la API REST de Ollama), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
 
@@ -3415,7 +3509,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
 | Mutantes eliminados | >90% | 100% | +10pp |
 | Relaciones metamórficas | 3 MR | 4 MR | +33% |
-<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
+<p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 
 **Hitos completados:** Pipeline de QA integral implantado en `scripts/run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
 
@@ -3430,9 +3524,9 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas de redacción | 55h | ~64h | +16% |
 | Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
 | Iteraciones de revisión | 2–3 | 5 | +67% |
-<p align="center"><i><b>Tabla 35:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
+<p align="center"><i><b>Tabla 36:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
 
-**Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (14 figuras), Anexos YAML y de Planificación.
+**Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (17 figuras), Anexos YAML y de Planificación.
 
 **Notas:** La memoria creció por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
 
@@ -3445,11 +3539,11 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 10h | ~18h | +80% |
 | Herramientas MCP totales | 4 | 7 | +75% |
 | Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
-<p align="center"><i><b>Tabla 36:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
+<p align="center"><i><b>Tabla 37:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
 
-**Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos.
+**Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos, **Experimentos Cognitivos Multi-Modelo** (Qwen vs Mistral vs Llama).
 
-**Notas:** Esta fase, aunque no estaba prevista en el alcance original P0/P1, se abordó para elevar el proyecto a los máximos estándares de calidad. Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores, sin que la lógica de negocio se vea afectada, validando empíricamente la hipótesis principal de diseño (Cap. 4.2).
+**Notas:** Esta fase estaba planificada desde el inicio como un objetivo opcional de excelencia (Prioridad P2), y pudo abordarse con éxito gracias al buen ritmo de desarrollo de los módulos obligatorios (P0/P1). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores. Por otro lado, la ejecución de los tests metamórficos en distintos LLMs de 7B (Mistral, Llama 3.2, Qwen) permitió descubrir empíricamente el fenómeno de colapso cognitivo en la arquitectura ReAct, validando matemáticamente la hipótesis de transicionar a una arquitectura *Stateful* de "Rescate Cognitivo".
 
 
 <div style='page-break-after: always;'></div>
@@ -3483,4 +3577,4 @@ Para facilitar la lectura y comprensión técnica de este documento, a continuac
 | **ROI** | Return on Investment | Retorno de Inversión. Métrica financiera que compara el beneficio obtenido en relación a la inversión realizada (ej. tiempo ahorrado vs. coste de desarrollo). |
 | **SIC** | Servicio de Informática y Comunicaciones | Departamento institucional (típicamente universitario o gubernamental) encargado de administrar la infraestructura tecnológica y soporte a usuarios. |
 | **TTM** | Time To Market / Time To Mitigation | Tiempo desde la concepción de una necesidad (ej. necesito una web) hasta que el servicio está operativo y disponible. |
-<p align="center"><i><b>Tabla 37:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>
+<p align="center"><i><b>Tabla 38:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>

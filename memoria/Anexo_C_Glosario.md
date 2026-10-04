@@ -27,4 +27,4 @@ Para facilitar la lectura y comprensión técnica de este documento, a continuac
 | **ROI** | Return on Investment | Retorno de Inversión. Métrica financiera que compara el beneficio obtenido en relación a la inversión realizada (ej. tiempo ahorrado vs. coste de desarrollo). |
 | **SIC** | Servicio de Informática y Comunicaciones | Departamento institucional (típicamente universitario o gubernamental) encargado de administrar la infraestructura tecnológica y soporte a usuarios. |
 | **TTM** | Time To Market / Time To Mitigation | Tiempo desde la concepción de una necesidad (ej. necesito una web) hasta que el servicio está operativo y disponible. |
-<p align="center"><i><b>Tabla 37:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>
+<p align="center"><i><b>Tabla 38:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>

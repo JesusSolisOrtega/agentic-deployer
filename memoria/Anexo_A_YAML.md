@@ -29,7 +29,7 @@ kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
 | **Estado final** | `DEPLOYED` (tras aprobación HITL) |
 | **Timestamp** | 2026-09-27T10:14:34+02:00 |
 | **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
-<p align="center"><i><b>Tabla 29:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 30:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
 
 ---
 

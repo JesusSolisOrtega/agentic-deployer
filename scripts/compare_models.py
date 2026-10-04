@@ -3,7 +3,7 @@ import json
 import os
 import time
 
-from app.agent_layer.agent import AgentOrchestrator, OpenAILLMClient
+from app.agent_layer.agent import AgentOrchestrator, OpenAILLMClient, LiteLLMClient
 from app.domain.models import DeploymentIntent
 
 
@@ -11,7 +11,13 @@ from app.domain.models import DeploymentIntent
 import logging
 logging.getLogger().setLevel(logging.ERROR)
 
-MODELS = ["qwen2.5:7b", "llama3.2", "mistral"]
+MODELS = [
+    "qwen2.5:7b", "llama3.2", "mistral", 
+    "gemini-3.5-flash", 
+    "cohere/command-r-plus-08-2024", 
+    "mistral/ministral-8b-latest", 
+    "groq/qwen/qwen3.8-27b"  # Modelo soportado y altamente funcional de Groq
+]
 
 SCENARIOS = [
     {
@@ -52,11 +58,20 @@ async def main():
     
     for model in MODELS:
         print(f"\nEvaluando {model}...")
-        client = OpenAILLMClient(
-            api_key="ollama",
-            base_url="http://localhost:11434/v1",
-            model=model
-        )
+        if model.startswith("gemini"):
+            client = OpenAILLMClient(
+                api_key=os.getenv("GEMINI_API_KEY", ""),
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+                model=model
+            )
+        elif "/" in model:
+            client = LiteLLMClient(model=model)
+        else:
+            client = OpenAILLMClient(
+                api_key="ollama",
+                base_url="http://localhost:11434/v1",
+                model=model
+            )
         
         total_iterations = 0
         total_time = 0
@@ -75,8 +90,8 @@ async def main():
                 print(f"    -> Fallo: {e}")
                 
         results[model] = {
-            "avg_iterations": total_iterations / len(SCENARIOS),
-            "avg_time": total_time / len(SCENARIOS),
+            "avg_iterations": total_iterations / successes if successes > 0 else 0,
+            "avg_time": total_time / successes if successes > 0 else 0,
             "success_rate": (successes / len(SCENARIOS)) * 100
         }
         
@@ -84,10 +99,11 @@ async def main():
     log_content += "| Modelo LLM | Tamaño | Iteraciones Medias | Latencia Media E2E | Tasa de Éxito |\n"
     log_content += "|---|---|---|---|---|\n"
     for model, res in results.items():
-        # Hardcode tamaño
         size = "7B"
         if "llama" in model:
-            size = "3B"
+            size = "3B" if "3.2" in model else "70B"
+        if "gemini" in model or "cohere" in model or "mistral/" in model or "groq" in model:
+            size = "Cloud"
             
         log_content += f"| **{model}** | {size} | {res['avg_iterations']:.1f} | {res['avg_time']:.2f} s | {res['success_rate']:.0f}% |\n"
 

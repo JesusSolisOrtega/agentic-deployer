@@ -63,6 +63,9 @@ OPENAI_API_KEY=sk-... LLM_PROVIDER=openai streamlit run app/agent_layer/chat_app
 streamlit run app/agent_layer/chat_app.py   # LLM_PROVIDER=fake por defecto
 ```
 
+**Modos adicionales (Cohere, Mistral, Groq):**
+Se soporta a través de proxies universales integrados en el código. Requiere configurar su API key en el archivo `.env`. (Ver [`.env.example`](.env.example)).
+
 > Ver [`.env.example`](.env.example) para la lista completa de variables de configuración.
 
 ## 🧪 Aseguramiento de Calidad Avanzado (QA)

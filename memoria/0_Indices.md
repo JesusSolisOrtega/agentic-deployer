@@ -111,30 +111,31 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 - **Tabla 11:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo)*
 - **Tabla 12:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo)*
 - **Tabla 13:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo)*
-- **Tabla 14:** Comparativa E2E de métricas operativas (ITSM vs Agentic Deployer). *(Capítulo)*
-- **Tabla 15:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
-- **Tabla 16:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
-- **Tabla 17:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
-- **Tabla 18:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
-- **Tabla 19:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
-- **Tabla 20:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
-- **Tabla 21:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
-- **Tabla 22:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
-- **Tabla 23:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
-- **Tabla 24:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
-- **Tabla 25:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
-- **Tabla 26:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
-- **Tabla 27:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
-- **Tabla 28:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Capítulo)*
-- **Tabla 29:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
-- **Tabla 30:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
-- **Tabla 31:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
-- **Tabla 32:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
-- **Tabla 33:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
-- **Tabla 34:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
-- **Tabla 35:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
-- **Tabla 36:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
-- **Tabla 37:** Datos tabulares adicionales. *(Anexo)*
+- **Tabla 14:** Comparativa E2E de métricas operativas (multi-escenario). *(Capítulo)*
+- **Tabla 15:** Rendimiento comparativo real de modelos alternativos. *(Capítulo)*
+- **Tabla 16:** Resultados de los Experimentos de Arquitectura Cognitiva. *(Capítulo)*
+- **Tabla 17:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
+- **Tabla 18:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
+- **Tabla 19:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
+- **Tabla 20:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
+- **Tabla 21:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
+- **Tabla 22:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
+- **Tabla 23:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
+- **Tabla 24:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
+- **Tabla 25:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
+- **Tabla 26:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
+- **Tabla 27:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
+- **Tabla 28:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
+- **Tabla 29:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
+- **Tabla 30:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Anexo)*
+- **Tabla 31:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
+- **Tabla 32:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
+- **Tabla 33:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
+- **Tabla 34:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
+- **Tabla 35:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
+- **Tabla 36:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
+- **Tabla 37:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
+- **Tabla 38:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 

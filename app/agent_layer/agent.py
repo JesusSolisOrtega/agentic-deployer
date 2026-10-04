@@ -315,6 +315,17 @@ class OpenAILLMClient(LLMClient):
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
 
+        import time
+        if "gemini" in self.model.lower():
+            # Evitar Rate Limit de 5 RPM en la cuota gratuita de Google AI Studio
+            time.sleep(15)
+        elif "llama" in self.model.lower() and "groq" in str(getattr(self.client, "base_url", "")):
+            # Evitar Rate Limit de 30 RPM en la cuota gratuita de Groq
+            time.sleep(2)
+        elif "mistral.ai" in str(getattr(self.client, "base_url", "")):
+            # Evitar Rate Limit estricto de la cuota gratuita de Mistral ("Le Free Tier")
+            time.sleep(5)
+
         response = self.client.chat.completions.create(**kwargs)
         choice = response.choices[0].message
 
@@ -323,6 +334,62 @@ class OpenAILLMClient(LLMClient):
         if choice.tool_calls:
             for tc in choice.tool_calls:
                 # The LLM generates the arguments as a JSON string
+                try:
+                    args = json.loads(tc.function.arguments)
+                except json.JSONDecodeError:
+                    args = {}
+
+                agent_response.tool_calls.append(
+                    ToolCall(
+                        id=tc.id,
+                        name=tc.function.name,
+                        arguments=args,
+                    )
+                )
+
+        return agent_response
+
+# ---------------------------------------------------------------------------
+# LiteLLM Client — Universal Interface
+# ---------------------------------------------------------------------------
+
+class LiteLLMClient(LLMClient):
+    """
+    Client using litellm to support any provider (Cohere, Anthropic, etc).
+    """
+
+    def __init__(
+        self,
+        model: str,
+    ):
+        self.model = model
+
+    def chat(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+    ) -> AgentResponse:
+        import litellm
+        
+        kwargs: dict = {
+            "model": self.model,
+            "messages": messages,
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+            
+        import time
+        if "command-r" in self.model.lower():
+            time.sleep(2) # rate limit prevention
+
+        response = litellm.completion(**kwargs)
+        choice = response.choices[0].message
+
+        agent_response = AgentResponse(content=choice.content)
+
+        if choice.tool_calls:
+            for tc in choice.tool_calls:
                 try:
                     args = json.loads(tc.function.arguments)
                 except json.JSONDecodeError:
