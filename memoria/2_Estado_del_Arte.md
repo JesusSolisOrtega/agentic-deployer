@@ -196,7 +196,7 @@ La contribución diferencial de este TFM respecto a estos trabajos es la **separ
 
 ### 2.5.3. Frameworks de Orquestación: LangChain y AutoGen
 
-Los frameworks de código abierto más populares para la construcción de agentes son **LangChain** (Harrison Chase, 2022) y **AutoGen** (Microsoft, 2023). Ambos ofrecen abstracciones de alto nivel para la construcción de cadenas de razonamiento y sistemas multi-agente.
+Los frameworks de código abierto más populares para la construcción de agentes son **LangChain** (Harrison Chase, 2022) [21] y **AutoGen** (Microsoft, 2023) [22]. Ambos ofrecen abstracciones de alto nivel para la construcción de cadenas de razonamiento y sistemas multi-agente.
 
 No obstante, su aplicación directa al dominio de operaciones de infraestructura crítica presenta tres riesgos no resueltos:
 

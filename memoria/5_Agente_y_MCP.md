@@ -136,7 +136,7 @@ El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 
 **`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube y deserializa la respuesta JSON.
 
-**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
+**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [19], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama [20] (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
 
 ```text
 PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
@@ -212,7 +212,7 @@ El *Agentic Deployer* maneja, por su propia naturaleza operativa, información e
 
 El diseño agnóstico soluciona este paradigma permitiendo la **conmutación por políticas de clasificación**:
 - **Escenario de Baja Clasificación:** Para entornos de investigación pública (despliegue de servidores web estáticos o *sandboxes* de prueba sin datos sensibles), el sistema puede apuntar mediante el *Factory* a la API de OpenAI, aprovechando la velocidad de inferencia suprema y la baja latencia de la nube.
-- **Escenario de Alta Clasificación (Air-Gapped):** Cuando la provisión involucra servicios confidenciales (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones altera la configuración del entorno para inyectar el adaptador de Ollama. Bajo esta topología, la inferencia probabilística se resuelve físicamente en servidores con aceleración GPU (Nvidia/AMD) alojados en el sótano del propio Centro de Procesamiento de Datos (CPD) de la universidad. Ni un solo token abandona la intranet institucional, garantizando la inviolabilidad del secreto sin sacrificar la interfaz agéntica natural de la que disfruta el usuario.
+- **Escenario de Alta Clasificación (Air-Gapped):** Cuando la provisión involucra servicios confidenciales (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones altera la configuración del entorno para inyectar el adaptador de Ollama [20]. Bajo esta topología, la inferencia probabilística se resuelve físicamente en servidores con aceleración GPU (Nvidia/AMD) alojados en el sótano del propio Centro de Procesamiento de Datos (CPD) de la universidad. Ni un solo token abandona la intranet institucional, garantizando la inviolabilidad del secreto sin sacrificar la interfaz agéntica natural de la que disfruta el usuario.
 
 Esta capacidad de hibridación (Nube Pública vs *Bare-Metal* Local), resuelta elegantemente gracias a los patrones de diseño orientados a objetos, convierte al prototipo desarrollado en este TFM en una plataforma madura, auditable y, sobre todo, legalmente compatible con los estándares de gobernanza ITIL aplicados en la gran industria.
 
