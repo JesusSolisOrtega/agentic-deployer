@@ -419,13 +419,18 @@ class OllamaLLMClient(LLMClient):  # pragma: no cover
 
     Requires a running Ollama server:
         ollama serve                    # Start server
-        ollama pull qwen2.5:7b          # Download model (recommended)
+        ollama pull qwen2.5:14b         # Download model (recommended)
         ollama pull llama3.1            # Alternative with tool_calls support
 
-    Recommended models with native tool_calls support:
-        - qwen2.5:7b    (8 GB VRAM, best Spanish-language performance)
-        - llama3.1:8b   (8 GB VRAM, strong reasoning)
-        - mistral:7b    (4 GB VRAM, fast, lighter)
+    Recommended models with native tool_calls support by tier:
+        - [Basic]        qwen2.5:7b    (8 GB VRAM, good for testing/MVP)
+        - [Intermediate] qwen2.5:14b   (16 GB VRAM, optimal balance of speed & reliability)
+        - [Enterprise]   qwen2.5:32b   (24 GB VRAM, high reliability, production-grade)
+        - [Enterprise]   llama3.1:70b  (48 GB VRAM, maximum reasoning capacity)
+
+    NOT recommended (tested but prone to cognitive collapse in ReAct loops):
+        - llama3.1:8b   (Frequent JSON schema violations under stress)
+        - mistral:7b    (Attention dilution in multi-turn conversations)
     """
 
     def __init__(

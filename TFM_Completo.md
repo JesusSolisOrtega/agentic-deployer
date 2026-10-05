@@ -4,7 +4,7 @@ La creciente complejidad de la infraestructura declarativa de Kubernetes supone 
 
 La solución se articula sobre tres pilares: (1) una Arquitectura Hexagonal que aísla las reglas de negocio de la estocasticidad de los Modelos de Lenguaje (LLM); (2) el estándar abierto *Model Context Protocol* (MCP), que evita el *vendor lock-in*; y (3) un patrón *Human-In-The-Loop* (HITL) gobernado por una Máquina de Estados inmutable que asegura que ningún despliegue impacte en el clúster sin validación técnica.
 
-El desarrollo siguió un enfoque *Domain-First*, asegurando la calidad mediante *Property-Based* y *Mutation Testing*. Los casos de estudio revelan que el sistema elimina los cuellos de botella asíncronos, proyectando (bajo supuestos operativos estandarizados) una reducción del tiempo de entrega de un orden de días a escasos minutos. Adicionalmente, el análisis económico establece un ROI prospectivo superior al 460% a tres años, demostrando la alta viabilidad corporativa de la ingeniería agéntica en entornos controlados.
+El desarrollo siguió un enfoque *Domain-First*, asegurando la calidad mediante *Property-Based* y *Mutation Testing*. Los casos de estudio revelan que el sistema elimina los cuellos de botella asíncronos, proyectando (bajo supuestos operativos estandarizados) una reducción del tiempo de entrega de un orden de días a escasos minutos. Adicionalmente, el análisis económico establece un ROI prospectivo superior al 520% a tres años, demostrando la alta viabilidad corporativa de la ingeniería agéntica en entornos controlados.
 
 **Palabras clave:** Agentes LLM, Model Context Protocol (MCP), Arquitectura Hexagonal, Human-In-The-Loop, Kubernetes, Platform Engineering.
 
@@ -14,7 +14,7 @@ The growing complexity of Kubernetes declarative infrastructure poses a signific
 
 The solution is built upon three pillars: (1) a Hexagonal Architecture that isolates business rules from the stochasticity of Large Language Models (LLMs); (2) the open *Model Context Protocol* (MCP) standard, which prevents vendor lock-in; and (3) a *Human-In-The-Loop* (HITL) pattern governed by an immutable Finite State Machine that ensures no deployment reaches the cluster without technical validation.
 
-Development followed a Domain-First approach, with quality assured through Property-Based and Mutation Testing. Documented case studies reveal that the system eliminates asynchronous bottlenecks, projecting (under standardized operational assumptions) a reduction in Time-to-Market from an order of days to mere minutes. Furthermore, the economic analysis establishes a prospective ROI exceeding 460% over three years, demonstrating the high corporate viability of agentic engineering in controlled environments.
+Development followed a Domain-First approach, with quality assured through Property-Based and Mutation Testing. Documented case studies reveal that the system eliminates asynchronous bottlenecks, projecting (under standardized operational assumptions) a reduction in Time-to-Market from an order of days to mere minutes. Furthermore, the economic analysis establishes a prospective ROI exceeding 520% over three years, demonstrating the high corporate viability of agentic engineering in controlled environments.
 
 **Keywords:** LLM Agents, Model Context Protocol (MCP), Hexagonal Architecture, Human-In-The-Loop, Kubernetes, Platform Engineering.
 
@@ -2823,13 +2823,22 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 
 Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar e implantar el *Agentic Deployer* en un entorno institucional real**, como un Servicio de Informática universitario o un departamento de IT corporativo?
 
+> **Nota metodológica sobre fuentes y referencias de costes:** Todos los importes económicos detallados en esta sección representan estimaciones de mercado a **fecha de redacción de esta memoria** y se han derivado de las siguientes fuentes públicas (consultadas durante el desarrollo del proyecto):
+> - **Tarifas de API:** Páginas oficiales de *pricing* para desarrolladores ([OpenAI API Pricing](https://openai.com/api/pricing/), [Anthropic Console Pricing](https://www.anthropic.com/pricing), [Google AI Studio](https://ai.google.dev/pricing)).
+> - **Hardware (Ollama Local):** Basado en el MSRP oficial de [NVIDIA para la serie RTX 4000](https://www.nvidia.com/es-es/geforce/graphics-cards/40-series/) y precios medios en distribuidores B2B.
+> - **Infraestructura Cloud/VPS:** Estimaciones promediadas de catálogos públicos de proveedores IaaS ([AWS EC2](https://aws.amazon.com/es/ec2/pricing/), [Google Cloud Compute](https://cloud.google.com/compute/pricing), [Hetzner Cloud](https://www.hetzner.com/cloud/)).
+> - **Coste Eléctrico:** Calculado asumiendo una tarifa media institucional/industrial de ~0,15 €/kWh en España, tomando como referencia los informes del [Mercado Eléctrico de Eurostat](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Electricity_price_statistics) y Red Eléctrica de España.
+> - **Salarios (Coste-Hora Técnico):** Estimados entre 40 €/h y 60 €/h (coste empresa total), en consonancia con la [Guía Salarial Hays España](https://guiasalarial.hays.es/) y el [Estudio de Remuneración de Michael Page](https://www.michaelpage.es/) para roles de *Platform Engineer* y *DevOps*.
+>
+> Debido a la volatilidad del sector tecnológico, estos valores constituyen una referencia base estructurada para el cálculo prospectivo de viabilidad y ROI, susceptible a fluctuaciones temporales.
+
 ### 9.5.1. Perfiles de Organización Adoptante
 
 | Perfil | Descripción | Complejidad |
 |---|---|---|
-| **A — Universidad pequeña** | <5.000 usuarios, 1 técnico SIC, clúster Minikube/K3s local | Baja |
-| **B — Universidad mediana** | 5.000–30.000 usuarios, equipo SIC de 5–10 personas, K8s on-premise | Media |
-| **C — Administración pública / empresa** | >30.000 usuarios, multi-clúster, auditoría RGPD estricta | Alta |
+| **A — Universidad/Empresa Pequeña** | <5.000 usuarios, equipo IT de 1–3 personas, infraestructura local básica | Baja |
+| **B — Universidad/Empresa Mediana** | 5.000–30.000 usuarios, departamento IT estructurado, K8s on-premise/híbrido | Media |
+| **C — Gran Universidad/Empresa** | >30.000 usuarios, multi-clúster, equipo IT dedicado, auditoría RGPD estricta | Alta |
 <p align="center"><i><b>Tabla 23:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
 
 ### 9.5.2. Costes de Implantación (CAPEX — Inversión Inicial)
@@ -2839,8 +2848,8 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **Adaptación del código** *(personalizar `SYSTEM_PROMPT`, herramientas MCP y políticas de seguridad al catálogo corporativo)* | 20h × 40 €/h = **800 €** | 60h × 50 €/h = **3.000 €** | 160h × 60 €/h = **9.600 €** |
 | **Implementación `RealK8sAdapter`** *(integración con clúster físico vía `kubernetes-client`)* | 20h × 40 €/h = **800 €** | 40h × 50 €/h = **2.000 €** | 80h × 60 €/h = **4.800 €** |
 | **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
-| **Formación del equipo técnico** | 4h × 5 pers = **400 €** | 8h × 10 pers = **1.600 €** | 16h × 20 pers = **4.800 €** |
-| **CAPEX Total** | **2.400 €** | **8.100 €** | **22.800 €** |
+| **Formación de administradores (HITL)** | 4h × 1 pers = **160 €** | 8h × 2 pers = **800 €** | 12h × 4 pers = **2.880 €** |
+| **CAPEX Total** | **2.160 €** | **7.300 €** | **20.880 €** |
 <p align="center"><i><b>Tabla 24:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
 
 ### 9.5.3. Costes Operativos Anuales (OPEX)
@@ -2857,24 +2866,28 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 
 **Opción 1 — Ollama local (modelos open-source, recomendado para instituciones públicas)**
 
-| Modelo | VRAM necesaria | Inversión hardware (única vez) | Coste API | Privacidad |
-|---|---|---|---|---|
-| `qwen2.5:7b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total (Zero Data Retention) |
-| `llama3.1:8b` | 8 GB | ~400 € GPU consumer | **0 €/año** | Total |
-| `mistral:7b` | 4 GB | ~250 € GPU consumer | **0 €/año** | Total |
-<p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud).</i></p>
+La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de una inversión inicial (CAPEX) en hardware. En base a los resultados empíricos (Capítulo 10), se proponen tres niveles de adopción corporativa según el equilibrio deseado entre coste y resiliencia cognitiva:
+
+| Nivel (Caso de Uso) | Modelo Recomendado | VRAM | Inversión hardware (GPU, pago único) | Coste API | Privacidad |
+|---|---|---|---|---|---|
+| **Básico** (MVP / Pruebas) | `qwen2.5:7b` | 8 GB | ~400 € (ej. RTX 4060) | **0 €/año** | Total (Zero Data Retention) |
+| **Intermedio** (Equilibrado) | `qwen2.5:14b` / `mistral-nemo:12b` | 16 GB | ~500 € (ej. RTX 4060 Ti 16GB) | **0 €/año** | Total |
+| **Enterprise** (Óptimo Corporativo) | `qwen2.5:32b` / `llama3.1:70b` | 24-48 GB | ~1.800 € - 5.000 € (ej. RTX 3090/4090 o dual) | **0 €/año** | Total |
+<p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud) según niveles de adopción.</i></p>
+
+> **Nota técnica sobre escalabilidad:** Aunque el prototipo validó la viabilidad funcional con modelos de 7B (Nivel Básico), empíricamente presentaron vulnerabilidades de "dilución de atención" bajo estrés. Para un entorno productivo institucional, se recomienda firmemente escalar al **Nivel Intermedio (14B)** o **Nivel Enterprise (32-70B)**. La inversión extra en hardware (~100 € - 1.600 €) es insignificante frente a la ganancia masiva en fiabilidad (*Tool Calling* casi infalible) y se amortiza en los primeros meses al compararlo con las tarifas de las APIs en la nube.
 
 **Opción 2 — API en la nube**
 
 | Proveedor | Modelo | Precio entrada | Precio salida | Estimación anual* |
 |---|---|---|---|---|
-| OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~600–2.400 €/año** |
-| OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~6.000–24.000 €/año** |
-| Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~800–3.200 €/año** |
-| Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~300–1.200 €/año** |
-<p align="center"><i><b>Tabla 27:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
+| OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~160–650 €/año** |
+| OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~2.700–11.000 €/año** |
+| Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~290–1.150 €/año** |
+| Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~80–330 €/año** |
+<p align="center"><i><b>Tabla 27:</b> Estimación de Costes de Motor LLM (API en la Nube).</i></p>
 
-> *Para 50–200 solicitudes diarias con conversaciones de ~2.000 tokens promedio.
+> *Para 50–200 solicitudes diarias. El volumen asume **~50.000 tokens promedio por solicitud** (90% contexto de entrada, 10% salida). Esta cifra se deriva del efecto "explosión de contexto" acumulativo de los agentes autónomos (patrón ReAct). Un despliegue estándar requiere múltiples iteraciones (planificar, aplicar, verificar, corregir errores); en cada iteración, el LLM debe procesar de nuevo todo el historial previo. Dado que las herramientas de Kubernetes devuelven salidas muy extensas (ej. volcados de manifiestos con `kubectl -o yaml` o trazas de *logs*, que pueden superar los 3.000 tokens por llamada), el consumo de tokens de entrada crece exponencialmente en cada paso del bucle hasta resolver la petición.
 
 #### OPEX Total Anual por Perfil
 
@@ -2882,12 +2895,16 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 |---|---|---|---|
 | Servidor aplicación | 600 €/año | 300 €/año | 3.600 €/año |
 | Almacenamiento | 60 €/año | 200 €/año | 800 €/año |
-| LLM Ollama local (hardware, única vez) | +400 € (año 0) | +400 € (año 0) | +400 € (año 0) |
-| LLM API nube (alternativa) | ~600 €/año | ~2.400 €/año | ~6.000 €/año |
+| Consumo Eléctrico GPU (Local)* | ~20 €/año | ~40 €/año | ~100 €/año |
+| LLM Ollama local (hardware, única vez) | +400 € (Nivel Básico, Año 0) | +500 € (Nivel Intermedio, Año 0) | +2.000 € (Nivel Enterprise, Año 0) |
+| LLM API nube (alternativa GPT-4o)** | ~2.700 €/año | ~5.500 €/año | ~11.000 €/año |
 | Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
-| **OPEX Total (con Ollama)** | **~1.060 €/año** | **~1.500 €/año** | **~6.800 €/año** |
-| **OPEX Total (con API nube)** | **~1.660 €/año** | **~3.900 €/año** | **~12.800 €/año** |
-<p align="center"><i><b>Tabla 27:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
+| **OPEX Total (con Ollama)** | **~1.080 €/año** | **~1.540 €/año** | **~6.900 €/año** |
+| **OPEX Total (con API nube)** | **~3.760 €/año** | **~7.000 €/año** | **~17.800 €/año** |
+<p align="center"><i><b>Tabla 28:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
+
+> *El coste eléctrico es prácticamente residual debido a que el sistema procesa una media de 50-200 solicitudes diarias. La GPU permanece en estado de reposo (Idle, consumiendo ~15-30W) el 99% del tiempo, activando picos de consumo máximo únicamente durante los escasos segundos que dura la inferencia.
+> **Para entornos institucionales productivos, la alternativa en la nube requiere modelos cognitivamente resilientes (nivel GPT-4o), asumiendo volúmenes escalados según el perfil (50, 100 y 200 solicitudes diarias respectivamente).
 
 ### 9.5.4. Análisis de Retorno de Inversión (ROI)
 
@@ -2895,30 +2912,30 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 
 **Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
 
-| Proceso eliminado | Tiempo ahorrado/solicitud | Solicitudes/año | Coste hora técnico N3 | Ahorro anual |
+| Proceso automatizado | Tiempo efectivo ahorrado/solicitud | Solicitudes/año | Coste hora técnico N3 | Ahorro anual |
 |---|---|---|---|---|
-| Negociación de requisitos (email asíncrono) | 1.440 min → 0,5 min | 500 | 50 €/h | **11.995 €** |
-| Traducción manual a YAML | 15 min → 0,01 min | 500 | 50 €/h | **6.242 €** |
-| Validación de políticas | 5 min → 0,001 min | 500 | 50 €/h | **2.083 €** |
-| **Ahorro total anual** | | | | **~20.320 €** |
-<p align="center"><i><b>Tabla 28:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
+| Negociación de requisitos (Triage) | ~29 min (trabajo activo) | 500 | 50 €/h | **~12.000 €** |
+| Traducción manual a YAML | ~15 min | 500 | 50 €/h | **~6.250 €** |
+| Validación de políticas | ~5 min | 500 | 50 €/h | **~2.080 €** |
+| **Ahorro total anual** | | | | **~20.330 €** |
+<p align="center"><i><b>Tabla 29:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
 
 > **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
 
-**ROI a 3 años — Perfil B con Ollama**
+**ROI a 3 años — Perfil B con Ollama (Nivel Intermedio, 14B)**
 
 | Concepto | Año 0 | Año 1 | Año 2 | Año 3 |
 |---|---|---|---|---|
-| Inversión CAPEX | -8.100 € | — | — | — |
-| Hardware LLM (Ollama GPU, única vez) | -400 € | — | — | — |
-| OPEX anual | — | -1.500 € | -1.500 € | -1.500 € |
-| Ahorro operativo | — | +20.320 € | +20.320 € | +20.320 € |
-| **Flujo neto** | **-8.500 €** | **+18.820 €** | **+18.820 €** | **+18.820 €** |
-| **Acumulado** | -8.500 € | +10.320 € | +29.140 € | +47.960 € |
-<p align="center"><i><b>Tabla 29:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
+| Inversión CAPEX | -7.300 € | — | — | — |
+| Hardware LLM (Ollama GPU, única vez) | -500 € | — | — | — |
+| OPEX anual | — | -1.540 € | -1.540 € | -1.540 € |
+| Ahorro operativo | — | +20.330 € | +20.330 € | +20.330 € |
+| **Flujo neto** | **-7.800 €** | **+18.790 €** | **+18.790 €** | **+18.790 €** |
+| **Acumulado** | -7.800 € | +10.990 € | +29.780 € | +48.570 € |
+<p align="center"><i><b>Tabla 30:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
 
-> **Período de retorno (Payback Period): ~5,4 meses** tras la implantación.
-> **ROI a 3 años: ~464%**
+> **Período de retorno (Payback Period): ~5 meses** tras la implantación.
+> **ROI a 3 años: ~522%**
 
 ---
 
@@ -2928,9 +2945,9 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 
 2. **La asistencia de IA generativa es un multiplicador de productividad consistente con el objeto de estudio.** El uso de un agente de codificación (Google Gemini Advanced, ~120 € de coste imputable) permitió abordar un alcance técnico ambicioso —arquitectura hexagonal, SDK MCP oficial, QA multicapa, agente ReAct— dentro de un esfuerzo total contenido (~340h), que de otro modo habría requerido un equipo de al menos 2 personas.
 
-3. **El modelo de coste cero es viable con Ollama para instituciones públicas.** La combinación Ollama + servidor on-premise reduce el OPEX a menos de 2.000 €/año, con garantía total de privacidad del dato (Zero Data Retention), lo que lo convierte en la opción recomendada para organismos con restricciones presupuestarias o de soberanía del dato.
+3. **La inferencia local es económicamente superior para instituciones públicas.** La combinación Ollama + servidor on-premise reduce el OPEX a ~1.540 €/año, eliminando el coste recurrente y asimétrico de las APIs en la nube. Además, garantiza la total privacidad del dato (Zero Data Retention), lo que la convierte en la opción imperativa para organismos sujetos al ENS y RGPD.
 
-4. **El ROI superior al 460% en 3 años justifica la adopción institucional.** El umbral de rentabilidad se alcanza en menos de 6 meses para un volumen mínimo de 500 solicitudes de infraestructura anuales.
+4. **El ROI superior al 520% en 3 años justifica la adopción institucional.** El umbral de rentabilidad se alcanza en unos 5 meses para un volumen mínimo de 500 solicitudes de infraestructura anuales.
 
 5. **La arquitectura hexagonal protege la inversión tecnológica a largo plazo.** La sustitución de cualquier adaptador —`FakeK8sAdapter` → `RealK8sAdapter`, Ollama → GPT-4o, etc.— no requiere modificar la lógica de negocio. El coste de evolución tecnológica está estructuralmente minimizado por el Principio de Inversión de Dependencias (DIP).
 
@@ -3074,7 +3091,7 @@ Las métricas de eficiencia operativa documentadas en el Capítulo 8 se basan en
 
 Las métricas empíricas documentadas en el Capítulo 8 están fuertemente condicionadas por la infraestructura física subyacente. Todo el entorno de pruebas ha sido ejecutado localmente utilizando una GPU de portátil orientada al consumo (NVIDIA GeForce RTX 3060 con 6 GB de VRAM).
 
-Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct frente a Llama o Mistral, el escrutinio empírico reveló su fragilidad cognitiva subyacente. Como se demostró en las Pruebas Metamórficas (Sección 7.4), Qwen fracasó en el 50% de los casos (ruido léxico y composición incremental) al colapsar su ventana de atención y perder el formato JSON. En un entorno institucional sin este cuello de botella de memoria (ej. clústeres A100/H100), se habrían podido desplegar modelos de frontera (ej. Llama 3.1 70B o Mixtral), cuya capacidad lógica superior habría resuelto estas pruebas con total robustez, y a los que no haría falta aplicar mitigaciones como los *Suffijos de Refuerzo* propuestos.
+Esta barrera de 6 GB de memoria de vídeo forzó la elección de modelos de tamaño reducido (<8B parámetros) y el uso de técnicas agresivas de compresión (cuantización a 4 bits). Esto explica la divergencia de rendimiento: mientras **Qwen 2.5 (7B)** demostró un *fine-tuning* excelente logrando orquestar el bucle ReAct frente a Llama o Mistral, el escrutinio empírico reveló su fragilidad cognitiva subyacente. Como se demostró en las Pruebas Metamórficas (Sección 7.4), Qwen fracasó en el 50% de los casos (ruido léxico y composición incremental) al colapsar su ventana de atención y perder el formato JSON. En un entorno institucional sin este cuello de botella de memoria (escalando a hardware asequible de 16GB-24GB VRAM como las RTX 4060 Ti o 4090), se habrían podido desplegar modelos de grado corporativo (ej. Qwen 2.5 14B/32B o Llama 3.1 70B), cuya capacidad lógica superior habría resuelto estas pruebas con total robustez, y a los que no haría falta aplicar mitigaciones como los *Suffijos de Refuerzo* propuestos.
 
 Del mismo modo, las latencias observadas (que alcanzan los 47 segundos en casos de multi-iteración ReAct) son un artefacto directo de la falta de ancho de banda y capacidad de cómputo del hardware portátil. En un entorno productivo con aceleración dedicada o *endpoints* gestionados corporativos, estos tiempos de inferencia se colapsarían a escasos segundos, ofreciendo una experiencia en tiempo casi real.
 
