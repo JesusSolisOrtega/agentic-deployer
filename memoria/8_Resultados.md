@@ -374,10 +374,11 @@ Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundo
 
 Para respaldar la afirmación arquitectónica sobre la mitigación del *vendor lock-in* (gracias a MCP y al patrón Adapter), el diseño del `AgentOrchestrator` abstrae por completo al proveedor del LLM subyacente. El sistema está diseñado para que la sustitución del motor de inferencia requiera únicamente la alteración de la variable de entorno correspondiente. 
 
-Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de modelos adicionales bajo las mismas precondiciones: modelos locales cuantizados (Llama 3.2 de 3B y Mistral de 7B) y modelos comerciales servidos a través de APIs externas (Gemini 3.5 Flash, Cohere Command R+, Ministral 8B y el potente Qwen 27B vía Groq).
+Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de modelos adicionales bajo las mismas precondiciones: modelos locales cuantizados (**Qwen 2.5 Coder de 7B**, Llama 3.2 de 3B y Mistral de 7B) y modelos comerciales servidos a través de APIs externas (Gemini 3.5 Flash, Cohere Command R+, Ministral 8B y el potente Qwen 27B vía Groq).
 
 | Modelo LLM | Tamaño / Plataforma | Iteraciones Medias (sobre éxitos) | Latencia Media E2E | Tasa de Invocación |
 |---|---|---|---|---|
+| **Qwen 2.5 Coder** | 7B (Local) | 1,0 | 12,15 s | 100% |
 | **Qwen 2.5** | 7B (Local) | 3,0 | 47,33 s | 100% |
 | **Llama 3.2** | 3B (Local) | 1,0 | 9,44 s | 75% |
 | **Mistral** | 7B (Local) | N/A | N/A | 0% |
@@ -389,7 +390,11 @@ Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de mod
 
 Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente, **Mistral (local)** demostró incapacidad para formatear las llamadas a herramientas. 
 
-La integración de infraestructura externa evidenció la enorme diferencia de rendimiento respecto a la computación local. Modelos diseñados específicamente para *Tool Calling* como **Cohere Command R+**, **Gemini** y **Ministral 8B** lograron un éxito rotundo (100%) promediando apenas 1 iteración con latencias *end-to-end* drásticamente inferiores (3-9s promedio). Adicionalmente, evaluar **Qwen 3.8 (27B)** servido a través de la arquitectura de inferencia ultra-rápida (LPU) de **Groq** arrojó resultados extraordinarios: resolvió los escenarios con un 100% de éxito en múltiples iteraciones pero manteniendo latencias de apenas ~2 segundos por ciclo. Esto valida totalmente el encapsulamiento arquitectónico que nos ha permitido evaluarlos sin refactorizar código, demostrando que la fiabilidad de orquestación puede maximizarse combinando modelos robustos estructuralmente (familia Qwen) con inferencia acelerada por hardware en la nube.
+La integración de infraestructura externa evidenció una diferencia de rendimiento significativa respecto a la computación local cuando se emplean modelos generalistas. Soluciones alojadas en la nube como **Cohere Command R+**, **Gemini** y **Ministral 8B** lograron un índice de éxito del 100%, promediando 1,0 iteraciones con latencias *end-to-end* drásticamente inferiores (3-9s promedio). 
+
+Sin embargo, la inclusión empírica de **Qwen 2.5 Coder (7B)** demuestra que la adopción de un modelo local especializado en código permite igualar la precisión estructural de las alternativas comerciales operando bajo el paradigma *Zero Data Retention*. Al carecer de desviaciones conversacionales y ceñirse estrictamente al esquema JSON, el bucle ReAct convergió consistentemente en 1,0 iteraciones, lo que redujo la latencia de inferencia local de 47s a 12s en comparación con su homólogo generalista. 
+
+Adicionalmente, la evaluación de **Qwen 3.8 (27B)** mediante la arquitectura de inferencia LPU de **Groq** corroboró la eficacia del sistema, manteniendo latencias de ~2 segundos por ciclo. Estos resultados validan la robustez del diseño arquitectónico propuesto (desacoplamiento mediante el patrón *Adapter*), evidenciando que la fiabilidad de la orquestación puede optimizarse tanto mediante aceleración en la nube como a través de la hiper-especialización local.
 
 > **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
 
@@ -416,7 +421,7 @@ Como prueba de concepto definitiva, se separó la arquitectura. El LLM se limit�
 
 ### 8.4.4. Comparativa Multi-Modelo: Locales vs Cloud Comercial
 
-Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los otros dos modelos locales del catálogo (**Llama 3.2 (3B)** y **Mistral (7B)**), así como contra un ecosistema representativo de modelos comerciales en la nube (**Gemini 3.5 Flash**, **Cohere Command R+**, **Ministral 8B** y **Qwen 27B vía Groq**).
+Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los demás modelos locales del catálogo (**Qwen 2.5 Coder (7B)**, **Llama 3.2 (3B)** y **Mistral (7B)**), así como contra un ecosistema representativo de modelos comerciales en la nube (**Gemini 3.5 Flash**, **Cohere Command R+**, **Ministral 8B** y **Qwen 27B vía Groq**).
 
 El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño, y contrastar este comportamiento con el soporte nativo de los modelos *Cloud* diseñados para ecosistemas agénticos.
 
@@ -424,6 +429,7 @@ El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos 
 
 | Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
 | :--- | :--- | :--- | :--- |
+| **Qwen 2.5 Coder (7B)** | **Éxito 100%** (Hiper-especialización local) | **Éxito 100%** (Sintaxis robusta) | **Éxito 100%** (Precisión absoluta) |
 | **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2) |  Colapso Sintáctico (`ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Orquestación por Python) |
 | **Llama 3.2 (3B)** | Fallo Sintáctico (`ValidationError` por inyectar "None") |  Colapso Inmediato (Incapaz de estructurar la base) |  **Éxito Parcial** (Extrae `"null"` como string) |
 | **Mistral (7B)** | Fallo Lógico/Degradación (Olvida el formato en turnos largos) |  Colapso por Bucle (Alucina repitiendo tokens) |  **Éxito 100%** (Aísla extracción semántica) |
@@ -433,10 +439,12 @@ El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos 
 | **Qwen 27B (Groq)** | **Éxito 100%** (Inferencia ultra-rápida) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
 <p align="center"><i><b>Tabla 16:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
 
-**Conclusión Final de los Experimentos: El Rescate Cognitivo**
+**Conclusiones de los Experimentos de Arquitectura Cognitiva**
 
-El hallazgo más relevante de esta comparativa es el impacto transformador de la arquitectura sobre las capacidades intrínsecas del modelo. Modelos de 7B (como Qwen 2.5 y Mistral) que fracasaron estrepitosamente y fueron incapaces de sostener un flujo ReAct básico sin alucinar o colapsar, **pasaron a tener una tasa de éxito del 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning*.** 
+Los resultados de esta comparativa evidencian dos aproximaciones viables para la estabilización de modelos de lenguaje sujetos a restricciones de hardware. En primer lugar, los modelos generalistas de 7B (tales como Qwen 2.5 y Mistral), que experimentaron altas tasas de degradación lógica en arquitecturas no guiadas (ReAct clásico), alcanzaron una tasa de éxito del 100% al ser integrados en una Máquina de Estado Destilado. Esto demuestra el impacto positivo de mitigar la carga cognitiva del modelo mediante la delegación del control de flujo a la capa de software tradicional.
 
-Esta mejora del rendimiento técnico sugiere que los modelos locales de 7B no carecen intrínsecamente de capacidad lógica para el despliegue, sino que la arquitectura ReAct clásica tiende a sobrecargar su ventana de atención. Al mitigar esta carga cognitiva mediante la **Máquina de Estado Destilado** (delegando la orquestación a Python y limitando al LLM a funciones de extracción semántica), se logra estabilizar modelos previamente descartados, elevando significativamente su grado de fiabilidad.
+En segundo lugar, la evaluación de la variante **Qwen 2.5 Coder (7B)** aporta un corolario empírico fundamental: la hiper-especialización del corpus de entrenamiento en estructuras sintácticas rigurosas (código, JSON, YAML) exime al sistema de la necesidad de recurrir a arquitecturas de contención externas. El modelo especializado mantuvo una precisión del 100% de manera autónoma dentro del paradigma ReAct clásico, equiparando sus índices de fiabilidad estructural a los observados en modelos comerciales alojados en la nube, pero operando eficientemente con recursos locales (8 GB VRAM).
 
-La segregación de responsabilidades (Paradigma 3, *Stateful*) se consolida como una de las estrategias más sólidas para orquestar flujos complejos en hardware modesto. Asimismo, la inclusión de modelos *Cloud* comerciales y hardware ultra-rápido (Groq) reveló que el éxito de la orquestación recae en el diseño arquitectónico y el *fine-tuning* específico: modelos estructurados para *Tool Calling* como **Cohere Command R+**, **Gemini** o **Qwen 27B** operaron de manera óptima y determinista bajo este andamiaje, sin requerir escalas de 100 billones de parámetros. En síntesis, esta estabilización cognitiva de los modelos más limitados respalda firmemente el cambio de paradigma propuesto como Trabajo Futuro en la Sección 10.3.6, y sugiere que el *Tool Calling* eficaz es una capacidad arquitectónica funcional más que una consecuencia directa del tamaño en bruto del modelo.
+Este comportamiento sugiere que las limitaciones iniciales documentadas en los modelos locales de 7B no se derivan de una carencia intrínseca de capacidad lógica, sino de la sobrecarga atencional inducida por la arquitectura ReAct convencional. Al subsanar esta limitación —ya sea mediante la **Máquina de Estado Destilado** (segregación de responsabilidades) o mediante la adopción de **modelos especializados**— se logra estabilizar el rendimiento del sistema hasta alcanzar parámetros de viabilidad productiva.
+
+En síntesis, la consolidación del Paradigma 3 (*Stateful*) y la efectividad empírica de las variantes *Coder* demuestran que la fiabilidad en la orquestación de flujos complejos recae en el diseño arquitectónico y en el *fine-tuning* metodológico de los modelos, mitigando la dependencia absoluta del incremento de parámetros. Estos hallazgos respaldan las líneas de trabajo futuro planteadas en la memoria (Sección 10.3) y confirman la viabilidad técnica de implementar agentes autónomos fiables en entornos que exigen soberanía de datos (*Zero Data Retention*).

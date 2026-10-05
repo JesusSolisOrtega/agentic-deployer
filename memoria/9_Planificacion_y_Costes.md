@@ -95,7 +95,7 @@ gantt
   section P2 · Fase 7<br>- Excelencia Técnica
   Persistencia ACID (SQLite) e Inyección de Dep. :s7a, after s6d, 7d
   Ampliación MCP a 7 herramientas operativas   :s7b, after s7a, 5d
-  QA 360: Mutmut + Pruebas Integración      :s7c, after s7b, 4d
+  QA 360 y Experimentos Multi-Modelo (Coder)   :s7c, after s7b, 6d
 ```
 <p align="center"><i><b>Figura 17:</b> Diagrama de Gantt (Parte 2). Planificación orientativa del QA avanzado y las fases de cierre/consolidación.</i></p>
 
@@ -136,7 +136,7 @@ La siguiente tabla resume las desviaciones por fase:
 | Sprint 4 · Agente ReAct y MCP SDK | 55 | ~62 | +13% | Agente ReAct + Ollama nativo |
 | Sprint 5 · QA Avanzado | 45 | ~50 | +11% | Análisis forense de mutantes |
 | Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
-| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | QA final, SQLite y Experimentos Cognitivos |
+| Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | QA final, Base de Datos y Evaluación Empírica (Coder/Cloud) |
 | **Total** | **~300** | **~340** | **~+13%** | |
 <p align="center"><i><b>Tabla 19:</b> Resumen de desviaciones de tiempo por fase.</i></p>
 
@@ -238,12 +238,12 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 
 | Nivel (Caso de Uso) | Modelo Recomendado | VRAM | Inversión hardware (GPU, pago único) | Coste API | Privacidad |
 |---|---|---|---|---|---|
-| **Básico** (MVP / Pruebas) | `qwen2.5:7b` | 8 GB | ~400 € (ej. RTX 4060) | **0 €/año** | Total (Zero Data Retention) |
-| **Intermedio** (Equilibrado) | `qwen2.5:14b` / `mistral-nemo:12b` | 16 GB | ~500 € (ej. RTX 4060 Ti 16GB) | **0 €/año** | Total |
-| **Enterprise** (Óptimo Corporativo) | `qwen2.5:32b` / `llama3.1:70b` | 24-48 GB | ~1.800 € - 5.000 € (ej. RTX 3090/4090 o dual) | **0 €/año** | Total |
+| **Básico** (MVP / Pruebas) | `qwen2.5-coder:7b` | 8 GB | ~400 € (ej. RTX 4060) | **0 €/año** | Total (Zero Data Retention) |
+| **Intermedio** (Equilibrado) | `qwen2.5-coder:14b` / `mistral-nemo:12b` | 16 GB | ~500 € (ej. RTX 4060 Ti 16GB) | **0 €/año** | Total |
+| **Enterprise** (Óptimo Corporativo) | `Qwen3-Coder-30B-A3B-Instruct` (MoE) | 24-48 GB | ~1.800 € - 5.000 € (ej. RTX 3090/4090 o dual) | **0 €/año** | Total |
 <p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud) según niveles de adopción.</i></p>
 
-> **Nota técnica sobre escalabilidad:** Aunque el prototipo validó la viabilidad funcional con modelos de 7B (Nivel Básico), empíricamente presentaron vulnerabilidades de "dilución de atención" bajo estrés. Para un entorno productivo institucional, se recomienda firmemente escalar al **Nivel Intermedio (14B)** o **Nivel Enterprise (32-70B)**. La inversión extra en hardware (~100 € - 1.600 €) es insignificante frente a la ganancia masiva en fiabilidad (*Tool Calling* casi infalible) y se amortiza en los primeros meses al compararlo con las tarifas de las APIs en la nube.
+> **Nota técnica sobre escalabilidad:** En el diseño inicial del proyecto, se preveía que la adopción institucional requeriría modelos de 14B o arquitecturas de 30B para solventar las vulnerabilidades lógicas detectadas en modelos generalistas de 7B. No obstante, los resultados empíricos obtenidos con la variante especializada **`qwen2.5-coder:7b`** (Nivel Básico) indican que es técnicamente viable operar el sistema en un nivel de entrada (hardware de 8 GB VRAM, ~400 €) manteniendo altos índices de fiabilidad. Esta optimización fundamentada en la especialización del modelo permite reducir significativamente el gasto de capital (CAPEX) necesario para la puesta en marcha. En consecuencia, el escalado hacia infraestructuras de Nivel Intermedio o Enterprise se plantea como un requisito reservado principalmente para instituciones (Perfil C) que deban soportar picos de alta concurrencia o flujos de orquestación de complejidad superior.
 
 **Opción 2 — API en la nube**
 
@@ -290,16 +290,16 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 
 > **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
 
-**ROI a 3 años — Perfil B con Ollama (Nivel Intermedio, 14B)**
+**ROI a 3 años — Perfil B con Ollama (Nivel Básico Coder, 7B)**
 
 | Concepto | Año 0 | Año 1 | Año 2 | Año 3 |
 |---|---|---|---|---|
 | Inversión CAPEX | -7.300 € | — | — | — |
-| Hardware LLM (Ollama GPU, única vez) | -500 € | — | — | — |
+| Hardware LLM (Ollama GPU, única vez) | -400 € | — | — | — |
 | OPEX anual | — | -1.540 € | -1.540 € | -1.540 € |
 | Ahorro operativo | — | +20.330 € | +20.330 € | +20.330 € |
-| **Flujo neto** | **-7.800 €** | **+18.790 €** | **+18.790 €** | **+18.790 €** |
-| **Acumulado** | -7.800 € | +10.990 € | +29.780 € | +48.570 € |
+| **Flujo neto** | **-7.700 €** | **+18.790 €** | **+18.790 €** | **+18.790 €** |
+| **Acumulado** | -7.700 € | +11.090 € | +29.880 € | +48.670 € |
 <p align="center"><i><b>Tabla 30:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
 
 > **Período de retorno (Payback Period): ~5 meses** tras la implantación.
