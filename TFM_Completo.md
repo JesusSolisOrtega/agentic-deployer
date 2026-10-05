@@ -3169,6 +3169,14 @@ En consonancia con la limitación lingüística identificada (Sección 10.2.9), 
 
 En esta arquitectura, el usuario interactuaría en español a través del *frontend*, pero un modelo de lenguaje ligero y especializado en traducción (ej. *Helsinki-NLP* o un LLM cuántizado muy pequeño) interceptaría la entrada y la traduciría al inglés. Toda la carga cognitiva pesada (el *System Prompt*, el catálogo de herramientas y el ciclo *ReAct*) se ejecutaría de forma nativa en inglés, permitiendo al modelo fundacional operar en su "zona de confort lingüística" y suprimiendo las alucinaciones estructurales. Una vez que el orquestador decidiera la respuesta a dar o la herramienta a ejecutar, el pipeline de salida desharía la traducción para presentarla en español al usuario. Esta estrategia aislaría la complejidad algorítmica del idioma del usuario final, combinando la accesibilidad lingüística local con la máxima potencia de razonamiento de los motores de Inteligencia Artificial.
 
+### 10.3.9. Inyección Dinámica de Contexto y Documentación (Context MCP)
+
+Uno de los desafíos inherentes a la generación de infraestructura declarativa mediante LLMs es la rápida obsolescencia de las especificaciones técnicas. Kubernetes evoluciona constantemente, depreciando *apiVersions* (ej. la transición de `v1beta1` a `apps/v1`) y modificando esquemas de recursos. Dado que los modelos fundacionales operan con una fecha de corte de conocimiento (*knowledge cutoff*), corren el riesgo de generar manifiestos YAML formalmente correctos pero operacionalmente obsoletos o incompatibles con la versión exacta del clúster institucional.
+
+Para erradicar definitivamente estas "alucinaciones de sintaxis", una línea de futuro altamente estratégica es la incorporación de **Servidores MCP de Contexto Documental** (como *Context7* o análogos). A diferencia del servidor MCP operativo desarrollado en este TFM (cuya función es ejecutar acciones), un Context MCP actuaría como un puente semántico de solo lectura. Permitiría al agente consultar en tiempo real la documentación oficial actualizada de la versión específica de Kubernetes del clúster, o incluso la Wiki interna del departamento SIC, instantes antes de proceder a la generación del manifiesto. 
+
+Esta arquitectura equivale a implementar un RAG (*Retrieval-Augmented Generation*) dinámico integrado orgánicamente dentro del bucle ReAct. Su adopción garantizaría que el razonamiento del agente esté anclado, de forma determinista, a la realidad documental y operativa más estricta de la organización, blindando al sistema frente a la degradación temporal del conocimiento del LLM.
+
 
 <div style='page-break-after: always;'></div>
 
