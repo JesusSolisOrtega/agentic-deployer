@@ -10,11 +10,12 @@ essential metamorphic relations in natural language processing:
 """
 
 import os
-import json
-import time
 import subprocess
-import urllib.request
+import time
 import urllib.error
+import urllib.request
+from typing import Any
+
 import pytest
 
 from app.agent_layer.agent import FakeLLMClient, OllamaLLMClient, OpenAILLMClient
@@ -52,7 +53,7 @@ def ensure_ollama_running():
             )
         except FileNotFoundError:
             pytest.fail("El ejecutable 'ollama' no está instalado o no se encuentra en el PATH.")
-        
+
         # Wait for daemon to be ready (up to 15 seconds)
         ready = False
         for _ in range(15):
@@ -63,7 +64,7 @@ def ensure_ollama_running():
                 break
             except urllib.error.URLError:
                 continue
-                
+
         if not ready:
             if process:
                 process.terminate()
@@ -76,18 +77,16 @@ def ensure_ollama_running():
         print("\n[Metamorphic Tests] Deteniendo demonio de Ollama...")
         process.terminate()
         process.wait()
-
-
-def extract_params(client, messages: list[dict]) -> dict:
+def extract_params(client, messages: list[dict]) -> dict[str, Any]:
     """Extrae los parámetros usando el Fake o el modelo real."""
     if isinstance(client, FakeLLMClient):
         return client._extract_params_from_history(messages)
-    
+
     # Si es Ollama o Gemini, llamamos al modelo y extraemos los argumentos del tool_call
     response = client.chat(messages, tools=TOOL_DEFINITIONS)
     for tc in response.tool_calls:
         if tc.name == "format_deployment_intent":
-            return tc.arguments
+            return tc.arguments  # type: ignore
     return {}
 
 
@@ -210,10 +209,10 @@ def test_mr5_paraphrasing(parser: FakeLLMClient) -> None:
     """
     base_prompt = [{"role": "user", "content": "Necesito que levantes un wordpress:6.0 en el puerto 80 llamado blog"}]
     paraphrase_prompt = [{"role": "user", "content": "Por favor, crea un servicio que responda al nombre de blog, utilizando para ello la imagen de contenedor wordpress:6.0 y publicándolo internamente a través del puerto 80."}]
-    
+
     result_base = extract_params(parser, base_prompt)
     result_para = extract_params(parser, paraphrase_prompt)
-    
+
     assert result_base.get("name") == result_para.get("name") == "blog"
     assert result_base.get("image") == result_para.get("image") == "wordpress:6.0"
     assert int(result_base.get("internal_port", 0)) == int(result_para.get("internal_port", 0)) == 80
@@ -227,10 +226,10 @@ def test_mr6_language_invariance(parser: FakeLLMClient) -> None:
     """
     spanish_prompt = [{"role": "user", "content": "Despliega una base de datos postgres:14 en el puerto 5432 con el nombre db-prod"}]
     english_prompt = [{"role": "user", "content": "Deploy a postgres:14 database on port 5432 with the name db-prod"}]
-    
+
     result_es = extract_params(parser, spanish_prompt)
     result_en = extract_params(parser, english_prompt)
-    
+
     assert result_es.get("name") == result_en.get("name") == "db-prod"
     assert result_es.get("image") == result_en.get("image") == "postgres:14"
     assert int(result_es.get("internal_port", 0)) == int(result_en.get("internal_port", 0)) == 5432

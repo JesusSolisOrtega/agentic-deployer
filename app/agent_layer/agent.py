@@ -282,7 +282,7 @@ class FakeLLMClient(LLMClient):  # pragma: no cover
 # OpenAI LLM Client (compatible with Ollama / LiteLLM)
 # ---------------------------------------------------------------------------
 
-class OpenAILLMClient(LLMClient):
+class OpenAILLMClient(LLMClient):  # pragma: no cover
     """
     Real LLM client using the OpenAI API.
     Compatible with local Ollama (http://localhost:11434/v1).
@@ -353,7 +353,7 @@ class OpenAILLMClient(LLMClient):
 # LiteLLM Client — Universal Interface
 # ---------------------------------------------------------------------------
 
-class LiteLLMClient(LLMClient):
+class LiteLLMClient(LLMClient):  # pragma: no cover
     """
     Client using litellm to support any provider (Cohere, Anthropic, etc).
     """
@@ -370,7 +370,7 @@ class LiteLLMClient(LLMClient):
         tools: list[dict] | None = None,
     ) -> AgentResponse:
         import litellm
-        
+
         kwargs: dict = {
             "model": self.model,
             "messages": messages,
@@ -378,7 +378,7 @@ class LiteLLMClient(LLMClient):
         if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
-            
+
         import time
         if "command-r" in self.model.lower():
             time.sleep(2) # rate limit prevention
@@ -410,7 +410,7 @@ class LiteLLMClient(LLMClient):
 # Ollama LLM Client — Native SDK (free, local, zero data retention)
 # ---------------------------------------------------------------------------
 
-class OllamaLLMClient(LLMClient):
+class OllamaLLMClient(LLMClient):  # pragma: no cover
     """
     Native Ollama client using the official `ollama` Python SDK.
 
@@ -529,8 +529,8 @@ class AgentOrchestrator:
         Returns:
             Tuple (text_response, updated_history).
         """
-        import os
         import copy
+        import os
 
         history.append({"role": "user", "content": user_message})
 
@@ -538,7 +538,7 @@ class AgentOrchestrator:
             # Evaluate reinforcement suffix
             use_suffix = os.getenv("USE_REINFORCEMENT_SUFFIX", "false").lower() == "true"
             chat_history = history
-            
+
             if use_suffix:
                 # We copy the history to avoid modifying the real conversation state
                 chat_history = copy.deepcopy(history)

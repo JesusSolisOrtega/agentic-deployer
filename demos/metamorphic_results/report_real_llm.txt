@@ -1,0 +1,46 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- /home/jesus/projects/TFM/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'mutmut_profile' -> suppress_health_check=(HealthCheck.differing_executors,)
+rootdir: /home/jesus/projects/TFM
+configfile: pyproject.toml
+plugins: playwright-0.7.2, hypothesis-6.152.7, anyio-4.13.0, locust-2.44.0, base-url-2.1.0, cov-6.3.0
+collecting ... collected 6 items
+
+app/tests/test_metamorphic.py::test_mr1_order_permutation PASSED         [ 16%]
+app/tests/test_metamorphic.py::test_mr2_noise_invariance FAILED          [ 33%]
+app/tests/test_metamorphic.py::test_mr3_case_invariance FAILED           [ 50%]
+app/tests/test_metamorphic.py::test_mr4_incremental_context FAILED       [ 66%]
+app/tests/test_metamorphic.py::test_mr5_paraphrasing PASSED              [ 83%]
+app/tests/test_metamorphic.py::test_mr6_language_invariance PASSED       [100%]
+
+=================================== FAILURES ===================================
+__________________________ test_mr2_noise_invariance ___________________________
+app/tests/test_metamorphic.py:158: in test_mr2_noise_invariance
+    assert result_base.get("name") == result_noisy.get("name") == "mi-web"
+E   AssertionError: assert None == 'mi-web'
+E    +  where None = <built-in method get of dict object at 0x7b1fdc3f1b40>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc3f1b40> = {}.get
+E    +  and   'mi-web' = <built-in method get of dict object at 0x7b1fdc7e2800>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc7e2800> = {'cpu': '250m', 'image': 'nginx:latest', 'internal_port': 80, 'name': 'mi-web', ...}.get
+___________________________ test_mr3_case_invariance ___________________________
+app/tests/test_metamorphic.py:175: in test_mr3_case_invariance
+    assert result_lower.get("name") == result_upper.get("name") == "redis"
+E   AssertionError: assert None == 'redis_service'
+E    +  where None = <built-in method get of dict object at 0x7b1fdc260480>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc260480> = {}.get
+E    +  and   'redis_service' = <built-in method get of dict object at 0x7b1fdc2550c0>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc2550c0> = {'cpu': '250m', 'image': 'redis:7.0', 'internal_port': 6379, 'name': 'redis_service', ...}.get
+_________________________ test_mr4_incremental_context _________________________
+app/tests/test_metamorphic.py:200: in test_mr4_incremental_context
+    assert result_single.get("name") == result_incremental.get("name") == "app-test"
+E   AssertionError: assert 'app-test' == None
+E    +  where 'app-test' = <built-in method get of dict object at 0x7b1fdc251640>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc251640> = {'cpu': '250m', 'image': 'node:18', 'internal_port': 3000, 'name': 'app-test', ...}.get
+E    +  and   None = <built-in method get of dict object at 0x7b1fdc250e40>('name')
+E    +    where <built-in method get of dict object at 0x7b1fdc250e40> = {}.get
+=========================== short test summary info ============================
+FAILED app/tests/test_metamorphic.py::test_mr2_noise_invariance - AssertionEr...
+FAILED app/tests/test_metamorphic.py::test_mr3_case_invariance - AssertionErr...
+FAILED app/tests/test_metamorphic.py::test_mr4_incremental_context - Assertio...
+==================== 3 failed, 3 passed in 79.53s (0:01:19) ====================

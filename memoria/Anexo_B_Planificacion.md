@@ -10,7 +10,7 @@
 |---|---|---|---|
 | Horas dedicadas | 50h | ~55h | +10% |
 | Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
-| Cobertura dominio | 90% | 100% | +10pp |
+| Cobertura dominio | >90% | >95% | +5pp |
 <p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
 
 **Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
@@ -70,7 +70,7 @@
 |---|---|---|---|
 | Horas dedicadas | 45h | ~50h | +11% |
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
-| Mutantes eliminados | >90% | 100% | +10pp |
+| Mutantes eliminados | >90% | >95% | +5pp |
 | Relaciones metamórficas | 3 MR | 4 MR | +33% |
 <p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 

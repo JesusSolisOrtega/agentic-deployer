@@ -203,3 +203,31 @@ class TestSecurityContextValidator:
             validator.validate(intent)
         violations = exc_info.value.violations
         assert any("Potential plaintext secret" in v for v in violations)
+
+    def test_database_without_storage_raises(self) -> None:
+        """PROPERTY: Databases without explicit storage raise violation."""
+        intent = DeploymentIntent(
+            name="mydb",
+            action=DeploymentAction.CREATE,
+            image="docker.io/postgres:14.0",
+            internal_port=5432
+        )
+        with pytest.raises(SecurityViolationError) as exc_info:
+            validator.validate(intent)
+        assert any("Databases require explicit storage" in v for v in exc_info.value.violations)
+
+    def test_ram_tib_parsing(self) -> None:
+        """Test parsing of TiB RAM and invalid RAM fallback to 0."""
+        # 1Ti is 1048576 Mi, which is > MAX_RAM_MI (8192)
+        intent = DeploymentIntent(
+            name="huge-app",
+            action=DeploymentAction.CREATE,
+            image="docker.io/app:1.0",
+            internal_port=8080,
+            ram="1Ti"
+        )
+        with pytest.raises(SecurityViolationError) as exc_info:
+            validator.validate(intent)
+        assert any("RAM quota exceeded" in v for v in exc_info.value.violations)
+
+

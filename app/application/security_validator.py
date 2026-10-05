@@ -61,23 +61,16 @@ class SecurityContextValidator:
             if not any(intent.image.startswith(reg) for reg in self.ALLOWED_REGISTRIES):
                 violations.append(f"Untrusted registry. Image must start with {self.ALLOWED_REGISTRIES}")
 
-            if any(db in intent.image.lower() for db in ["postgres", "mysql", "redis", "mongo"]):
-                if not getattr(intent, "storage", None):
-                    violations.append("Databases require explicit storage (e.g. storage='10Gi')")
+            if any(db in intent.image.lower() for db in ["postgres", "mysql", "redis", "mongo"]) and not getattr(intent, "storage", None):
+                violations.append("Databases require explicit storage (e.g. storage='10Gi')")
 
-        try:
-            cpu_m = self._parse_cpu(intent.cpu)
-            if cpu_m > self.MAX_CPU_MILLICORES:
-                violations.append(f"CPU quota exceeded: {intent.cpu} > {self.MAX_CPU_MILLICORES}m")
-        except ValueError:
-            pass
+        cpu_m = self._parse_cpu(intent.cpu)
+        if cpu_m > self.MAX_CPU_MILLICORES:
+            violations.append(f"CPU quota exceeded: {intent.cpu} > {self.MAX_CPU_MILLICORES}m")
 
-        try:
-            ram_mi = self._parse_ram(intent.ram)
-            if ram_mi > self.MAX_RAM_MI:
-                violations.append(f"RAM quota exceeded: {intent.ram} > {self.MAX_RAM_MI}Mi")
-        except ValueError:
-            pass
+        ram_mi = self._parse_ram(intent.ram)
+        if ram_mi > self.MAX_RAM_MI:
+            violations.append(f"RAM quota exceeded: {intent.ram} > {self.MAX_RAM_MI}Mi")
 
         for key in intent.env_vars:
             if any(forbidden in key.lower() for forbidden in self.FORBIDDEN_ENV_KEYS):
