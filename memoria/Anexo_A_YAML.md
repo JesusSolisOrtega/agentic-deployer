@@ -29,7 +29,7 @@ kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
 | **Estado final** | `DEPLOYED` (tras aprobación HITL) |
 | **Timestamp** | 2026-09-27T10:14:34+02:00 |
 | **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
-<p align="center"><i><b>Tabla 30:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 32:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
 
 ---
 
@@ -151,7 +151,7 @@ spec:
 
 El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/k8s_adapter.py`](../app/infrastructure/k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
 
-En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 9.2.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
+En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 10.3.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
 
 ```python
 # Futura implementación RealK8sAdapter (pseudocódigo)

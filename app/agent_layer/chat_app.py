@@ -138,6 +138,7 @@ class SICFakeLLMClient(LLMClient):  # pragma: no cover
     # -- Helpers --
 
     def _all_user_text(self, messages: list[dict]) -> str:
+        # pyrefly: ignore [no-any-return-implicit]
         return " ".join(
             m.get("content", "") for m in messages
             if m.get("role") == "user" and m.get("content")
@@ -227,7 +228,7 @@ if "agent" not in st.session_state:
 
     llm: LLMClient
     if provider == "ollama":
-        model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+        model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
         host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         llm = OllamaLLMClient(model=model, host=host)
     elif provider == "openai":
@@ -249,7 +250,7 @@ if "agent" not in st.session_state:
 
 # -- Header --
 provider_label = {
-    "ollama": f"🤖 Ollama · {os.getenv('OLLAMA_MODEL', 'qwen2.5:7b')}",
+    "ollama": f"🤖 Ollama · {os.getenv('OLLAMA_MODEL', 'qwen2.5-coder:7b')}",
     "openai": "🌐 OpenAI · GPT-4o-mini",
     "gemini": f"✨ Gemini · {os.getenv('GEMINI_MODEL', 'gemini-3.1-pro-preview')}",
     "fake": "🔧 Modo Demo (sin IA real)",

@@ -6,7 +6,7 @@ A continuación, se exponen las conclusiones derivadas de la validación empíri
 
 ## 10.1. Conclusiones
 
-La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un yugo arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en cinco puntos:
+La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un control arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en cinco puntos:
 
 ### 10.1.1. Superación del *Vendor Lock-In* mediante MCP
 
@@ -14,7 +14,7 @@ La decisión arquitectónica de aislar el catálogo de operaciones del Servicio 
 
 Este desacoplamiento estratégico se validó materialmente en dos frentes. En primer lugar, con la implementación del `OllamaLLMClient` nativo (sección 5.2.1), que sustituyó la dependencia en la API de OpenAI por un modelo ejecutado localmente (`qwen2.5:7b`), sin modificar una sola línea de la lógica de negocio hexagonal ni del servidor MCP. En segundo lugar, mediante la validación del servidor con el **MCP Inspector** — la herramienta de certificación oficial de Anthropic — que, ejecutándose de forma completamente independiente al cliente Streamlit del proyecto, fue capaz de descubrir (`tools/list`) e invocar todas las herramientas del catálogo del SIC mediante el protocolo `stdio` estándar. Esta doble evidencia certifica que el servidor MCP del proyecto es un activo interoperable: consumible indistintamente por el agente propio, por herramientas de auditoría externas y por clientes de terceros (documentado en el README del repositorio mediante el MCP Inspector oficial).
 
-### 10.1.2. La Arquitectura Hexagonal como Jaula Cognitiva
+### 10.1.2. La Arquitectura Hexagonal como Mecanismo de Contención Cognitiva
 
 Uno de los mayores hallazgos de este trabajo es la refutación práctica del mito de la "Inteligencia Artificial incontrolable" en entornos de operaciones. La adopción del patrón *Ports and Adapters* (Arquitectura Hexagonal) [15] ha demostrado ser un mecanismo de contención eficaz contra las "alucinaciones" del LLM.
 
@@ -30,7 +30,7 @@ La reducción del tiempo de entrega demostrada —de ~4.340 minutos (ITSM clási
 
 Las metodologías de *testing* convencionales son insuficientes para sistemas estocásticos. El TFM ha validado que auditar IAs generativas requiere paradigmas avanzados. La integración de *Property-Based Testing* (Hypothesis) [30] y Pruebas Metamórficas [31] ha demostrado que el agente extrae entidades matemáticas correctas a partir de texto con alto ruido sintáctico.
 
-De igual trascendencia ha sido el descubrimiento derivado del *Mutation Testing* (Mutmut): se ha evidenciado que una alta cobertura de líneas no garantiza la resiliencia lógica. La auditoría inicial detectó **30 mutantes supervivientes** en los parsers de recursos auxiliares (`_parse_cpu`, `_parse_ram`), brechas que las métricas clásicas reportaban como "cubiertas". Este hallazgo permitió refactorizar el código, eliminar lógica muerta y asesinar dichos mutantes antes de la entrega final, neutralizando la deuda técnica. Esto constituye una contribución metodológica por sí misma, demostrando la superioridad epistémica del *Mutation Testing* como herramienta de mejora continua para sistemas de infraestructura crítica.
+De igual trascendencia ha sido el descubrimiento derivado del *Mutation Testing* (Mutmut): se ha evidenciado que una alta cobertura de líneas no garantiza la resiliencia lógica. La auditoría inicial detectó **30 mutantes supervivientes** en los parsers de recursos auxiliares (`_parse_cpu`, `_parse_ram`), brechas que las métricas clásicas reportaban como "cubiertas". Este hallazgo permitió refactorizar el código, eliminar lógica muerta y neutralizar dichos mutantes antes de la entrega final, resolviendo la deuda técnica. Esto constituye una contribución metodológica por sí misma, demostrando la superioridad epistémica del *Mutation Testing* como herramienta de mejora continua para sistemas de infraestructura crítica.
 
 ### 10.1.5. La Interfaz Conversacional como Democratizador de la Infraestructura
 
@@ -42,13 +42,13 @@ En síntesis, este Trabajo de Fin de Máster aporta una **arquitectura de refere
 
 El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de estado en sistemas agénticos. Mediante la implementación del patrón de repositorio (`SQLiteDeploymentRepository`), el sistema ha abandonado el almacenamiento volátil en memoria para garantizar que el historial de intenciones y aprobaciones (la Máquina de Estados) sobreviva a reinicios del servidor. Esta inyección de dependencias consolida el diseño hexagonal y certifica que el prototipo es robusto y ACID-compliant frente a fallos de infraestructura.
 
-### 10.1.7. El Rescate Cognitivo en Hardware Modesto (7B)
+### 10.1.7. La Estabilización Cognitiva en Hardware Modesto (7B)
 
 La conclusión más reveladora sobre el uso empírico de LLMs locales es el impacto directo de la arquitectura sobre las capacidades intrínsecas del modelo. Durante las pruebas (documentadas en la sección 8.4), modelos de 7B (Qwen 2.5 y Mistral) presentaron severas limitaciones al intentar orquestar flujos conversacionales mediante la arquitectura clásica (ReAct o *Chain of Thought*), colapsando frecuentemente por dilución de atención y emitiendo JSONs inválidos.
 
 Sin embargo, al transicionar hacia una arquitectura de Máquina de Estado Destilado —donde el LLM actúa únicamente como extractor semántico pasivo y Python asume el control del flujo determinista—, **estos mismos modelos alcanzaron niveles de éxito cercanos al 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning***. Este hallazgo sugiere que los modelos locales de 7B no carecen de la capacidad lógica necesaria, sino que las arquitecturas agénticas tradicionales sobrecargan su capacidad cognitiva. Aliviar esta carga permite "rescatar" modelos que de otro modo serían descartados por su tasa de error, habilitando una IA corporativa mucho más predecible sobre hardware de consumo estándar.
 
-### 10.1.8. Viabilidad Híbrida y la Ilusión Cognitiva del Cloud
+### 10.1.8. Viabilidad Híbrida y las Limitaciones Cognitivas del Cloud
 
 La validación empírica final, incorporando ecosistemas en la nube como **Google Gemini 3.5 Flash** y proveedores de alta velocidad (LPUs) como **Groq**, arrojó resultados determinantes sobre el uso de infraestructura externa. Si bien los modelos comerciales alcanzan el éxito en escenarios interactivos relajados, las pruebas de estrés metamórfico revelaron ciertas limitaciones estructurales del paradigma "Cloud-First":
 
@@ -67,17 +67,17 @@ Como consolidación de los experimentos realizados durante el desarrollo del *Ag
 |---|---|---|---|---|---|
 | **Ollama** | `qwen2.5-coder:7b` | Local | Sí (Hardware propio) | **Excelente (Soberanía)** | Superó el stress-test metamórfico con un 100% de éxito. Su hiper-especialización en código y *Tool Calling* elimina las alucinaciones estructurales, validando que la especialización del modelo compensa las limitaciones de hardware. |
 | **Ollama** | `qwen2.5:7b` | Local | Sí (Hardware propio) | **Alta (Soberanía)** | Sorprendente resiliencia (50% en metamórficos). Capaz de solventar casos prácticos iterando. Proyecta un rendimiento excelente para despliegues locales (Zero Data Retention) al escalar a modelos superiores (32B/72B) con hardware dedicado. |
-| **Google** | `gemini-3.5-flash` | Cloud | Sí (15 RPM) | **Alta** | El más resiliente a nivel estructural. Tasa de éxito del 66% (4/6) en el despiadado stress-test metamórfico (Zero-Shot). |
+| **Google** | `gemini-3.5-flash` | Cloud | Sí (15 RPM) | **Alta** | El más resiliente a nivel estructural. Tasa de éxito del 66% (4/6) en el riguroso stress-test metamórfico (Zero-Shot). |
 | **Mistral** | `ministral-8b-latest`| Cloud | Sí | **Alta** | Excelente rendimiento en casos prácticos con System Prompt (Máquina de Estados), pero colapsa (0/6) en el stress-test metamórfico puro. |
 | **Mistral** | `codestral-latest` | Cloud | Sí | **Nula** | Pese a su especialización en código, carece de *fine-tuning* para herramientas estructuradas (responde con texto libre). |
 | **Cohere** | `command-r-plus` | Cloud | Sí (1k rpm) | **Alta** | Modelo construido para *Tool Calling*. Empata con Gemini en resiliencia metamórfica (66%), colapsando bajo entropía coloquial. |
-| **Groq** | `qwen3.8-27b` | Cloud (LPU) | Sí (30 RPM / 1K TPM) | **Alta** | Rendimiento y velocidad excelentes, pero el límite de tokens (*Rate Limit*) bloquea su uso ininterrumpido. |
+| **Groq** | `Qwen 3.8 (27B)` | Cloud (LPU) | Sí (30 RPM / 1K TPM) | **Alta** | Rendimiento y velocidad excelentes, pero el límite de tokens (*Rate Limit*) bloquea su uso ininterrumpido. |
 | **Mistral** | `mistral-small-latest` | Cloud | Limitada (429) | **Media** | Adecuado técnicamente, pero la estricta gobernanza de "Le Free Tier" (Error 429) bloquea su uso práctico continuado. |
 
 **El Mejor Rendimiento Empírico y la Promesa Local:**
 La experimentación ha revelado una dualidad interesante en la nube: por un lado, **`gemini-3.5-flash`** y **`cohere-command-r-plus`** demostraron ser campeones de la resiliencia estructural en modelos generalistas (empatando al 66% en el stress-test aislado). Que ni siquiera un modelo corporativo ultra-especializado en *Tool Calling* como Cohere logre el 100% en solitario (al confundirse con ruido coloquial) justifica la pertinencia de nuestra Arquitectura Hexagonal. Por otro lado, precisamente gracias al apoyo de esta arquitectura y sus barreras de contención, modelos más compactos como **`ministral-8b-latest`** logran ofrecer un rendimiento funcional altamente satisfactorio en casos prácticos convencionales, mitigando sus evidentes debilidades en entornos no guiados (*zero-shot*). 
 
-Sin embargo, el hallazgo empírico definitivo que corona este trabajo de investigación corresponde a la variante especializada **`qwen2.5-coder:7b`**. Pese a ejecutarse en hardware de consumo estándar (8GB VRAM), este modelo se ha consolidado como el motor cognitivo más fiable de todo el catálogo evaluado: demostró una precisión milimétrica en la simulación de escenarios realistas *End-to-End* (promediando 1,0 iteraciones) y ha sido el único modelo capaz de superar con un **100% de éxito** la batería inicial de pruebas metamórficas, batiendo incluso a los modelos comerciales masivos de la nube. Este resultado valida irrefutablemente la hipótesis de que la optimización del corpus de entrenamiento (código, JSON, YAML) es un factor más determinante para el *Tool Calling* que el recuento bruto de parámetros. En consecuencia, la adopción de modelos locales especializados en código garantiza un rendimiento de grado empresarial idóneo para despliegues institucionales sujetos a **Zero Data Retention**, maximizando la eficiencia de inferencia sin comprometer la soberanía del dato ni el presupuesto.
+Sin embargo, el hallazgo empírico definitivo que consolida este trabajo de investigación corresponde a la variante especializada **`qwen2.5-coder:7b`**. Pese a ejecutarse en hardware de consumo estándar (8GB VRAM), este modelo se ha consolidado como el motor cognitivo más fiable de todo el catálogo evaluado: demostró una precisión milimétrica en la simulación de escenarios realistas *End-to-End* (promediando 1,0 iteraciones) y ha sido el único modelo capaz de superar con un **100% de éxito** la batería inicial de pruebas metamórficas, batiendo incluso a los modelos comerciales masivos de la nube. Este resultado valida de manera concluyente la hipótesis de que la optimización del corpus de entrenamiento (código, JSON, YAML) es un factor más determinante para el *Tool Calling* que el recuento bruto de parámetros. En consecuencia, la adopción de modelos locales especializados en código garantiza un rendimiento de grado empresarial idóneo para despliegues institucionales sujetos a **Zero Data Retention**, maximizando la eficiencia de inferencia sin comprometer la soberanía del dato ni el presupuesto.
 
 **Modelos excluidos de la evaluación (Ausencia de capa gratuita ilimitada):**
 Es necesario mencionar que estándares de la industria tecnológica como **GPT-4o (OpenAI) [33]** o **Claude 3.5 Sonnet (Anthropic) [34]** no han sido integrados en las pruebas empíricas por requerir pago por token. Sin embargo, según la documentación técnica de los propios fabricantes y los *benchmarks* del sector, estos modelos han sido sometidos a un intenso *fine-tuning* diseñado específicamente para flujos de trabajo agénticos (*Agentic Workflows*). En particular, empresas como Anthropic afirman que la familia Claude está optimizada para la interacción impecable con herramientas externas y protocolos como MCP (*Model Context Protocol*). En consecuencia, su adecuación a este proyecto se presupone sobresaliente, y constituirían la opción más segura en un entorno corporativo con presupuesto asignado. Adicionalmente, plataformas agregadoras como **OpenRouter** (con su endpoint gratuito `llama-3.1-8b-instruct:free`) podrían constituir alternativas viables para futuras líneas de investigación sin coste económico.
@@ -146,7 +146,7 @@ Todo el prototipo y la experimentación empírica se han desarrollado forzando l
 
 ## 10.3. Trabajo Futuro
 
-El prototipo actual certifica matemáticamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
+El prototipo actual certifica empíricamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
 
 ### 10.3.1. Horizonte a Corto Plazo: Integración Física (K8s API)
 

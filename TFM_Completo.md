@@ -208,7 +208,7 @@ El problema radica en la ausencia histórica de un protocolo de comunicación es
 
 El segundo problema crítico reside en la propia naturaleza generativa de los LLMs. Un modelo generalista entrenado con vastas cantidades de datos de Internet tenderá a generar manifiestos de Kubernetes o configuraciones de Docker sintácticamente válidas, pero semánticamente erróneas o inseguras en el contexto de la organización. Este fenómeno, conocido comúnmente como "alucinación", puede derivar en un agente proponiendo el uso de imágenes de contenedor no auditadas [4] (p. ej., imágenes con la etiqueta `:latest` propensas a vulnerabilidades), abriendo puertos de red no autorizados, o ignorando las cuotas restrictivas de CPU y memoria (ResourceQuotas) impuestas por el SIC para evitar problemas de "vecino ruidoso" (*noisy neighbor*) en el clúster.
 
-Abordar este problema implica que el agente no debe redactar infraestructura desde cero. En su lugar, el sistema debe ser capaz de invocar rutinas predefinidas (*Golden Paths*) donde la IA únicamente negocia e infiere los parámetros estrictamente necesarios (el nombre de la aplicación, el tráfico esperado o la versión de lenguaje), mientras que la arquitectura subyacente impone de forma determinista y matemática las normativas de seguridad, redes y topología exigidas por la institución.
+Abordar este problema implica que el agente no debe redactar infraestructura desde cero. En su lugar, el sistema debe ser capaz de invocar rutinas predefinidas (*Golden Paths*) donde la IA únicamente negocia e infiere los parámetros estrictamente necesarios (el nombre de la aplicación, el tráfico esperado o la versión de lenguaje), mientras que la arquitectura subyacente impone de forma determinista y estricta las normativas de seguridad, redes y topología exigidas por la institución.
 
 ### 1.2.3. Seguridad y trazabilidad: El imperativo humano (Human-In-The-Loop)
 
@@ -286,7 +286,7 @@ Para facilitar la trazabilidad desde la concepción teórica hasta la verificaci
 - El **Capítulo 10** recoge las **Conclusiones y Trabajo Futuro**, evaluando el grado de cumplimiento de los objetivos, documentando en detalle las limitaciones del prototipo (Sección 10.2) y proponiendo líneas de evolución arquitectónica.
 - El **Capítulo 11** recopila la **Bibliografía y Referencias** técnicas que sustentan el marco teórico del trabajo.
 - El **Anexo A** contiene el manifiesto Kubernetes completo (Deployment + Service + Ingress) generado automáticamente por el sistema en el Escenario 1 (Happy Path), con anotaciones técnicas y su relación con el código fuente.
-- El **Anexo B** recoge la **Planificación Detallada del Proyecto y Análisis de Costes**, desglosando la estructura de *sprints*, las retrospectivas por fase, y el cálculo granular financiero comparando proveedores de nube frente al modelo Ollama *on-premise*.
+- El **Anexo B** documenta las **Retrospectivas Detalladas por Sprint**, desglosando métricas, desviaciones de esfuerzo e hitos técnicos conseguidos fase a fase.
 - El **Anexo C** proporciona un **Glosario de Acrónimos y Términos** de consulta rápida para facilitar la lectura de la terminología técnica empleada en el TFM.
 
 
@@ -577,6 +577,13 @@ Tras la consolidación del MVP, se abordaron una serie de mejoras de calidad y u
 - **Canal de Retorno al Investigador:** Implementación del endpoint `GET /hitl/status/{id}` y el panel de notificaciones en el chat (` Mis Solicitudes Pendientes`), cerrando el ciclo de comunicación bidireccional del patrón HITL (sección 6.4).
 - **Ampliación de Evidencias Empíricas:** Creación del directorio `demos/` con transcripciones forenses de las sesiones de ejecución real y el manifiesto YAML generado por el `FakeK8sAdapter` (Anexo A).
 
+### 3.2.7. Fase 7 (Excelencia Técnica y Experimentos Multi-Modelo)
+
+Como esfuerzo final fuera del alcance inicial (Prioridad P2), se elevó el estándar del prototipo mediante tres hitos arquitectónicos:
+- **Persistencia Transaccional:** Migración del almacenamiento de memoria volátil a una base de datos **SQLite**, dotando a la Máquina de Estados de robustez ACID.
+- **Escalado del Catálogo MCP:** Ampliación del servidor de 4 a 7 herramientas operativas, integrando capacidades complejas como gestión de bases de datos o borrado de servicios institucionales.
+- **Validación Empírica Extendida:** Ejecución de pruebas comparativas sobre un espectro amplio de modelos, tanto Cloud (Gemini, Cohere, Groq) como Locales especializados (Qwen Coder), consolidando definitivamente las conclusiones de viabilidad del proyecto.
+
 ## 3.3. Stack Tecnológico y Justificación Arquitectónica
 
 La elección de tecnologías en un ecosistema que combina Inteligencia Artificial y provisionamiento de infraestructura debe equilibrar la innovación disruptiva con la fiabilidad matemática exigida por las operaciones institucionales. A continuación, se desglosa y fundamenta el *stack* tecnológico adoptado.
@@ -592,8 +599,8 @@ El proyecto se ha construido íntegramente sobre **Python (versión 3.12)**. Si 
 - **Streamlit [19]:** Desarrollar interfaces gráficas (*Front-End*) modernas en React o Vue.js conlleva una alta fricción y sobrecarga de dependencias. Streamlit permite codificar la interfaz de chat (incluyendo historial, avatares, indicadores de estado y el panel de notificaciones HITL) íntegramente en Python puro. Esto permite iterar el componente visual de forma ágil, manteniendo el foco del trabajo investigador en la ingeniería del *middleware* de infraestructura.
 - **Model Context Protocol (MCP) SDK:** En lugar de diseñar una API HTTP propietaria para invocar herramientas, se ha adoptado el SDK oficial de MCP para Python. Esta librería permite decorar funciones arbitrarias (ej. `@server.tool()`) e introspeccionar sus firmas (nombres de parámetros y tipos) en tiempo de ejecución, transformándolas en esquemas JSON estandarizados consumibles por cualquier cliente LLM.
 - **Abstracción Agnóstica de Proveedor LLM:** El orquestador implementa un contrato abstracto (`LLMClient`) con dos implementaciones concretas:
- - **`OllamaLLMClient`**: Cliente nativo implementado con `httpx` que se comunica directamente con la API REST de Ollama [20] (`POST /api/chat`), sin dependencias externas adicionales. Permite ejecutar modelos como `qwen2.5:7b` o `llama3.2:3b` en la red privada institucional, garantizando un esquema de **Soberanía del Dato** (*Zero Data Retention*) imperativo para universidades. No envía ningún token de texto del investigador a servidores externos.
- - **`OpenAILLMClient`**: Adaptador para la API de OpenAI, que permite acceder a modelos como GPT-4o en escenarios donde la capacidad cognitiva de los modelos cloud supera a los modelos locales disponibles. La selección del cliente se realiza exclusivamente mediante la variable de entorno `LLM_PROVIDER`, sin requerir modificaciones al código.
+ - **`OllamaLLMClient`**: Cliente nativo implementado con `httpx` que se comunica directamente con la API REST de Ollama [20] (`POST /api/chat`), sin dependencias externas adicionales. Permite ejecutar modelos especializados como **`qwen2.5-coder:7b`** o generalistas en la red privada institucional, garantizando un esquema de **Soberanía del Dato** (*Zero Data Retention*) imperativo para administraciones públicas. No envía ningún token de texto del investigador a servidores externos.
+ - **`OpenAILLMClient`**: Adaptador que implementa el protocolo estándar de OpenAI. Su diseño agnóstico permitió utilizarlo como puente (*proxy*) para evaluar empíricamente ecosistemas *cloud* de terceros (Google Gemini, Cohere Command-R, Mistral, Llama 3) sin acoplar el sistema a una única corporación. La selección del cliente (Local o Cloud) se realiza exclusivamente mediante la variable de entorno `LLM_PROVIDER`, sin requerir modificaciones al código de dominio.
 
 ### 3.3.4. Ecosistema de Aseguramiento de Calidad (QA)
 La confianza operativa en el *Agentic Deployer* se asienta sobre un *pipeline* de validación agresivo, sustentado por un ecosistema de librerías avanzadas:
@@ -1359,7 +1366,7 @@ PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
 
 CLASE OllamaLLMClient IMPLEMENTA LLMClient:
   ATRIBUTOS:
-    modelo: Cadena (ej. "qwen2.5:7b")
+    modelo: Cadena (ej. "qwen2.5-coder:7b")
     url_base: Cadena (ej. "http://localhost:11434")
 
   MÉTODO chat(mensajes, herramientas):
@@ -1402,7 +1409,7 @@ SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
 
 INICIO
   SI proveedor ES "ollama" ENTONCES
-    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5:7b")
+    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5-coder:7b")
   SINO SI proveedor ES "openai" ENTONCES
     RETORNAR NUEVO OpenAILLMClient(modelo="gpt-4o-mini")
   SINO
@@ -1414,11 +1421,11 @@ FIN
 Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
 
 
-### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5)
+### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5 Coder)
 
-El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó por desplegar **Qwen 2.5 (7B)** de Alibaba Cloud, descartando alternativas como Llama 3.2 (3B) o Mistral (7B). 
+El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó finalmente por desplegar la variante especializada **Qwen 2.5 Coder (7B)** de Alibaba Cloud, descartando a sus homólogos generalistas como Llama 3.2, Mistral, o el propio Qwen 2.5 base.
 
-Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica muy bueno para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales destacables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad para modelos open source locales en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
+Esta elección responde a la necesidad de garantizar una alta eficacia en la invocación de herramientas (*Tool Calling*). La variante Coder incorpora un ajuste fino (*fine-tuning*) exhaustivo sobre corpus de código fuente, lo que le confiere una robustez superior en la generación y manipulación de estructuras JSON complejas frente a modelos puramente conversacionales. Durante la experimentación, mientras que modelos generalistas como *Llama 3.2* o *Mistral* evidenciaron una degradación sintáctica recurrente bajo estrés operativo, **Qwen 2.5 Coder (7B)** demostró ser la única solución local de su categoría capaz de superar íntegramente la batería de Pruebas Metamórficas, exhibiendo la mayor estabilidad estructural frente a la entropía lingüística y posibilitando la correcta orquestación del bucle ReAct (véase el análisis empírico en el Capítulo 8).
 
 ### 5.2.3. Soberanía del Dato en Entornos Institucionales
 
@@ -1623,7 +1630,7 @@ La implementación de este FSM mediante Python y el *framework* asíncrono FastA
 
 Imaginemos un escenario concurrente: Una petición se encuentra en `PENDING_APPROVAL`. Por un problema de latencia en la red Wi-Fi, el Técnico de Operaciones hace doble clic rápidamente sobre el botón "Rechazar" en su interfaz, o peor aún, dos operarios de distintos turnos, visualizando el mismo panel, deciden pulsar simultáneamente los botones de "Aprobar" y "Rechazar" en milisegundos idénticos.
 
-Sin una salvaguarda arquitectónica, estas peticiones paralelas podrían colisionar en la memoria volátil del servidor, resultando en un estado de Schrödinger donde el sistema intenta desplegar y denegar el mismo registro al mismo tiempo, fracturando el estado del clúster de Kubernetes.
+Sin una salvaguarda arquitectónica, estas peticiones paralelas generarían una condición de carrera (*race condition*) en la base de datos del servidor, provocando una inconsistencia transaccional donde el sistema intentaría desplegar y denegar el mismo registro simultáneamente, lo que comprometería gravemente la integridad del estado del clúster de Kubernetes.
 
 Para neutralizar este vector, la transición entre vértices del DAG se blinda mediante algoritmos de comprobación atómica (*Test-and-Set* lógicos) o mecanismos de **Optimistic Locking** (Bloqueo Optimista). A continuación se expone la fundamentación algorítmica de esta defensa en el núcleo Hexagonal:
 
@@ -1638,7 +1645,7 @@ SALIDA:
 
 INICIO
   // 1. Adquisición y comprobación (Atomicidad)
-  Variable registro = ObtenerRegistroMemoria(id_peticion)
+  Variable registro = ObtenerRegistroBaseDeDatos(id_peticion)
   
   SI registro ES NULO ENTONCES
     LANZAR HttpNotFoundError(404)
@@ -1931,7 +1938,7 @@ La batería de pruebas cubre seis escenarios:
 | `test_rejected_status_after_rejection` | Tras `POST /hitl/reject/{id}`, el estado refleja `REJECTED` |
 | `test_response_includes_deployment_metadata` | La respuesta incluye `name`, `image` y `port` correctos |
 | `test_status_endpoint_does_not_mutate_state` | 3 llamadas consecutivas mantienen `PENDING_APPROVAL` inalterado |
-<p align="center"><i><b>Tabla 4:</b> Cobertura de pruebas unitarias por componente.</i></p>
+<p align="center"><i><b>Tabla 4:</b> Casos de prueba de la capa de consulta de estado del investigador.</i></p>
 
 El último test es el más crítico desde el punto de vista de la integridad del sistema: garantiza que la operación de *lectura* del canal del investigador no interfiere con la *escritura* exclusiva del canal del técnico SIC (el dashboard), preservando la separación de responsabilidades entre ambas interfaces de usuario.
 
@@ -2174,13 +2181,13 @@ Para contrastar las limitaciones del hardware local, la batería metamórfica fu
 | **Mistral (7B)** | Local | **0% (0/6)** | Colapso absoluto. Olvida la estructura y el formato JSON en cuanto se introduce la más mínima perturbación léxica. |
 | **Ministral 8B** | Cloud | **0% (0/6)** | Colapso total *zero-shot*. Incapaz de emitir el *Tool Call* sin el apoyo estructural del *System Prompt*. |
 | **Codestral** | Cloud | **0% (0/6)** | Carece de *fine-tuning* estricto para herramientas. Responde con texto libre ignorando el esquema JSON. |
-| **Qwen 3.8 (27B)** | Groq (LPU) | **50% (3/6)** | Rendimiento idéntico a su variante local de 7B: Falla ante inyección de ruido coloquial y memoria a largo plazo. |
-| **Qwen 2.5 Coder (7B)** | Local | **100% (6/6)** | Perfección estructural absoluta. El *fine-tuning* para código y JSON neutraliza por completo la dilución de atención (MR-4) y el ruido léxico (MR-2) que afectaban al modelo base. |
+| **Qwen 3.8 (27B)** | Groq (LPU) | **50% (3/6)** | Rendimiento estocástico: Falla ante inyección de ruido coloquial y memoria a largo plazo. |
+| **Qwen 2.5 Coder (7B)** | Local | **100% (6/6)** | Supera íntegramente la batería (6/6). Su especialización en código y JSON neutraliza la degradación de atención (MR-4) y el ruido léxico (MR-2) que afectaban a los modelos generalistas. |
 <p align="center"><i><b>Tabla 8:</b> Resultados comparativos del stress-test metamórfico (Zero-Shot puro).</i></p>
 
-Este hallazgo empírico es uno de los más reveladores del estudio. Sugiere que la delegación cognitiva a la nube, el incremento masivo de parámetros y el *fine-tuning* corporativo generalista (Cohere) no son soluciones definitivas contra la naturaleza estocástica de los modelos, ya que ninguno de los modelos base superó el umbral del 66% de éxito en un entorno no guiado de alta entropía (*Zero-Shot* puro). Sin embargo, la inclusión final de la variante **Qwen 2.5 Coder (7B)** arroja una conclusión rotunda: la hiper-especialización del modelo en lenguajes estructurados (código, JSON, YAML) vence por completo a las limitaciones de hardware, logrando un **100% de éxito** y eliminando las alucinaciones estructurales.
+Este hallazgo empírico es uno de los más reveladores del estudio. Sugiere que la delegación cognitiva a la nube, el incremento masivo de parámetros y el *fine-tuning* corporativo generalista (Cohere) no son soluciones definitivas contra la naturaleza estocástica de los modelos, ya que ninguno de los modelos base superó el umbral del 66% de éxito en un entorno no guiado de alta entropía (*Zero-Shot* puro). Sin embargo, el desempeño de la variante **Qwen 2.5 Coder (7B)** aporta una conclusión significativa: la especialización intensiva del modelo en lenguajes estructurados (código, JSON, YAML) compensa las limitaciones de hardware, permitiéndole superar íntegramente la batería de pruebas y mitigando drásticamente las alucinaciones estructurales en estos escenarios de estrés.
 
-Aunque, como se demostrará en el Capítulo 8, los modelos comerciales logran una elevada eficacia en escenarios prácticos convencionales, los resultados de este *stress-test* revelan la vulnerabilidad estructural de los modelos generalistas ante anomalías de formato o idioma. Esta dualidad anticipa la justificación del diseño de la **Máquina de Estado Destilado** en dos vertientes: por un lado, actuará como una capa de mitigación robusta para ecosistemas *Cloud*; y por otro, la adopción de variantes especializadas *Coder* sobre hardware local permitirá alcanzar cotas de fiabilidad perfectas, superando a las alternativas comerciales masivas. En definitiva, estos datos apoyan la tesis de que la Inteligencia Artificial requiere del apoyo de la ingeniería de software tradicional, premisa que se validará íntegramente en la siguiente sección.
+Aunque, como se demostrará en el Capítulo 8, los modelos comerciales logran una elevada eficacia en escenarios prácticos convencionales, los resultados de este *stress-test* revelan la vulnerabilidad estructural de los modelos generalistas ante anomalías de formato o idioma. Esta dualidad anticipa la justificación del diseño de la **Máquina de Estado Destilado** en dos vertientes: por un lado, actuará como una capa de mitigación robusta para ecosistemas *Cloud*; y por otro, la adopción de variantes especializadas *Coder* sobre hardware local permitirá alcanzar cotas de fiabilidad sobresalientes, equiparándose e incluso superando a las alternativas comerciales masivas evaluadas. En definitiva, estos datos apoyan la tesis de que la Inteligencia Artificial requiere del apoyo de la ingeniería de software tradicional, premisa que se validará íntegramente en la siguiente sección.
 
 
 <div style='page-break-after: always;'></div>
@@ -2223,7 +2230,7 @@ La siguiente tabla refleja el impacto temporal (medido en minutos operativos) de
 | **4. Aprobación y Despliegue** | 2 min (`kubectl apply`) | 2 min (Clic en el Dashboard) | **0% (Mismo esfuerzo)** |
 | **Tiempos Muertos (Cola)** | 2.880 min (Ticket en espera) | 60 min (Cola del Dashboard) | **~97.9%** |
 | **Costo Cognitivo Técnico N3** | **Alto** (Redacción código) | **Mínimo** (Auditoría visual) | **-** |
-<p align="center"><i><b>Tabla 8:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
+<p align="center"><i><b>Tabla 9:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
 
 La métrica más definitoria de esta arquitectura no es la velocidad de escritura del YAML, sino la **eliminación del tiempo muerto de negociación**. Al absorber la ambigüedad lingüística en tiempo real a través del patrón ReAct (Capítulo 5), el investigador obtiene sus recursos en la misma mañana que los solicitó, frente a los 2 o 3 días hábiles que exige la burocracia del correo electrónico. 
 
@@ -2305,7 +2312,7 @@ Esta sección documenta de forma forense tres escenarios de ejecución real del 
 | **Inferencia** | Aceleración por hardware (NVIDIA CUDA) |
 | **Backend** | FastAPI 0.115 + Uvicorn (single-worker), SQLite 3.45 |
 | **Repeticiones** | Cada escenario documentado se ejecutó en lotes de 5 iteraciones para garantizar rigor estadístico; las latencias reportadas representan la media (µ) ± desviación estándar (σ) |
-<p align="center"><i><b>Tabla 9:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
+<p align="center"><i><b>Tabla 10:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
 
 ### 8.3.1. Escenario 1 — Walkthrough Forense: Portal Web para Congreso Académico
 
@@ -2384,7 +2391,7 @@ El `SecurityContextValidator` evalúa la intención en tiempo O(1):
 | Sin variables de entorno con secretos | Conforme |
 | CPU ≤ cuota departamental | Conforme |
 | RAM ≤ cuota departamental | Conforme |
-<p align="center"><i><b>Tabla 10:</b> Traza de ejecución: Validación en el núcleo hexagonal (Paso 5).</i></p>
+<p align="center"><i><b>Tabla 11:</b> Traza de ejecución: Validación en el núcleo hexagonal (Paso 5).</i></p>
 
 **Sin violaciones detectadas → transición FSM: intención registrada como `PENDING_APPROVAL`**
 
@@ -2471,7 +2478,7 @@ El adaptador genera el manifiesto completo (Deployment + Service + Ingress) medi
 | Tiempo de aprobación HITL | ~7 min (decisión humana) |
 | Tiempo total E2E | ~7,2 min vs. ~4.340 min ITSM |
 | Reducción TTM | **99,8%** |
-<p align="center"><i><b>Tabla 11:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 12:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
 
 **Transcripción completa:** [`demos/session_logs/escenario1_happy_path.json`](../demos/session_logs/escenario1_happy_path.json)
 
@@ -2487,7 +2494,7 @@ Documentado en profundidad en la Sección 8.2. En síntesis:
 | Tool Call del LLM | `format_deployment_intent(image="ubuntu:latest", internal_port=22, ...)` |
 | Respuesta del Backend | **`HTTP 422`** — Tres violaciones: tag `:latest`, puerto reservado 22, y registro no confiable |
 | Autocorrección iterativa | Explica las violaciones y propone mejoras de forma recurrente durante 5 iteraciones hasta proponer `docker.io/ubuntu:22.04` en el puerto `2222` |
-<p align="center"><i><b>Tabla 12:</b> Traza de ejecución: Intento de Prompt Injection (Escenario 2).</i></p>
+<p align="center"><i><b>Tabla 13:</b> Traza de ejecución: Intento de Prompt Injection (Escenario 2).</i></p>
 
 La intercepción se produjo **antes de que ninguna operación modificara el clúster**, lo que valida el principio de *fail-fast* de la arquitectura hexagonal.
 
@@ -2516,7 +2523,7 @@ La intercepción se produjo **antes de que ninguna operación modificara el clú
 | Revisión en Dashboard | Técnico SIC | ~7 min | Panel HITL (Cap. 6.3) |
 | Aprobación y despliegue | Técnico SIC | ~2s | Botón "Aprobar" |
 | YAML escrito en disco | `FakeK8sAdapter` | <1ms | Template f-string |
-<p align="center"><i><b>Tabla 13:</b> Desglose de latencias por componente en el ciclo de vida.</i></p>
+<p align="center"><i><b>Tabla 14:</b> Desglose de latencias por componente en el ciclo de vida.</i></p>
 
 **Tiempo total extremo a extremo (incluyendo espera HITL):** ~9 minutos vs. ~4.340 minutos en el modelo ITSM convencional (**reducción del 99,8%**).
 
@@ -2547,7 +2554,7 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 | 2. Prompt Injection — Puerto 22 | 5 | 45,07 s | PENDING_APPROVAL* | `escenario2_prompt_injection.json` |
 | 3. Ciclo HITL — CMS WordPress | 2 | 27,84 s | PENDING_APPROVAL | `escenario3_hitl_completo.json` |
 | 4. Autocorrección Multi-turno | 2 | 26,10 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
-<p align="center"><i><b>Tabla 14:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
+<p align="center"><i><b>Tabla 15:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
 
 Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
 - El **Escenario 1** (Happy Path) se resolvió en 1 sola iteración (13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como requerimientos semánticos de red) desde el primer intento.
@@ -2555,7 +2562,7 @@ Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundo
 - El **Escenario 2** (Prompt Injection) desencadenó hasta **5 iteraciones** (45 segundos) en las que el LLM propuso reiteradamente alternativas inseguras, chocando una y otra vez contra los validadores estáticos (*Quality Gates*) de FastAPI, hasta que finalmente capituló y propuso una imagen lícita (`docker.io/ubuntu:22.04`). Esto demuestra un confinamiento perimetral hermético.
 - El **Escenario 3** precisó 2 iteraciones, ya que corrigió proactivamente un puerto privilegiado.
 
-**Nota de Reproducibilidad:** Para certificar el rigor empírico y la transparencia de este TFM, la totalidad de los datos volcados en la Tabla 14 y en los anexos no son teóricos, sino que han sido obtenidos mediante ejecución de caja negra contra la API de Ollama y el orquestador desarrollado. En el código fuente del proyecto se ha habilitado un script de validación automatizada (`scripts/generate_demos.py`) que audita y recrea programáticamente estos *logs* (almacenados en `demos/session_logs/`), certificando que el comportamiento metodológico detallado es 100% reproducible en un entorno local dotado de aceleración hardware.
+**Nota de Reproducibilidad:** Para certificar el rigor empírico y la transparencia de este TFM, la totalidad de los datos volcados en la Tabla 15 y en los anexos no son teóricos, sino que han sido obtenidos mediante ejecución de caja negra contra la API de Ollama y el orquestador desarrollado. En el código fuente del proyecto se ha habilitado un script de validación automatizada (`scripts/generate_demos.py`) que audita y recrea programáticamente estos *logs* (almacenados en `demos/session_logs/`), certificando que el comportamiento metodológico detallado es 100% reproducible en un entorno local dotado de aceleración hardware.
 
 ### 8.3.6. Comparativa de Inferencia Multimodelo (Agnosticismo)
 
@@ -2573,7 +2580,7 @@ Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de mod
 | **Cohere Command R+**| Cloud (Cohere) | 1,0 | ~9,00 s | 100% |
 | **Ministral 8B** | Cloud (Mistral) | 1,0 | ~3,20 s | 100% |
 | **Qwen 3.8 (27B)** | Cloud (Groq) | 2,0 | ~2,45 s | 100% |
-<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
+<p align="center"><i><b>Tabla 16:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
 
 Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente, **Mistral (local)** demostró incapacidad para formatear las llamadas a herramientas. 
 
@@ -2624,7 +2631,7 @@ El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos 
 | **Cohere Command R+** | **Éxito 100%** (Diseño *Tool Calling*) | **Éxito 100%** (Respuesta determinista) | **Éxito 100%** (Precisión absoluta) |
 | **Ministral 8B** | **Éxito 100%** (Soporte nativo *Tool Calling*) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
 | **Qwen 27B (Groq)** | **Éxito 100%** (Inferencia ultra-rápida) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
-<p align="center"><i><b>Tabla 16:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
+<p align="center"><i><b>Tabla 17:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
 
 **Conclusiones de los Experimentos de Arquitectura Cognitiva**
 
@@ -2671,7 +2678,7 @@ Esta aproximación es coherente con las recomendaciones de gestión ágil de pro
 | **P1 — Diferenciador académico** | Servidor MCP (SDK oficial), agente ReAct, multiproveedor LLM, QA avanzado | Completado |
 | **P2 — Excelencia y acabado** | `OllamaLLMClient`, persistencia (SQLite), catálogo extendido (7 herr.), evidencias empíricas (MCP Inspector), exp. cognitivos multi-modelo | Completado |
 | **P3 — Trabajo futuro** | `RealK8sAdapter` (integración clúster físico), RBAC, CI/CD cloud, multi-clúster | Roadmap |
-<p align="center"><i><b>Tabla 17:</b> Módulos de desarrollo y jerarquía de prioridades.</i></p>
+<p align="center"><i><b>Tabla 18:</b> Módulos de desarrollo y jerarquía de prioridades.</i></p>
 
 Únicamente los módulos **P0 y P1 son necesarios para la evaluación académica**. Los módulos P2 se han abordado con éxito en la recta final de consolidación, logrando un nivel de excelencia técnica que fortalece la robustez del proyecto. Los módulos P3 quedan explícitamente documentados como líneas de trabajo futuro (Sección 10.3).
 
@@ -2754,7 +2761,7 @@ La siguiente tabla refleja la estimación inicial de esfuerzo neto, asumiendo un
 | Fase 6 | Redacción y Cierre | 55h | 47–63h | P2 |
 | Fase 7 | Excelencia Técnica | 10h | 8–12h | P2 |
 | **Total estimado** | | **~300h** | **~255–345h** | |
-<p align="center"><i><b>Tabla 18:</b> Estimación de esfuerzo neto por Sprint.</i></p>
+<p align="center"><i><b>Tabla 19:</b> Estimación de esfuerzo neto por Sprint.</i></p>
 
 > [!NOTE]
 > La asistencia mediante un agente de IA de codificación (Google Gemini Advanced, utilizado para aceleración de *scaffolding*, generación de código *boilerplate*, revisión de lógica y apoyo en la redacción técnica) permitió comprimir el tiempo de implementación en fases que de otro modo habrían requerido un esfuerzo sustancialmente mayor. Esto es coherente con la línea de investigación del propio proyecto, que postula la utilidad de los agentes LLM como asistentes en flujos de trabajo técnicos complejos.
@@ -2779,7 +2786,7 @@ La siguiente tabla resume las desviaciones por fase:
 | Fase 6 · Redacción y Cierre | 55 | ~64 | +16% | Densidad técnica y extensión final (100+ págs) |
 | Fase 7 · Excelencia Técnica | 10 | ~18 | +80% | QA final, Base de Datos y Evaluación Empírica (Coder/Cloud) |
 | **Total** | **~300** | **~340** | **~+13%** | |
-<p align="center"><i><b>Tabla 19:</b> Resumen de desviaciones de tiempo por fase.</i></p>
+<p align="center"><i><b>Tabla 20:</b> Resumen de desviaciones de tiempo por fase.</i></p>
 
 > [!NOTE]
 > Una desviación del **+13%** respecto a la estimación de referencia se sitúa cómodamente dentro del margen de contingencia previsto (±15%). Esta inversión de horas extra (~40h) se asumió de manera consciente y deliberada para garantizar un acabado de excelencia académica e ingenieril en la recta final (Fase 7), demostrando que el proyecto puede escalar a estándares corporativos manteniendo la planificación original bajo control. El desglose pormenorizado por sprint con las retrospectivas detalladas, incluyendo los hitos completados y las lecciones aprendidas, se documenta en el **Anexo B**.
@@ -2797,7 +2804,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
 | **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
 | **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
-<p align="center"><i><b>Tabla 20:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
+<p align="center"><i><b>Tabla 21:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
 
 > **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
 
@@ -2814,7 +2821,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | **Asistente IA (Google Gemini Advanced)** | Google | **~120 €** | 20 €/mes × 6 meses. Utilizado para asistencia en codificación, scaffolding, revisión de lógica y apoyo en redacción técnica |
 | OpenAI API (validación puntual) | OpenAI | ~15 € | Créditos de prueba |
 | **Subtotal Infraestructura y Herramientas** | | **~261 €** | |
-<p align="center"><i><b>Tabla 21:</b> Costes de Infraestructura y Herramientas (Fase de Desarrollo).</i></p>
+<p align="center"><i><b>Tabla 22:</b> Costes de Infraestructura y Herramientas (Fase de Desarrollo).</i></p>
 
 ### 9.4.3. Costes Totales de Desarrollo
 
@@ -2824,7 +2831,7 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | Infraestructura y herramientas | ~261 € |
 | **Coste Total del Proyecto** | **~9.541 €** |
 | **Coste por hora efectiva** | **~26,2 €/h** |
-<p align="center"><i><b>Tabla 22:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
+<p align="center"><i><b>Tabla 23:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
 
 ---
 
@@ -2848,7 +2855,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **A — Universidad/Empresa Pequeña** | <5.000 usuarios, equipo IT de 1–3 personas, infraestructura local básica | Baja |
 | **B — Universidad/Empresa Mediana** | 5.000–30.000 usuarios, departamento IT estructurado, K8s on-premise/híbrido | Media |
 | **C — Gran Universidad/Empresa** | >30.000 usuarios, multi-clúster, equipo IT dedicado, auditoría RGPD estricta | Alta |
-<p align="center"><i><b>Tabla 23:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
+<p align="center"><i><b>Tabla 24:</b> Perfiles de Organización Adoptante (Casos A, B y C).</i></p>
 
 ### 9.5.2. Costes de Implantación (CAPEX — Inversión Inicial)
 
@@ -2859,7 +2866,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 | **Configuración y despliegue** *(CI/CD, variables de entorno, SSL, LDAP/SAML)* | 10h × 40 €/h = **400 €** | 30h × 50 €/h = **1.500 €** | 60h × 60 €/h = **3.600 €** |
 | **Formación de administradores (HITL)** | 4h × 1 pers = **160 €** | 8h × 2 pers = **800 €** | 12h × 4 pers = **2.880 €** |
 | **CAPEX Total** | **2.160 €** | **7.300 €** | **20.880 €** |
-<p align="center"><i><b>Tabla 24:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
+<p align="center"><i><b>Tabla 25:</b> Costes de Implantación (CAPEX - Inversión Inicial).</i></p>
 
 ### 9.5.3. Costes Operativos Anuales (OPEX)
 
@@ -2869,7 +2876,7 @@ Esta sección responde a la pregunta estratégica: **¿Cuánto costaría adaptar
 |---|---|---|---|
 | Servidor aplicación (FastAPI + MCP) | VPS 4 vCPU / 8 GB ≈ **600 €/año** | Servidor on-premise amortizado ≈ **300 €/año** | 3 réplicas en nube ≈ **3.600 €/año** |
 | Almacenamiento (BD + logs YAML) | 50 GB SSD ≈ **60 €/año** | 200 GB ≈ **200 €/año** | 1 TB + backups ≈ **800 €/año** |
-<p align="center"><i><b>Tabla 25:</b> Costes Operativos Anuales de Infraestructura (OPEX).</i></p>
+<p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Infraestructura (OPEX).</i></p>
 
 #### Motor LLM — La Variable Determinante del OPEX
 
@@ -2882,7 +2889,7 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 | **Básico** (MVP / Pruebas) | `qwen2.5-coder:7b` | 8 GB | ~400 € (ej. RTX 4060) | **0 €/año** | Total (Zero Data Retention) |
 | **Intermedio** (Equilibrado) | `qwen2.5-coder:14b` / `mistral-nemo:12b` | 16 GB | ~500 € (ej. RTX 4060 Ti 16GB) | **0 €/año** | Total |
 | **Enterprise** (Óptimo Corporativo) | `Qwen3-Coder-30B-A3B-Instruct` (MoE) | 24-48 GB | ~1.800 € - 5.000 € (ej. RTX 3090/4090 o dual) | **0 €/año** | Total |
-<p align="center"><i><b>Tabla 26:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud) según niveles de adopción.</i></p>
+<p align="center"><i><b>Tabla 27:</b> Costes Operativos Anuales de Motor LLM (Local vs Cloud) según niveles de adopción.</i></p>
 
 > **Nota técnica sobre escalabilidad:** En el diseño inicial del proyecto, se preveía que la adopción institucional requeriría modelos de 14B o arquitecturas de 30B para solventar las vulnerabilidades lógicas detectadas en modelos generalistas de 7B. No obstante, los resultados empíricos obtenidos con la variante especializada **`qwen2.5-coder:7b`** (Nivel Básico) indican que es técnicamente viable operar el sistema en un nivel de entrada (hardware de 8 GB VRAM, ~400 €) manteniendo altos índices de fiabilidad. Esta optimización fundamentada en la especialización del modelo permite reducir significativamente el gasto de capital (CAPEX) necesario para la puesta en marcha. En consecuencia, el escalado hacia infraestructuras de Nivel Intermedio o Enterprise se plantea como un requisito reservado principalmente para instituciones (Perfil C) que deban soportar picos de alta concurrencia o flujos de orquestación de complejidad superior.
 
@@ -2894,7 +2901,7 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 | OpenAI | GPT-4o | 2,50 $/MTok | 10,00 $/MTok | **~2.700–11.000 €/año** |
 | Anthropic | Claude Haiku | 0,25 $/MTok | 1,25 $/MTok | **~290–1.150 €/año** |
 | Google | Gemini Flash | 0,075 $/MTok | 0,30 $/MTok | **~80–330 €/año** |
-<p align="center"><i><b>Tabla 27:</b> Estimación de Costes de Motor LLM (API en la Nube).</i></p>
+<p align="center"><i><b>Tabla 28:</b> Estimación de Costes de Motor LLM (API en la Nube).</i></p>
 
 > *Para 50–200 solicitudes diarias. El volumen asume **~50.000 tokens promedio por solicitud** (90% contexto de entrada, 10% salida). Esta cifra se deriva del efecto "explosión de contexto" acumulativo de los agentes autónomos (patrón ReAct). Un despliegue estándar requiere múltiples iteraciones (planificar, aplicar, verificar, corregir errores); en cada iteración, el LLM debe procesar de nuevo todo el historial previo. Dado que las herramientas de Kubernetes devuelven salidas muy extensas (ej. volcados de manifiestos con `kubectl -o yaml` o trazas de *logs*, que pueden superar los 3.000 tokens por llamada), el consumo de tokens de entrada crece exponencialmente en cada paso del bucle hasta resolver la petición.
 
@@ -2910,14 +2917,14 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 | Mantenimiento y actualizaciones | 10h × 40 €/h = **400 €/año** | 20h × 50 €/h = **1.000 €/año** | 40h × 60 €/h = **2.400 €/año** |
 | **OPEX Total (con Ollama)** | **~1.080 €/año** | **~1.540 €/año** | **~6.900 €/año** |
 | **OPEX Total (con API nube)** | **~3.760 €/año** | **~7.000 €/año** | **~17.800 €/año** |
-<p align="center"><i><b>Tabla 28:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
+<p align="center"><i><b>Tabla 29:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
 
 > *El coste eléctrico es prácticamente residual debido a que el sistema procesa una media de 50-200 solicitudes diarias. La GPU permanece en estado de reposo (Idle, consumiendo ~15-30W) el 99% del tiempo, activando picos de consumo máximo únicamente durante los escasos segundos que dura la inferencia.
 > **Para entornos institucionales productivos, la alternativa en la nube requiere modelos cognitivamente resilientes (nivel GPT-4o), asumiendo volúmenes escalados según el perfil (50, 100 y 200 solicitudes diarias respectivamente).
 
 ### 9.5.4. Análisis de Retorno de Inversión (ROI)
 
-El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8 (Tabla 8).
+El valor generado se cuantifica a partir de la reducción de tiempo operativo documentada en el Capítulo 8 (Tabla 9).
 
 **Cálculo del ahorro anual — Perfil B (Universidad mediana, 500 solicitudes/año)**
 
@@ -2927,7 +2934,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Traducción manual a YAML | ~15 min | 500 | 50 €/h | **~6.250 €** |
 | Validación de políticas | ~5 min | 500 | 50 €/h | **~2.080 €** |
 | **Ahorro total anual** | | | | **~20.330 €** |
-<p align="center"><i><b>Tabla 29:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
+<p align="center"><i><b>Tabla 30:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
 
 > **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
 
@@ -2941,7 +2948,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | Ahorro operativo | — | +20.330 € | +20.330 € | +20.330 € |
 | **Flujo neto** | **-7.700 €** | **+18.790 €** | **+18.790 €** | **+18.790 €** |
 | **Acumulado** | -7.700 € | +11.090 € | +29.880 € | +48.670 € |
-<p align="center"><i><b>Tabla 30:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
+<p align="center"><i><b>Tabla 31:</b> Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama).</i></p>
 
 > **Período de retorno (Payback Period): ~5 meses** tras la implantación.
 > **ROI a 3 años: ~522%**
@@ -2971,7 +2978,7 @@ A continuación, se exponen las conclusiones derivadas de la validación empíri
 
 ## 10.1. Conclusiones
 
-La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un yugo arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en cinco puntos:
+La conceptualización, desarrollo y sometimiento a pruebas de estrés del *Agentic Deployer* ha demostrado de manera concluyente la viabilidad técnica de delegar la provisión de infraestructura a agentes autónomos, siempre y cuando se encuentren bajo un control arquitectónico estricto. Las conclusiones fundamentales derivadas de este trabajo de investigación se articulan en cinco puntos:
 
 ### 10.1.1. Superación del *Vendor Lock-In* mediante MCP
 
@@ -2979,7 +2986,7 @@ La decisión arquitectónica de aislar el catálogo de operaciones del Servicio 
 
 Este desacoplamiento estratégico se validó materialmente en dos frentes. En primer lugar, con la implementación del `OllamaLLMClient` nativo (sección 5.2.1), que sustituyó la dependencia en la API de OpenAI por un modelo ejecutado localmente (`qwen2.5:7b`), sin modificar una sola línea de la lógica de negocio hexagonal ni del servidor MCP. En segundo lugar, mediante la validación del servidor con el **MCP Inspector** — la herramienta de certificación oficial de Anthropic — que, ejecutándose de forma completamente independiente al cliente Streamlit del proyecto, fue capaz de descubrir (`tools/list`) e invocar todas las herramientas del catálogo del SIC mediante el protocolo `stdio` estándar. Esta doble evidencia certifica que el servidor MCP del proyecto es un activo interoperable: consumible indistintamente por el agente propio, por herramientas de auditoría externas y por clientes de terceros (documentado en el README del repositorio mediante el MCP Inspector oficial).
 
-### 10.1.2. La Arquitectura Hexagonal como Jaula Cognitiva
+### 10.1.2. La Arquitectura Hexagonal como Mecanismo de Contención Cognitiva
 
 Uno de los mayores hallazgos de este trabajo es la refutación práctica del mito de la "Inteligencia Artificial incontrolable" en entornos de operaciones. La adopción del patrón *Ports and Adapters* (Arquitectura Hexagonal) [15] ha demostrado ser un mecanismo de contención eficaz contra las "alucinaciones" del LLM.
 
@@ -2995,7 +3002,7 @@ La reducción del tiempo de entrega demostrada —de ~4.340 minutos (ITSM clási
 
 Las metodologías de *testing* convencionales son insuficientes para sistemas estocásticos. El TFM ha validado que auditar IAs generativas requiere paradigmas avanzados. La integración de *Property-Based Testing* (Hypothesis) [30] y Pruebas Metamórficas [31] ha demostrado que el agente extrae entidades matemáticas correctas a partir de texto con alto ruido sintáctico.
 
-De igual trascendencia ha sido el descubrimiento derivado del *Mutation Testing* (Mutmut): se ha evidenciado que una alta cobertura de líneas no garantiza la resiliencia lógica. La auditoría inicial detectó **30 mutantes supervivientes** en los parsers de recursos auxiliares (`_parse_cpu`, `_parse_ram`), brechas que las métricas clásicas reportaban como "cubiertas". Este hallazgo permitió refactorizar el código, eliminar lógica muerta y asesinar dichos mutantes antes de la entrega final, neutralizando la deuda técnica. Esto constituye una contribución metodológica por sí misma, demostrando la superioridad epistémica del *Mutation Testing* como herramienta de mejora continua para sistemas de infraestructura crítica.
+De igual trascendencia ha sido el descubrimiento derivado del *Mutation Testing* (Mutmut): se ha evidenciado que una alta cobertura de líneas no garantiza la resiliencia lógica. La auditoría inicial detectó **30 mutantes supervivientes** en los parsers de recursos auxiliares (`_parse_cpu`, `_parse_ram`), brechas que las métricas clásicas reportaban como "cubiertas". Este hallazgo permitió refactorizar el código, eliminar lógica muerta y neutralizar dichos mutantes antes de la entrega final, resolviendo la deuda técnica. Esto constituye una contribución metodológica por sí misma, demostrando la superioridad epistémica del *Mutation Testing* como herramienta de mejora continua para sistemas de infraestructura crítica.
 
 ### 10.1.5. La Interfaz Conversacional como Democratizador de la Infraestructura
 
@@ -3007,13 +3014,13 @@ En síntesis, este Trabajo de Fin de Máster aporta una **arquitectura de refere
 
 El desarrollo del MVP ha resuelto con éxito el desafío de la persistencia de estado en sistemas agénticos. Mediante la implementación del patrón de repositorio (`SQLiteDeploymentRepository`), el sistema ha abandonado el almacenamiento volátil en memoria para garantizar que el historial de intenciones y aprobaciones (la Máquina de Estados) sobreviva a reinicios del servidor. Esta inyección de dependencias consolida el diseño hexagonal y certifica que el prototipo es robusto y ACID-compliant frente a fallos de infraestructura.
 
-### 10.1.7. El Rescate Cognitivo en Hardware Modesto (7B)
+### 10.1.7. La Estabilización Cognitiva en Hardware Modesto (7B)
 
 La conclusión más reveladora sobre el uso empírico de LLMs locales es el impacto directo de la arquitectura sobre las capacidades intrínsecas del modelo. Durante las pruebas (documentadas en la sección 8.4), modelos de 7B (Qwen 2.5 y Mistral) presentaron severas limitaciones al intentar orquestar flujos conversacionales mediante la arquitectura clásica (ReAct o *Chain of Thought*), colapsando frecuentemente por dilución de atención y emitiendo JSONs inválidos.
 
 Sin embargo, al transicionar hacia una arquitectura de Máquina de Estado Destilado —donde el LLM actúa únicamente como extractor semántico pasivo y Python asume el control del flujo determinista—, **estos mismos modelos alcanzaron niveles de éxito cercanos al 100% sin necesidad de aumentar sus parámetros ni aplicar *fine-tuning***. Este hallazgo sugiere que los modelos locales de 7B no carecen de la capacidad lógica necesaria, sino que las arquitecturas agénticas tradicionales sobrecargan su capacidad cognitiva. Aliviar esta carga permite "rescatar" modelos que de otro modo serían descartados por su tasa de error, habilitando una IA corporativa mucho más predecible sobre hardware de consumo estándar.
 
-### 10.1.8. Viabilidad Híbrida y la Ilusión Cognitiva del Cloud
+### 10.1.8. Viabilidad Híbrida y las Limitaciones Cognitivas del Cloud
 
 La validación empírica final, incorporando ecosistemas en la nube como **Google Gemini 3.5 Flash** y proveedores de alta velocidad (LPUs) como **Groq**, arrojó resultados determinantes sobre el uso de infraestructura externa. Si bien los modelos comerciales alcanzan el éxito en escenarios interactivos relajados, las pruebas de estrés metamórfico revelaron ciertas limitaciones estructurales del paradigma "Cloud-First":
 
@@ -3032,17 +3039,17 @@ Como consolidación de los experimentos realizados durante el desarrollo del *Ag
 |---|---|---|---|---|---|
 | **Ollama** | `qwen2.5-coder:7b` | Local | Sí (Hardware propio) | **Excelente (Soberanía)** | Superó el stress-test metamórfico con un 100% de éxito. Su hiper-especialización en código y *Tool Calling* elimina las alucinaciones estructurales, validando que la especialización del modelo compensa las limitaciones de hardware. |
 | **Ollama** | `qwen2.5:7b` | Local | Sí (Hardware propio) | **Alta (Soberanía)** | Sorprendente resiliencia (50% en metamórficos). Capaz de solventar casos prácticos iterando. Proyecta un rendimiento excelente para despliegues locales (Zero Data Retention) al escalar a modelos superiores (32B/72B) con hardware dedicado. |
-| **Google** | `gemini-3.5-flash` | Cloud | Sí (15 RPM) | **Alta** | El más resiliente a nivel estructural. Tasa de éxito del 66% (4/6) en el despiadado stress-test metamórfico (Zero-Shot). |
+| **Google** | `gemini-3.5-flash` | Cloud | Sí (15 RPM) | **Alta** | El más resiliente a nivel estructural. Tasa de éxito del 66% (4/6) en el riguroso stress-test metamórfico (Zero-Shot). |
 | **Mistral** | `ministral-8b-latest`| Cloud | Sí | **Alta** | Excelente rendimiento en casos prácticos con System Prompt (Máquina de Estados), pero colapsa (0/6) en el stress-test metamórfico puro. |
 | **Mistral** | `codestral-latest` | Cloud | Sí | **Nula** | Pese a su especialización en código, carece de *fine-tuning* para herramientas estructuradas (responde con texto libre). |
 | **Cohere** | `command-r-plus` | Cloud | Sí (1k rpm) | **Alta** | Modelo construido para *Tool Calling*. Empata con Gemini en resiliencia metamórfica (66%), colapsando bajo entropía coloquial. |
-| **Groq** | `qwen3.8-27b` | Cloud (LPU) | Sí (30 RPM / 1K TPM) | **Alta** | Rendimiento y velocidad excelentes, pero el límite de tokens (*Rate Limit*) bloquea su uso ininterrumpido. |
+| **Groq** | `Qwen 3.8 (27B)` | Cloud (LPU) | Sí (30 RPM / 1K TPM) | **Alta** | Rendimiento y velocidad excelentes, pero el límite de tokens (*Rate Limit*) bloquea su uso ininterrumpido. |
 | **Mistral** | `mistral-small-latest` | Cloud | Limitada (429) | **Media** | Adecuado técnicamente, pero la estricta gobernanza de "Le Free Tier" (Error 429) bloquea su uso práctico continuado. |
 
 **El Mejor Rendimiento Empírico y la Promesa Local:**
 La experimentación ha revelado una dualidad interesante en la nube: por un lado, **`gemini-3.5-flash`** y **`cohere-command-r-plus`** demostraron ser campeones de la resiliencia estructural en modelos generalistas (empatando al 66% en el stress-test aislado). Que ni siquiera un modelo corporativo ultra-especializado en *Tool Calling* como Cohere logre el 100% en solitario (al confundirse con ruido coloquial) justifica la pertinencia de nuestra Arquitectura Hexagonal. Por otro lado, precisamente gracias al apoyo de esta arquitectura y sus barreras de contención, modelos más compactos como **`ministral-8b-latest`** logran ofrecer un rendimiento funcional altamente satisfactorio en casos prácticos convencionales, mitigando sus evidentes debilidades en entornos no guiados (*zero-shot*). 
 
-Sin embargo, el hallazgo empírico definitivo que corona este trabajo de investigación corresponde a la variante especializada **`qwen2.5-coder:7b`**. Pese a ejecutarse en hardware de consumo estándar (8GB VRAM), este modelo se ha consolidado como el motor cognitivo más fiable de todo el catálogo evaluado: demostró una precisión milimétrica en la simulación de escenarios realistas *End-to-End* (promediando 1,0 iteraciones) y ha sido el único modelo capaz de superar con un **100% de éxito** la batería inicial de pruebas metamórficas, batiendo incluso a los modelos comerciales masivos de la nube. Este resultado valida irrefutablemente la hipótesis de que la optimización del corpus de entrenamiento (código, JSON, YAML) es un factor más determinante para el *Tool Calling* que el recuento bruto de parámetros. En consecuencia, la adopción de modelos locales especializados en código garantiza un rendimiento de grado empresarial idóneo para despliegues institucionales sujetos a **Zero Data Retention**, maximizando la eficiencia de inferencia sin comprometer la soberanía del dato ni el presupuesto.
+Sin embargo, el hallazgo empírico definitivo que consolida este trabajo de investigación corresponde a la variante especializada **`qwen2.5-coder:7b`**. Pese a ejecutarse en hardware de consumo estándar (8GB VRAM), este modelo se ha consolidado como el motor cognitivo más fiable de todo el catálogo evaluado: demostró una precisión milimétrica en la simulación de escenarios realistas *End-to-End* (promediando 1,0 iteraciones) y ha sido el único modelo capaz de superar con un **100% de éxito** la batería inicial de pruebas metamórficas, batiendo incluso a los modelos comerciales masivos de la nube. Este resultado valida de manera concluyente la hipótesis de que la optimización del corpus de entrenamiento (código, JSON, YAML) es un factor más determinante para el *Tool Calling* que el recuento bruto de parámetros. En consecuencia, la adopción de modelos locales especializados en código garantiza un rendimiento de grado empresarial idóneo para despliegues institucionales sujetos a **Zero Data Retention**, maximizando la eficiencia de inferencia sin comprometer la soberanía del dato ni el presupuesto.
 
 **Modelos excluidos de la evaluación (Ausencia de capa gratuita ilimitada):**
 Es necesario mencionar que estándares de la industria tecnológica como **GPT-4o (OpenAI) [33]** o **Claude 3.5 Sonnet (Anthropic) [34]** no han sido integrados en las pruebas empíricas por requerir pago por token. Sin embargo, según la documentación técnica de los propios fabricantes y los *benchmarks* del sector, estos modelos han sido sometidos a un intenso *fine-tuning* diseñado específicamente para flujos de trabajo agénticos (*Agentic Workflows*). En particular, empresas como Anthropic afirman que la familia Claude está optimizada para la interacción impecable con herramientas externas y protocolos como MCP (*Model Context Protocol*). En consecuencia, su adecuación a este proyecto se presupone sobresaliente, y constituirían la opción más segura en un entorno corporativo con presupuesto asignado. Adicionalmente, plataformas agregadoras como **OpenRouter** (con su endpoint gratuito `llama-3.1-8b-instruct:free`) podrían constituir alternativas viables para futuras líneas de investigación sin coste económico.
@@ -3111,7 +3118,7 @@ Todo el prototipo y la experimentación empírica se han desarrollado forzando l
 
 ## 10.3. Trabajo Futuro
 
-El prototipo actual certifica matemáticamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
+El prototipo actual certifica empíricamente la viabilidad de la integración agéntica en sistemas deterministas. Su consolidación operativa en un entorno productivo de gran escala requiere abordar una serie de mejoras iterativas. Las futuras líneas de desarrollo se desglosan en tres horizontes temporales estratégicos.
 
 ### 10.3.1. Horizonte a Corto Plazo: Integración Física (K8s API)
 
@@ -3342,7 +3349,7 @@ kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
 | **Estado final** | `DEPLOYED` (tras aprobación HITL) |
 | **Timestamp** | 2026-09-27T10:14:34+02:00 |
 | **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
-<p align="center"><i><b>Tabla 30:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 32:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
 
 ---
 
@@ -3464,7 +3471,7 @@ spec:
 
 El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/k8s_adapter.py`](../app/infrastructure/k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
 
-En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 9.2.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
+En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 10.3.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
 
 ```python
 # Futura implementación RealK8sAdapter (pseudocódigo)
@@ -3496,7 +3503,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 50h | ~55h | +10% |
 | Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
 | Cobertura dominio | >90% | >95% | +5pp |
-<p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
+<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
 
 **Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
 
@@ -3511,7 +3518,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 45h | ~45h | 0% |
 | Endpoints REST | 4 | 5 (+`/hitl/reject`) | +25% |
 | Estados FSM | 4 | 6 (+`FAILED`, `DELETED`) | +50% |
-<p align="center"><i><b>Tabla 32:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
+<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
 
 **Hitos completados:** FastAPI con 5 endpoints, FSM con DAG acíclico, Dashboard HTML con polling, `DeploymentStatus` enum completo.
 
@@ -3526,7 +3533,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 40h | ~46h | +15% |
 | Herramientas MCP | 3 | 4 | +33% |
 | Templates YAML | 2 tipos | 3 tipos | +50% |
-<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
+<p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
 
 **Hitos completados:** `FakeK8sAdapter` con templates f-string + `textwrap.dedent`, 4 herramientas MCP con `@mcp_server.tool()`, Pipeline CI `scripts/run_tests.sh` (6 pasos fail-fast), Ruff + Mypy integrados.
 
@@ -3541,7 +3548,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 55h | ~62h | +13% |
 | Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
 | Iteraciones ReAct máximas | 5 | 5 | 0% |
-<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
+<p align="center"><i><b>Tabla 36:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
 
 **Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (`httpx` directo a la API REST de Ollama), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
 
@@ -3557,7 +3564,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
 | Mutantes eliminados | >90% | >95% | +5pp |
 | Relaciones metamórficas | 3 MR | 4 MR | +33% |
-<p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
+<p align="center"><i><b>Tabla 37:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 
 **Hitos completados:** Pipeline de QA integral implantado en `scripts/run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
 
@@ -3572,7 +3579,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas de redacción | 55h | ~64h | +16% |
 | Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
 | Iteraciones de revisión | 2–3 | 5 | +67% |
-<p align="center"><i><b>Tabla 36:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
+<p align="center"><i><b>Tabla 38:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
 
 **Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (17 figuras), Anexos YAML y de Planificación.
 
@@ -3587,11 +3594,11 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 | Horas dedicadas | 10h | ~18h | +80% |
 | Herramientas MCP totales | 4 | 7 | +75% |
 | Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
-<p align="center"><i><b>Tabla 37:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
+<p align="center"><i><b>Tabla 39:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
 
 **Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos, **Experimentos Cognitivos Multi-Modelo** (Qwen vs Mistral vs Llama vs Coder vs Cloud).
 
-**Notas:** Esta fase estaba planificada desde el inicio como un objetivo opcional de excelencia (Prioridad P2), y pudo abordarse con éxito gracias al buen ritmo de desarrollo de los módulos obligatorios (P0/P1). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores. Por otro lado, la evaluación empírica con distintos LLMs de 7B generalistas (Mistral, Llama 3.2, Qwen) permitió documentar el fenómeno de colapso cognitivo bajo estrés. Sin embargo, la inclusión final del modelo especializado **Qwen 2.5 Coder (7B)** supuso el hallazgo diferencial de esta fase: su éxito absoluto en todas las arquitecturas y pruebas metamórficas reformuló por completo las conclusiones financieras de viabilidad (Capítulo 9), demostrando que es posible alcanzar un rendimiento de grado corporativo empleando exclusivamente hardware local de gama de entrada (Zero Data Retention).
+**Notas:** Esta fase estaba planificada desde el inicio como un objetivo opcional de excelencia (Prioridad P2), y pudo abordarse con éxito gracias al buen ritmo de desarrollo de los módulos obligatorios (P0/P1). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores. Por otro lado, la evaluación empírica con distintos LLMs de 7B generalistas (Mistral, Llama 3.2, Qwen) permitió documentar el fenómeno de colapso cognitivo bajo estrés. Sin embargo, la inclusión final del modelo especializado **Qwen 2.5 Coder (7B)** supuso el hallazgo diferencial de esta fase: su capacidad para superar las pruebas metamórficas consolidó las conclusiones financieras de viabilidad (Capítulo 9), demostrando que es posible alcanzar un rendimiento de grado corporativo empleando exclusivamente hardware local de gama de entrada (Zero Data Retention).
 
 
 <div style='page-break-after: always;'></div>
@@ -3625,4 +3632,4 @@ Para facilitar la lectura y comprensión técnica de este documento, a continuac
 | **ROI** | Return on Investment | Retorno de Inversión. Métrica financiera que compara el beneficio obtenido en relación a la inversión realizada (ej. tiempo ahorrado vs. coste de desarrollo). |
 | **SIC** | Servicio de Informática y Comunicaciones | Departamento institucional (típicamente universitario o gubernamental) encargado de administrar la infraestructura tecnológica y soporte a usuarios. |
 | **TTM** | Time To Market / Time To Mitigation | Tiempo desde la concepción de una necesidad (ej. necesito una web) hasta que el servicio está operativo y disponible. |
-<p align="center"><i><b>Tabla 38:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>
+<p align="center"><i><b>Tabla 40:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>

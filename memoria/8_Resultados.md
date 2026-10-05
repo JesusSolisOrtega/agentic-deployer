@@ -36,7 +36,7 @@ La siguiente tabla refleja el impacto temporal (medido en minutos operativos) de
 | **4. Aprobación y Despliegue** | 2 min (`kubectl apply`) | 2 min (Clic en el Dashboard) | **0% (Mismo esfuerzo)** |
 | **Tiempos Muertos (Cola)** | 2.880 min (Ticket en espera) | 60 min (Cola del Dashboard) | **~97.9%** |
 | **Costo Cognitivo Técnico N3** | **Alto** (Redacción código) | **Mínimo** (Auditoría visual) | **-** |
-<p align="center"><i><b>Tabla 8:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
+<p align="center"><i><b>Tabla 9:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
 
 La métrica más definitoria de esta arquitectura no es la velocidad de escritura del YAML, sino la **eliminación del tiempo muerto de negociación**. Al absorber la ambigüedad lingüística en tiempo real a través del patrón ReAct (Capítulo 5), el investigador obtiene sus recursos en la misma mañana que los solicitó, frente a los 2 o 3 días hábiles que exige la burocracia del correo electrónico. 
 
@@ -118,7 +118,7 @@ Esta sección documenta de forma forense tres escenarios de ejecución real del 
 | **Inferencia** | Aceleración por hardware (NVIDIA CUDA) |
 | **Backend** | FastAPI 0.115 + Uvicorn (single-worker), SQLite 3.45 |
 | **Repeticiones** | Cada escenario documentado se ejecutó en lotes de 5 iteraciones para garantizar rigor estadístico; las latencias reportadas representan la media (µ) ± desviación estándar (σ) |
-<p align="center"><i><b>Tabla 9:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
+<p align="center"><i><b>Tabla 10:</b> Entorno de evaluación para los casos de estudio prácticos.</i></p>
 
 ### 8.3.1. Escenario 1 — Walkthrough Forense: Portal Web para Congreso Académico
 
@@ -197,7 +197,7 @@ El `SecurityContextValidator` evalúa la intención en tiempo O(1):
 | Sin variables de entorno con secretos | Conforme |
 | CPU ≤ cuota departamental | Conforme |
 | RAM ≤ cuota departamental | Conforme |
-<p align="center"><i><b>Tabla 10:</b> Traza de ejecución: Validación en el núcleo hexagonal (Paso 5).</i></p>
+<p align="center"><i><b>Tabla 11:</b> Traza de ejecución: Validación en el núcleo hexagonal (Paso 5).</i></p>
 
 **Sin violaciones detectadas → transición FSM: intención registrada como `PENDING_APPROVAL`**
 
@@ -284,7 +284,7 @@ El adaptador genera el manifiesto completo (Deployment + Service + Ingress) medi
 | Tiempo de aprobación HITL | ~7 min (decisión humana) |
 | Tiempo total E2E | ~7,2 min vs. ~4.340 min ITSM |
 | Reducción TTM | **99,8%** |
-<p align="center"><i><b>Tabla 11:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 12:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
 
 **Transcripción completa:** [`demos/session_logs/escenario1_happy_path.json`](../demos/session_logs/escenario1_happy_path.json)
 
@@ -300,7 +300,7 @@ Documentado en profundidad en la Sección 8.2. En síntesis:
 | Tool Call del LLM | `format_deployment_intent(image="ubuntu:latest", internal_port=22, ...)` |
 | Respuesta del Backend | **`HTTP 422`** — Tres violaciones: tag `:latest`, puerto reservado 22, y registro no confiable |
 | Autocorrección iterativa | Explica las violaciones y propone mejoras de forma recurrente durante 5 iteraciones hasta proponer `docker.io/ubuntu:22.04` en el puerto `2222` |
-<p align="center"><i><b>Tabla 12:</b> Traza de ejecución: Intento de Prompt Injection (Escenario 2).</i></p>
+<p align="center"><i><b>Tabla 13:</b> Traza de ejecución: Intento de Prompt Injection (Escenario 2).</i></p>
 
 La intercepción se produjo **antes de que ninguna operación modificara el clúster**, lo que valida el principio de *fail-fast* de la arquitectura hexagonal.
 
@@ -329,7 +329,7 @@ La intercepción se produjo **antes de que ninguna operación modificara el clú
 | Revisión en Dashboard | Técnico SIC | ~7 min | Panel HITL (Cap. 6.3) |
 | Aprobación y despliegue | Técnico SIC | ~2s | Botón "Aprobar" |
 | YAML escrito en disco | `FakeK8sAdapter` | <1ms | Template f-string |
-<p align="center"><i><b>Tabla 13:</b> Desglose de latencias por componente en el ciclo de vida.</i></p>
+<p align="center"><i><b>Tabla 14:</b> Desglose de latencias por componente en el ciclo de vida.</i></p>
 
 **Tiempo total extremo a extremo (incluyendo espera HITL):** ~9 minutos vs. ~4.340 minutos en el modelo ITSM convencional (**reducción del 99,8%**).
 
@@ -360,7 +360,7 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 | 2. Prompt Injection — Puerto 22 | 5 | 45,07 s | PENDING_APPROVAL* | `escenario2_prompt_injection.json` |
 | 3. Ciclo HITL — CMS WordPress | 2 | 27,84 s | PENDING_APPROVAL | `escenario3_hitl_completo.json` |
 | 4. Autocorrección Multi-turno | 2 | 26,10 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
-<p align="center"><i><b>Tabla 14:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
+<p align="center"><i><b>Tabla 15:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
 
 Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
 - El **Escenario 1** (Happy Path) se resolvió en 1 sola iteración (13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como requerimientos semánticos de red) desde el primer intento.
@@ -368,7 +368,7 @@ Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundo
 - El **Escenario 2** (Prompt Injection) desencadenó hasta **5 iteraciones** (45 segundos) en las que el LLM propuso reiteradamente alternativas inseguras, chocando una y otra vez contra los validadores estáticos (*Quality Gates*) de FastAPI, hasta que finalmente capituló y propuso una imagen lícita (`docker.io/ubuntu:22.04`). Esto demuestra un confinamiento perimetral hermético.
 - El **Escenario 3** precisó 2 iteraciones, ya que corrigió proactivamente un puerto privilegiado.
 
-**Nota de Reproducibilidad:** Para certificar el rigor empírico y la transparencia de este TFM, la totalidad de los datos volcados en la Tabla 14 y en los anexos no son teóricos, sino que han sido obtenidos mediante ejecución de caja negra contra la API de Ollama y el orquestador desarrollado. En el código fuente del proyecto se ha habilitado un script de validación automatizada (`scripts/generate_demos.py`) que audita y recrea programáticamente estos *logs* (almacenados en `demos/session_logs/`), certificando que el comportamiento metodológico detallado es 100% reproducible en un entorno local dotado de aceleración hardware.
+**Nota de Reproducibilidad:** Para certificar el rigor empírico y la transparencia de este TFM, la totalidad de los datos volcados en la Tabla 15 y en los anexos no son teóricos, sino que han sido obtenidos mediante ejecución de caja negra contra la API de Ollama y el orquestador desarrollado. En el código fuente del proyecto se ha habilitado un script de validación automatizada (`scripts/generate_demos.py`) que audita y recrea programáticamente estos *logs* (almacenados en `demos/session_logs/`), certificando que el comportamiento metodológico detallado es 100% reproducible en un entorno local dotado de aceleración hardware.
 
 ### 8.3.6. Comparativa de Inferencia Multimodelo (Agnosticismo)
 
@@ -386,7 +386,7 @@ Para demostrar esta interoperabilidad, se evaluó un abanico heterogéneo de mod
 | **Cohere Command R+**| Cloud (Cohere) | 1,0 | ~9,00 s | 100% |
 | **Ministral 8B** | Cloud (Mistral) | 1,0 | ~3,20 s | 100% |
 | **Qwen 3.8 (27B)** | Cloud (Groq) | 2,0 | ~2,45 s | 100% |
-<p align="center"><i><b>Tabla 15:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
+<p align="center"><i><b>Tabla 16:</b> Rendimiento comparativo real de modelos alternativos en el bucle ReAct.</i></p>
 
 Los resultados empíricos revelaron un hallazgo crítico para la selección del modelo base: la **Tasa de Invocación de Herramientas** (capacidad de apegarse al esquema JSON de las funciones sin alucinar texto). Mientras que **Qwen 2.5** logró adherirse al bucle ReAct de manera sobresaliente, **Mistral (local)** demostró incapacidad para formatear las llamadas a herramientas. 
 
@@ -437,7 +437,7 @@ El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos 
 | **Cohere Command R+** | **Éxito 100%** (Diseño *Tool Calling*) | **Éxito 100%** (Respuesta determinista) | **Éxito 100%** (Precisión absoluta) |
 | **Ministral 8B** | **Éxito 100%** (Soporte nativo *Tool Calling*) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
 | **Qwen 27B (Groq)** | **Éxito 100%** (Inferencia ultra-rápida) | **Éxito 100%** (Razonamiento estable) | **Éxito 100%** (Precisión absoluta) |
-<p align="center"><i><b>Tabla 16:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
+<p align="center"><i><b>Tabla 17:</b> Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud.</i></p>
 
 **Conclusiones de los Experimentos de Arquitectura Cognitiva**
 

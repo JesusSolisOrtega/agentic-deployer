@@ -143,7 +143,7 @@ PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
 
 CLASE OllamaLLMClient IMPLEMENTA LLMClient:
   ATRIBUTOS:
-    modelo: Cadena (ej. "qwen2.5:7b")
+    modelo: Cadena (ej. "qwen2.5-coder:7b")
     url_base: Cadena (ej. "http://localhost:11434")
 
   MÉTODO chat(mensajes, herramientas):
@@ -186,7 +186,7 @@ SALIDA: motor_llm -> Instancia de motor cognitivo (compatible con LLMClient)
 
 INICIO
   SI proveedor ES "ollama" ENTONCES
-    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5:7b")
+    RETORNAR NUEVO OllamaLLMClient(modelo="qwen2.5-coder:7b")
   SINO SI proveedor ES "openai" ENTONCES
     RETORNAR NUEVO OpenAILLMClient(modelo="gpt-4o-mini")
   SINO
@@ -198,11 +198,11 @@ FIN
 Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
 
 
-### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5)
+### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5 Coder)
 
-El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó por desplegar **Qwen 2.5 (7B)** de Alibaba Cloud, descartando alternativas como Llama 3.2 (3B) o Mistral (7B). 
+El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó finalmente por desplegar la variante especializada **Qwen 2.5 Coder (7B)** de Alibaba Cloud, descartando a sus homólogos generalistas como Llama 3.2, Mistral, o el propio Qwen 2.5 base.
 
-Esta elección no es arbitraria y responde estrictamente a la eficacia del modelo en la invocación de herramientas (*Tool Calling*). Qwen 2.5 posee un *fine-tuning* de fábrica muy bueno para interpretar y emitir estructuras JSON anidadas y adherirse estrictamente a las restricciones de un *System Prompt* operativo. Mientras que modelos muy eficientes como *Llama 3.2* o *Phi-3.5* demuestran capacidades conversacionales destacables, fracasan de forma recurrente al acoplarse al orquestador MCP, desviándose del esquema JSON o respondiendo con texto conversacional no parseable. Así, Qwen 2.5 (7B) emerge empíricamente como la única solución capaz de soportar la arquitectura de orquestación ReAct con un 100% de fiabilidad para modelos open source locales en este espectro de hardware (véase la demostración empírica en la Sección 8.3.6).
+Esta elección responde a la necesidad de garantizar una alta eficacia en la invocación de herramientas (*Tool Calling*). La variante Coder incorpora un ajuste fino (*fine-tuning*) exhaustivo sobre corpus de código fuente, lo que le confiere una robustez superior en la generación y manipulación de estructuras JSON complejas frente a modelos puramente conversacionales. Durante la experimentación, mientras que modelos generalistas como *Llama 3.2* o *Mistral* evidenciaron una degradación sintáctica recurrente bajo estrés operativo, **Qwen 2.5 Coder (7B)** demostró ser la única solución local de su categoría capaz de superar íntegramente la batería de Pruebas Metamórficas, exhibiendo la mayor estabilidad estructural frente a la entropía lingüística y posibilitando la correcta orquestación del bucle ReAct (véase el análisis empírico en el Capítulo 8).
 
 ### 5.2.3. Soberanía del Dato en Entornos Institucionales
 

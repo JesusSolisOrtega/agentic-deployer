@@ -358,6 +358,7 @@ class LiteLLMClient(LLMClient):  # pragma: no cover
     Client using litellm to support any provider (Cohere, Anthropic, etc).
     """
 
+    # pyrefly: ignore [unannotated-return]
     def __init__(
         self,
         model: str,
@@ -384,6 +385,7 @@ class LiteLLMClient(LLMClient):  # pragma: no cover
             time.sleep(2) # rate limit prevention
 
         response = litellm.completion(**kwargs)
+        # pyrefly: ignore [missing-attribute]
         choice = response.choices[0].message
 
         agent_response = AgentResponse(content=choice.content)
@@ -423,9 +425,9 @@ class OllamaLLMClient(LLMClient):  # pragma: no cover
         ollama pull llama3.1            # Alternative with tool_calls support
 
     Recommended models with native tool_calls support by tier:
-        - [Basic]        qwen2.5:7b    (8 GB VRAM, good for testing/MVP)
-        - [Intermediate] qwen2.5:14b   (16 GB VRAM, optimal balance of speed & reliability)
-        - [Enterprise]   qwen2.5:32b   (24 GB VRAM, high reliability, production-grade)
+        - [Basic]        qwen2.5-coder:7b (8 GB VRAM, good for testing/MVP)
+        - [Intermediate] qwen2.5-coder:14b (16 GB VRAM, optimal balance of speed & reliability)
+        - [Enterprise]   qwen2.5-coder:32b (24 GB VRAM, high reliability, production-grade)
         - [Enterprise]   llama3.1:70b  (48 GB VRAM, maximum reasoning capacity)
 
     NOT recommended (tested but prone to cognitive collapse in ReAct loops):
@@ -447,7 +449,7 @@ class OllamaLLMClient(LLMClient):  # pragma: no cover
                 "pip install ollama"
             ) from exc
 
-        self.model = model or os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+        self.model = model or os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
         self.host = host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
     def chat(

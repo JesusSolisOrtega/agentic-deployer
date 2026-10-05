@@ -47,10 +47,10 @@ El sistema soporta **tres modos de proveedor LLM** seleccionables vía variable 
 ```bash
 # 1. Instalar Ollama: https://ollama.com
 ollama serve                        # Iniciar servidor (otra terminal)
-ollama pull qwen2.5:7b              # Descargar modelo (~4.7 GB)
+ollama pull qwen2.5-coder:7b              # Descargar modelo (~4.7 GB)
 
 # 2. Lanzar el chat con Ollama
-LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5:7b streamlit run app/agent_layer/chat_app.py
+LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5-coder:7b streamlit run app/agent_layer/chat_app.py
 ```
 
 **Modo OpenAI:**

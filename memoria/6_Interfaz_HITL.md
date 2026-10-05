@@ -76,7 +76,7 @@ La implementación de este FSM mediante Python y el *framework* asíncrono FastA
 
 Imaginemos un escenario concurrente: Una petición se encuentra en `PENDING_APPROVAL`. Por un problema de latencia en la red Wi-Fi, el Técnico de Operaciones hace doble clic rápidamente sobre el botón "Rechazar" en su interfaz, o peor aún, dos operarios de distintos turnos, visualizando el mismo panel, deciden pulsar simultáneamente los botones de "Aprobar" y "Rechazar" en milisegundos idénticos.
 
-Sin una salvaguarda arquitectónica, estas peticiones paralelas podrían colisionar en la memoria volátil del servidor, resultando en un estado de Schrödinger donde el sistema intenta desplegar y denegar el mismo registro al mismo tiempo, fracturando el estado del clúster de Kubernetes.
+Sin una salvaguarda arquitectónica, estas peticiones paralelas generarían una condición de carrera (*race condition*) en la base de datos del servidor, provocando una inconsistencia transaccional donde el sistema intentaría desplegar y denegar el mismo registro simultáneamente, lo que comprometería gravemente la integridad del estado del clúster de Kubernetes.
 
 Para neutralizar este vector, la transición entre vértices del DAG se blinda mediante algoritmos de comprobación atómica (*Test-and-Set* lógicos) o mecanismos de **Optimistic Locking** (Bloqueo Optimista). A continuación se expone la fundamentación algorítmica de esta defensa en el núcleo Hexagonal:
 
@@ -91,7 +91,7 @@ SALIDA:
 
 INICIO
   // 1. Adquisición y comprobación (Atomicidad)
-  Variable registro = ObtenerRegistroMemoria(id_peticion)
+  Variable registro = ObtenerRegistroBaseDeDatos(id_peticion)
   
   SI registro ES NULO ENTONCES
     LANZAR HttpNotFoundError(404)

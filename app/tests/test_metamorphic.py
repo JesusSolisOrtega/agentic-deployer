@@ -23,6 +23,7 @@ from app.agent_layer.tools import TOOL_DEFINITIONS
 
 
 @pytest.fixture(scope="session", autouse=True)
+# pyrefly: ignore [unannotated-return]
 def ensure_ollama_running():
     """
     Si se solicita ejecución real, comprueba si Ollama está corriendo.
@@ -77,6 +78,7 @@ def ensure_ollama_running():
         print("\n[Metamorphic Tests] Deteniendo demonio de Ollama...")
         process.terminate()
         process.wait()
+# pyrefly: ignore [implicit-any-parameter]
 def extract_params(client, messages: list[dict]) -> dict[str, Any]:
     """Extrae los parámetros usando el Fake o el modelo real."""
     if isinstance(client, FakeLLMClient):
@@ -91,6 +93,7 @@ def extract_params(client, messages: list[dict]) -> dict[str, Any]:
 
 
 @pytest.fixture
+# pyrefly: ignore [unannotated-return]
 def parser():
     if os.getenv("RUN_REAL_LLM") == "true":
         provider = os.getenv("LLM_PROVIDER", "ollama")
@@ -118,7 +121,7 @@ def parser():
                 model=os.getenv("COHERE_MODEL", "cohere/command-r-plus-08-2024")
             )
         # Usado para las ejecuciones documentadas en el Capítulo 7
-        return OllamaLLMClient(model=os.getenv("OLLAMA_MODEL", "qwen2.5:7b"))
+        return OllamaLLMClient(model=os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b"))
     return FakeLLMClient()
 
 

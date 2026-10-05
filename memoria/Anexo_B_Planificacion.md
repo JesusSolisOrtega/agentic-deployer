@@ -11,7 +11,7 @@
 | Horas dedicadas | 50h | ~55h | +10% |
 | Tests (Unitarios + Property-Based) | ~15 | 51 tests | +240% |
 | Cobertura dominio | >90% | >95% | +5pp |
-<p align="center"><i><b>Tabla 31:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
+<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 1 (Núcleo Hexagonal).</i></p>
 
 **Hitos completados:** `DeploymentIntent` con Pydantic v2, `SecurityContextValidator` (5 reglas), `DeployPort` abstracto, Suite Property-Based con Hypothesis.
 
@@ -26,7 +26,7 @@
 | Horas dedicadas | 45h | ~45h | 0% |
 | Endpoints REST | 4 | 5 (+`/hitl/reject`) | +25% |
 | Estados FSM | 4 | 6 (+`FAILED`, `DELETED`) | +50% |
-<p align="center"><i><b>Tabla 32:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
+<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 2 (Backend HITL y FSM).</i></p>
 
 **Hitos completados:** FastAPI con 5 endpoints, FSM con DAG acíclico, Dashboard HTML con polling, `DeploymentStatus` enum completo.
 
@@ -41,7 +41,7 @@
 | Horas dedicadas | 40h | ~46h | +15% |
 | Herramientas MCP | 3 | 4 | +33% |
 | Templates YAML | 2 tipos | 3 tipos | +50% |
-<p align="center"><i><b>Tabla 33:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
+<p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 3 (Golden Paths y FakeK8s).</i></p>
 
 **Hitos completados:** `FakeK8sAdapter` con templates f-string + `textwrap.dedent`, 4 herramientas MCP con `@mcp_server.tool()`, Pipeline CI `scripts/run_tests.sh` (6 pasos fail-fast), Ruff + Mypy integrados.
 
@@ -56,7 +56,7 @@
 | Horas dedicadas | 55h | ~62h | +13% |
 | Clientes LLM | 2 (Fake + OpenAI) | 3 (+Ollama nativo) | +50% |
 | Iteraciones ReAct máximas | 5 | 5 | 0% |
-<p align="center"><i><b>Tabla 34:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
+<p align="center"><i><b>Tabla 36:</b> Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK).</i></p>
 
 **Hitos completados:** `LLMClient` ABC con inversión de dependencias, `OllamaLLMClient` nativo (`httpx` directo a la API REST de Ollama), `OpenAILLMClient`, `AgentOrchestrator` (bucle ReAct), Factory `LLM_PROVIDER` (`fake | ollama | openai`).
 
@@ -72,7 +72,7 @@
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
 | Mutantes eliminados | >90% | >95% | +5pp |
 | Relaciones metamórficas | 3 MR | 4 MR | +33% |
-<p align="center"><i><b>Tabla 35:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
+<p align="center"><i><b>Tabla 37:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 
 **Hitos completados:** Pipeline de QA integral implantado en `scripts/run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
 
@@ -87,7 +87,7 @@
 | Horas de redacción | 55h | ~64h | +16% |
 | Extensión de la memoria | ~55–70 páginas | **100+ páginas** | +43% |
 | Iteraciones de revisión | 2–3 | 5 | +67% |
-<p align="center"><i><b>Tabla 36:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
+<p align="center"><i><b>Tabla 38:</b> Retrospectiva de la Fase 6 (Redacción y Cierre).</i></p>
 
 **Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (17 figuras), Anexos YAML y de Planificación.
 
@@ -101,9 +101,9 @@
 |---|---|---|---|
 | Horas dedicadas | 10h | ~18h | +80% |
 | Herramientas MCP totales | 4 | 7 | +75% |
-| Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
-<p align="center"><i><b>Tabla 37:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
+| Tests totales (Unitarios + Integración) | 51 tests | 65 tests | +27% |
+<p align="center"><i><b>Tabla 39:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
 
 **Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos, **Experimentos Cognitivos Multi-Modelo** (Qwen vs Mistral vs Llama vs Coder vs Cloud).
 
-**Notas:** Esta fase estaba planificada desde el inicio como un objetivo opcional de excelencia (Prioridad P2), y pudo abordarse con éxito gracias al buen ritmo de desarrollo de los módulos obligatorios (P0/P1). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores. Por otro lado, la evaluación empírica con distintos LLMs de 7B generalistas (Mistral, Llama 3.2, Qwen) permitió documentar el fenómeno de colapso cognitivo bajo estrés. Sin embargo, la inclusión final del modelo especializado **Qwen 2.5 Coder (7B)** supuso el hallazgo diferencial de esta fase: su éxito absoluto en todas las arquitecturas y pruebas metamórficas reformuló por completo las conclusiones financieras de viabilidad (Capítulo 9), demostrando que es posible alcanzar un rendimiento de grado corporativo empleando exclusivamente hardware local de gama de entrada (Zero Data Retention).
+**Notas:** Esta fase estaba planificada desde el inicio como un objetivo opcional de excelencia (Prioridad P2), y pudo abordarse con éxito gracias al buen ritmo de desarrollo de los módulos obligatorios (P0/P1). Se demostró que la Arquitectura Hexagonal es capaz de absorber un cambio completo de capa de datos (de RAM a SQLite) modificando únicamente los adaptadores. Por otro lado, la evaluación empírica con distintos LLMs de 7B generalistas (Mistral, Llama 3.2, Qwen) permitió documentar el fenómeno de colapso cognitivo bajo estrés. Sin embargo, la inclusión final del modelo especializado **Qwen 2.5 Coder (7B)** supuso el hallazgo diferencial de esta fase: su capacidad para superar las pruebas metamórficas consolidó las conclusiones financieras de viabilidad (Capítulo 9), demostrando que es posible alcanzar un rendimiento de grado corporativo empleando exclusivamente hardware local de gama de entrada (Zero Data Retention).

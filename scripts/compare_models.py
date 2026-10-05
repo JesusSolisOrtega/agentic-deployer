@@ -12,7 +12,7 @@ import logging
 logging.getLogger().setLevel(logging.ERROR)
 
 MODELS = [
-    "qwen2.5:7b", "llama3.2", "mistral", 
+    "qwen2.5:7b", "qwen2.5-coder:7b", "llama3.2", "mistral", 
     "gemini-3.5-flash", 
     "cohere/command-r-plus-08-2024", 
     "mistral/ministral-8b-latest", 
@@ -38,6 +38,7 @@ SCENARIOS = [
     }
 ]
 
+# pyrefly: ignore [implicit-any-parameter, unannotated-return]
 async def run_scenario(client, prompt):
     orchestrator = AgentOrchestrator(client)
     history = [{"role": "system", "content": "Eres el asistente IA del Servicio de Informática."}]
@@ -53,6 +54,7 @@ async def run_scenario(client, prompt):
     iterations = len([msg for msg in history if "tool_calls" in msg])
     return iterations, elapsed, (response is not None)
 
+# pyrefly: ignore [unannotated-return]
 async def main():
     results = {}
     
