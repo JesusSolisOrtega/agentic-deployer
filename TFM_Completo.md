@@ -100,72 +100,75 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 
 ### Índice de Figuras
 
-- **Figura 1:** Contraste arquitectónico entre el problema de integración N×M (acoplamiento propietario) y la topología de Bus Universal propuesta por el protocolo MCP. *(Capítulo 2)*
-- **Figura 2:** Diagrama de componentes del Stack Tecnológico empleado, evidenciando la segregación entre las capas de interfaz, razonamiento cognitivo, backend restrictivo y las herramientas de validación de calidad continua. *(Capítulo 3)*
-- **Figura 3:** Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer. *(Capítulo 4)*
-- **Figura 4:** Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por `stdio` sin exponer ningún puerto TCP. *(Capítulo 4)*
-- **Figura 5:** Diagrama de Clases (UML) resumiendo las principales entidades y contratos del núcleo lógico, destacando el uso del polimorfismo para la inyección de dependencias. *(Capítulo 4)*
-- **Figura 6:** Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión). *(Capítulo 4)*
-- **Figura 7:** Árbol de decisión del `SecurityContextValidator`. Cada rama de rechazo lanza un `SecurityViolationError` que el bucle ReAct captura como Observación para auto-corregirse. *(Capítulo 4)*
-- **Figura 8:** Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención. *(Capítulo 4)*
-- **Figura 9:** Diagrama de Secuencia E2E (Fase 2). El Backend procesa la petición, aplicando reglas de negocio estrictas. *(Capítulo 4)*
-- **Figura 10:** Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución. *(Capítulo 4)*
-- **Figura 11:** Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización, ejecución y observación. *(Capítulo 5)*
-- **Figura 12:** Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting). *(Capítulo 5)*
-- **Figura 13:** Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema. *(Capítulo 6)*
-- **Figura 14:** Diagrama de Secuencia del flujo HITL: polling del Dashboard, vector de aprobación (PENDING → APPROVED → DEPLOYED) y vector de rechazo (PENDING → REJECTED). *(Capítulo 6)*
-- **Figura 15:** Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa. *(Capítulo 7)*
-- **Figura 16:** Diagrama de Gantt (Parte 1). Planificación orientativa de los Sprints 1 a 4 (núcleo y agente). *(Capítulo 9)*
-- **Figura 17:** Diagrama de Gantt (Parte 2). Planificación orientativa del QA avanzado y las fases de cierre/consolidación. *(Capítulo 9)*
+- **Figura 1:** Contraste arquitectónico entre el problema de integración N×M (acoplamiento propietario) y la topología de Bus Universal propuesta por el protocolo MCP. *(Capítulo)*
+- **Figura 2:** Diagrama de componentes del Stack Tecnológico empleado, evidenciando la segregación entre las capas de interfaz, razonamiento cognitivo, backend restrictivo y las herramientas de validación de calidad continua. *(Capítulo)*
+- **Figura 3:** Diagrama de Contenedores (Nivel 2) del Modelo C4 para el sistema Agentic Deployer. *(Capítulo)*
+- **Figura 4:** Diagrama de despliegue a nivel de proceso. Los cuatro componentes coexisten en la misma máquina; el servidor MCP se comunica por <code>stdio</code> sin exponer ningún puerto TCP. *(Capítulo)*
+- **Figura 5:** Diagrama de Clases (UML) resumiendo las principales entidades y contratos del núcleo lógico, destacando el uso del polimorfismo para la inyección de dependencias (LLMClient, DeployPort). *(Capítulo)*
+- **Figura 6:** Topología de la Arquitectura Hexagonal. El flujo de control penetra desde los Adaptadores Primarios, pero la dependencia de código siempre fluye hacia el centro (Regla de Dependencia de Inversión). *(Capítulo)*
+- **Figura 7:** Visión general simplificada del <code>SecurityContextValidator</code>. Una rama de rechazo lanza el error para que ReAct se auto-corrija. *(Capítulo)*
+- **Figura 8:** Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención. *(Capítulo)*
+- **Figura 9:** Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección. *(Capítulo)*
+- **Figura 10:** Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución. *(Capítulo)*
+- **Figura 11:** Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM). *(Capítulo)*
+- **Figura 12:** Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting). *(Capítulo)*
+- **Figura 13:** Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema. *(Capítulo)*
+- **Figura 14:** Diagrama de Secuencia del flujo HITL. (Arriba) Polling asíncrono y Vector de Aprobación. (Abajo) Vector de Rechazo (estado inmutable terminal). *(Capítulo)*
+- **Figura 15:** Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa. *(Capítulo)*
+- **Figura 16:** Diagrama de Gantt (Parte 1). Planificación orientativa de los Sprints 1 a 4 (núcleo y agente). *(Capítulo)*
+- **Figura 17:** Diagrama de Gantt (Parte 2). Planificación orientativa del QA avanzado y las fases de cierre/consolidación. *(Capítulo)*
 
 ### Índice de Tablas
 
-- **Tabla 1:** Comparativa de herramientas declarativas vs imperativas. *(Capítulo)*
+- **Tabla 1:** Comparativa entre Asistentes Cloud Propietarios y el Agentic Deployer. *(Capítulo)*
 - **Tabla 2:** Posicionamiento del sistema respecto al estado del arte. *(Capítulo)*
-- **Tabla 3:** Vectores de mutación REST del Dashboard de Operaciones. *(Capítulo)*
-- **Tabla 4:** Cobertura de pruebas unitarias por componente. *(Capítulo)*
+- **Tabla 3:** Mapeo de estados FSM a indicadores visuales del panel de notificaciones del investigador. *(Capítulo)*
+- **Tabla 4:** Casos de prueba de la capa de consulta de estado del investigador. *(Capítulo)*
 - **Tabla 5:** Resultados del Mutation Testing por módulo. *(Capítulo)*
-- **Tabla 6:** Resultados de las Pruebas Metamórficas por Relación. *(Capítulo)*
+- **Tabla 6:** Resultados empíricos de las Pruebas Metamórficas por Relación frente a Qwen 2.5 (7B). *(Capítulo)*
 - **Tabla 7:** Métricas globales de la batería metamórfica. *(Capítulo)*
-- **Tabla 8:** Impacto temporal operativo (ITSM tradicional vs Agentic Deployer). *(Capítulo)*
-- **Tabla 9:** Traza de ejecución: Análisis de contexto y herramienta (Paso 1). *(Capítulo)*
-- **Tabla 10:** Traza de ejecución: Validación en el núcleo hexagonal (Paso 5). *(Capítulo)*
-- **Tabla 11:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo)*
-- **Tabla 12:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo)*
-- **Tabla 13:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo)*
-- **Tabla 14:** Comparativa E2E de métricas operativas (multi-escenario). *(Capítulo)*
-- **Tabla 15:** Rendimiento comparativo real de modelos alternativos. *(Capítulo)*
-- **Tabla 16:** Resultados de los Experimentos de Arquitectura Cognitiva. *(Capítulo)*
-- **Tabla 17:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
-- **Tabla 18:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
-- **Tabla 19:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
-- **Tabla 20:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
-- **Tabla 21:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
-- **Tabla 22:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
-- **Tabla 23:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
-- **Tabla 24:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
-- **Tabla 25:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
-- **Tabla 26:** Costes Operativos Anuales de Motor LLM (Local vs Cloud). *(Capítulo)*
-- **Tabla 27:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
-- **Tabla 28:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
-- **Tabla 29:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
-- **Tabla 30:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Anexo)*
-- **Tabla 31:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
-- **Tabla 32:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
-- **Tabla 33:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
-- **Tabla 34:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
-- **Tabla 35:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
-- **Tabla 36:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
-- **Tabla 37:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
-- **Tabla 38:** Glosario completo de Acrónimos y Términos Técnicos. *(Anexo)*
+- **Tabla 8:** Resultados comparativos del stress-test metamórfico (Zero-Shot puro). *(Capítulo)*
+- **Tabla 9:** Impacto temporal operativo (ITSM tradicional vs Agentic Deployer). *(Capítulo)*
+- **Tabla 10:** Entorno de evaluación para los casos de estudio prácticos. *(Capítulo)*
+- **Tabla 11:** Traza de ejecución: Validación en el núcleo hexagonal (Paso 5). *(Capítulo)*
+- **Tabla 12:** Métricas de rendimiento del walkthrough completo (Escenario 1). *(Capítulo)*
+- **Tabla 13:** Traza de ejecución: Intento de Prompt Injection (Escenario 2). *(Capítulo)*
+- **Tabla 14:** Desglose de latencias por componente en el ciclo de vida. *(Capítulo)*
+- **Tabla 15:** Comparativa E2E de métricas operativas (multi-escenario). *(Capítulo)*
+- **Tabla 16:** Rendimiento comparativo real de modelos alternativos en el bucle ReAct. *(Capítulo)*
+- **Tabla 17:** Resultados de los Experimentos de Arquitectura Cognitiva ampliado con modelos Cloud. *(Capítulo)*
+- **Tabla 18:** Módulos de desarrollo y jerarquía de prioridades. *(Capítulo)*
+- **Tabla 19:** Estimación de esfuerzo neto por Sprint. *(Capítulo)*
+- **Tabla 20:** Resumen de desviaciones de tiempo por fase. *(Capítulo)*
+- **Tabla 21:** Costes de Recursos Humanos (CAPEX equivalente). *(Capítulo)*
+- **Tabla 22:** Costes de Infraestructura y Herramientas (Fase de Desarrollo). *(Capítulo)*
+- **Tabla 23:** Subtotal y costes totales de la fase de desarrollo. *(Capítulo)*
+- **Tabla 24:** Perfiles de Organización Adoptante (Casos A, B y C). *(Capítulo)*
+- **Tabla 25:** Costes de Implantación (CAPEX - Inversión Inicial). *(Capítulo)*
+- **Tabla 26:** Costes Operativos Anuales de Infraestructura (OPEX). *(Capítulo)*
+- **Tabla 27:** Costes Operativos Anuales de Motor LLM (Local vs Cloud) según niveles de adopción. *(Capítulo)*
+- **Tabla 28:** Estimación de Costes de Motor LLM (API en la Nube). *(Capítulo)*
+- **Tabla 29:** OPEX Total Anual consolidado por Perfil de Adopción. *(Capítulo)*
+- **Tabla 30:** Cálculo del ahorro anual operativo (Escenario de Perfil B). *(Capítulo)*
+- **Tabla 31:** Retorno de Inversión (ROI) a 3 años (Perfil B con Ollama). *(Capítulo)*
+- **Tabla 32:** Contexto de Generación del Manifiesto YAML (Escenario 1). *(Anexo)*
+- **Tabla 33:** Retrospectiva del Sprint 1 (Núcleo Hexagonal). *(Anexo)*
+- **Tabla 34:** Retrospectiva del Sprint 2 (Backend HITL y FSM). *(Anexo)*
+- **Tabla 35:** Retrospectiva del Sprint 3 (Golden Paths y FakeK8s). *(Anexo)*
+- **Tabla 36:** Retrospectiva del Sprint 4 (Agente ReAct y MCP SDK). *(Anexo)*
+- **Tabla 37:** Retrospectiva del Sprint 5 (QA Avanzado). *(Anexo)*
+- **Tabla 38:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo)*
+- **Tabla 39:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo)*
+- **Tabla 40:** Glosario de Acrónimos y Términos Técnicos. *(Anexo)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 
-- **Algoritmo 1:** Validación Estricta de Entidades de Dominio Hexagonal. *(Sección 4.3.1)*
-- **Algoritmo 2:** Introspección Dinámica de Contratos de Herramientas. *(Sección 5.1.1)*
-- **Algoritmo 3:** Bucle de Orquestación Cognitiva (ReAct Loop). *(Sección 5.3.1)*
-- **Algoritmo 4:** Transición Inmutable de la Máquina de Estados (FSM_Transition). *(Sección 6.2.2)*
-- **Algoritmo 5:** Property-Based Test para Invariantes Hexagonales (Fuzzing). *(Sección 7.2.1)*
+- **Algoritmo 1:** Validación Estricta de Entidades de Dominio Hexagonal (SecurityContextValidator). *(Capítulo)*
+- **Algoritmo 2:** Introspección Dinámica de Contratos de Herramientas. *(Capítulo)*
+- **Algoritmo 3:** Bucle de Orquestación Cognitiva (ReAct Loop). *(Capítulo)*
+- **Algoritmo 4:** Transición Inmutable de la Máquina de Estados (FSM_Transition). *(Capítulo)*
+- **Algoritmo 5:** Property-Based Test para Invariantes Hexagonales (Fuzzing). *(Capítulo)*
+
 
 
 <div style='page-break-after: always;'></div>
@@ -3593,7 +3596,7 @@ La arquitectura hexagonal garantiza que este cambio de adaptador no requiere mod
 |---|---|---|---|
 | Horas dedicadas | 10h | ~18h | +80% |
 | Herramientas MCP totales | 4 | 7 | +75% |
-| Tests totales (Unitarios + Integración) | 51 tests | 61 tests | +19% |
+| Tests totales (Unitarios + Integración) | 51 tests | 65 tests | +27% |
 <p align="center"><i><b>Tabla 39:</b> Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica).</i></p>
 
 **Hitos completados:** Sustitución de persistencia volátil por **SQLite** (Transacciones ACID), Ampliación a 7 herramientas MCP (BD, Sitios Estáticos, Estado), Verificación externa empírica (Integración con **MCP Inspector** documentada en README), Cierre del *pipeline* CI con 0 fallos, **Experimentos Cognitivos Multi-Modelo** (Qwen vs Mistral vs Llama vs Coder vs Cloud).
