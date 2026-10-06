@@ -2136,7 +2136,7 @@ Esta propiedad se formaliza y evalúa inyectando una batería de variaciones lé
 
 ### 7.4.2. Resultados Empíricos y Tolerancia a la Ambigüedad
 
-La ejecución de las 6 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para garantizar la validez empírica de esta evaluación cognitiva, los resultados documentados en esta sección se obtuvieron ejecutando la batería directamente contra el LLM real (`qwen2.5:7b` mediante `OllamaLLMClient`), inyectando el ruido léxico y evaluando la deducción JSON del modelo estocástico. La siguiente tabla resume los resultados empíricos de la batería metamórfica:
+La ejecución de las 6 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para el análisis detallado de estas relaciones se ha seleccionado el modelo `qwen2.5:7b` (mediante `OllamaLLMClient`) como **modelo de referencia base**. Esta elección está deliberadamente alineada con el contexto institucional: representa un modelo generalista estándar, capaz de ejecutarse en hardware modesto (*On-Premise*) bajo estrictas restricciones de soberanía del dato, convirtiéndolo en el candidato idóneo para ilustrar las limitaciones cognitivas (y la necesidad de la arquitectura) antes de evaluar alternativas avanzadas o en la nube. La siguiente tabla resume los resultados empíricos de la batería metamórfica frente a este modelo base:
 
 | Relación Metamórfica | Descripción | Entradas de prueba | Resultado | Extracción JSON |
 |---|---|---|---|---|
@@ -2303,7 +2303,9 @@ La transcripción completa de este escenario, incluyendo los mensajes JSON inter
 
 ## 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
 
-Esta sección documenta de forma forense tres escenarios de ejecución real del sistema, con el modelo de lenguaje `qwen2.5:7b` ejecutándose localmente mediante Ollama (Zero Data Retention). Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
+Esta sección documenta de forma forense tres escenarios de ejecución real del sistema. Para la ejecución de estos escenarios prácticos se ha mantenido deliberadamente el modelo generalista de referencia `qwen2.5:7b` (ejecutándose localmente mediante Ollama con *Zero Data Retention*), el cual obtuvo un 50% de éxito en las pruebas metamórficas de estrés (Sección 7.4.2), en lugar de utilizar la variante hiper-especializada *Coder* (100%). Esta decisión argumentativa busca demostrar empíricamente cómo la arquitectura propuesta (el bucle ReAct y el núcleo Hexagonal) es capaz de absorber y corregir la estocasticidad de un modelo imperfecto en el mundo real, garantizando despliegues seguros sin depender exclusivamente de las capacidades intrínsecas de la red neuronal.
+
+Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
 
 **Entorno de evaluación:**
 
