@@ -106,7 +106,9 @@ La transcripción completa de este escenario, incluyendo los mensajes JSON inter
 
 ## 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
 
-Esta sección documenta de forma forense tres escenarios de ejecución real del sistema, con el modelo de lenguaje `qwen2.5:7b` ejecutándose localmente mediante Ollama (Zero Data Retention). Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
+Esta sección documenta de forma forense tres escenarios de ejecución real del sistema. Para la ejecución de estos escenarios prácticos se ha mantenido deliberadamente el modelo generalista de referencia `qwen2.5:7b` (ejecutándose localmente mediante Ollama con *Zero Data Retention*), el cual obtuvo un 50% de éxito en las pruebas metamórficas de estrés (Sección 7.4.2), en lugar de utilizar la variante hiper-especializada *Coder* (100%). Esta decisión argumentativa busca demostrar empíricamente cómo la arquitectura propuesta (el bucle ReAct y el núcleo Hexagonal) es capaz de absorber y corregir la estocasticidad de un modelo imperfecto en el mundo real, garantizando despliegues seguros sin depender exclusivamente de las capacidades intrínsecas de la red neuronal.
+
+Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
 
 **Entorno de evaluación:**
 
