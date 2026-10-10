@@ -51,7 +51,11 @@ caption_pattern = re.compile(r'<p align="center"><i><b>(Figura|Tabla|Algoritmo)\
 for fname in toc_source_files:
     fpath = os.path.join(BASE_DIR, fname)
     is_anexo = fname.startswith("Anexo")
-    ubicacion = "Anexo" if is_anexo else "Capítulo"
+    if is_anexo:
+        ubicacion = f"Anexo {fname.split('_')[1]}"
+    else:
+        num = fname.split('_')[0]
+        ubicacion = f"Capítulo {num}"
     
     if os.path.exists(fpath):
         with open(fpath, "r", encoding="utf-8") as f:

@@ -2,7 +2,7 @@
 
 La integración de Modelos de Lenguaje Grandes (LLM) en la orquestación de infraestructuras corporativas fractura los paradigmas tradicionales de Ingeniería de Pruebas (*Software Testing*). En el desarrollo de software convencional, la función matemática *f(x)* siempre retorna *y*. Sin embargo, en un sistema agéntico estocástico, el mismo estímulo (el mismo *prompt*) puede generar resultados sintácticamente dispares dependiendo de la semilla de inferencia (*seed*) o de la temperatura del modelo.
 
-Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [27].
+Para garantizar la estabilidad matemática del *Agentic Deployer*, este Trabajo de Fin de Máster propone y ejecuta una pirámide de pruebas heterogénea y agresiva. Este capítulo desglosa la estrategia de Aseguramiento de Calidad (QA), comenzando por las pruebas unitarias deterministas que protegen la Arquitectura Hexagonal, escalando hacia el bombardeo estocástico mediante *Property-Based Testing* (Hypothesis), auditando la propia red de pruebas mediante *Mutation Testing* (Mutmut), y culminando con la aplicación del incipiente paradigma de las Pruebas Metamórficas para acorralar las alucinaciones de la Inteligencia Artificial, inspirándose en el modelo fundacional de la Pirámide de Pruebas propuesto por Mike Cohn [29].
 
 <div style="max-width: 6cm; margin: 0 auto;">
 
@@ -17,7 +17,7 @@ flowchart BT
   %% Estrato Medio
   subgraph Medio [Medio: Fuzzing y Mutación]
     direction BT
-    F(Asedio Estocástico y Clones Mutantes)
+    F(Pruebas de Fuzzing y Clones Mutantes)
   end
 
   %% Cúspide
@@ -40,11 +40,11 @@ flowchart BT
 </div>
 <p align="center"><i><b>Figura 15:</b> Arquitectura de la Pirámide Híbrida de Testing implementada en el Agentic Deployer, adaptando el modelo clásico a las exigencias de la Inteligencia Artificial Generativa.</i></p>
 
-## 7.1. Pruebas de Dominio e Integración: Validando la Jaula Hexagonal
+## 7.1. Pruebas de Dominio e Integración: Validando el Perímetro Hexagonal
 
 La base fundamental de la pirámide de aseguramiento de calidad reside en la Capa de Dominio. Como se justificó en el Capítulo 4, la Inteligencia Artificial actúa como un usuario externo sin privilegios; su capacidad para influir en la infraestructura está supeditada a la robustez del `SecurityContextValidator` y a los invariantes matemáticos impuestos por las entidades de Pydantic. 
 
-En consecuencia, el primer objetivo de QA es asegurar que esta "jaula hexagonal" es altamente resiliente antes de conectarla al motor de IA. Esta fase se ejecuta mediante técnicas de **Testing Unitario (*White-Box Testing*)** aisladas, ejecutadas localmente a través del *framework* `pytest`.
+En consecuencia, el primer objetivo de QA es asegurar que este perímetro hexagonal es altamente resiliente antes de conectarla al motor de IA. Esta fase se ejecuta mediante técnicas de **Testing Unitario (*White-Box Testing*)** aisladas, ejecutadas localmente a través del *framework* `pytest`.
 
 ### 7.1.1. Análisis de Valores Límite y Clases de Equivalencia
 
@@ -87,10 +87,10 @@ El último test es el más crítico desde el punto de vista de la integridad del
 Para garantizar que la mantenibilidad y calidad del proyecto no se degrade durante futuras evoluciones, la canalización de integración continua (`scripts/run_tests.sh`) actúa como un *Quality Gate* estricto mediante la aplicación de análisis estático en el archivo de configuración `pyproject.toml`. 
 
 Se han configurado dos umbrales infranqueables que rompen la integración en caso de incumplimiento:
-1. **Complejidad Ciclomática (McCabe):** Se ha establecido un límite máximo de complejidad `C901 = 15` a través del linter *Ruff*. Aunque la formulación original de McCabe [28] proponía un límite de 10, los estándares de ingeniería modernos (como *SonarQube*) recomiendan un límite pragmático de 15 para acomodar construcciones sintácticas actuales (como gestores de contexto y *match/case*) sin generar falsos positivos. Este umbral garantiza que ninguna función contenga un exceso de ramas lógicas, obligando arquitectónicamente a la refactorización y asegurando código limpio y auditable.
-2. **Cobertura de Código Pragmática:** Se exige una cobertura mínima del 80% (`--cov-fail-under=80`). En consonancia con las directrices de ingeniería de gigantes tecnológicos como Google [29], se rechaza la persecución artificial del 100% de cobertura. Alcanzar el 100% a menudo fomenta la escritura de pruebas triviales que no aportan seguridad real lógica, creando una falsa sensación de inmunidad. El umbral del 80% garantiza que el núcleo de negocio está férreamente protegido, dejando margen para ignorar deliberadamente *boilerplates* o pegamento de *frameworks* cuya evaluación no aporta valor académico ni de negocio.
+1. **Complejidad Ciclomática (McCabe):** Se ha establecido un límite máximo de complejidad `C901 = 15` a través del linter *Ruff*. Aunque la formulación original de McCabe [30] proponía un límite de 10, los estándares de ingeniería modernos (como *SonarQube*) recomiendan un límite pragmático de 15 para acomodar construcciones sintácticas actuales (como gestores de contexto y *match/case*) sin generar falsos positivos. Este umbral garantiza que ninguna función contenga un exceso de ramas lógicas, obligando arquitectónicamente a la refactorización y asegurando código limpio y auditable.
+2. **Cobertura de Código Pragmática:** Se exige una cobertura mínima del 80% (`--cov-fail-under=80`). En consonancia con las directrices de ingeniería de gigantes tecnológicos como Google [31], se rechaza la persecución artificial del 100% de cobertura. Alcanzar el 100% a menudo fomenta la escritura de pruebas triviales que no aportan seguridad real lógica, creando una falsa sensación de inmunidad. El umbral del 80% garantiza que el núcleo de negocio está férreamente protegido, dejando margen para ignorar deliberadamente *boilerplates* o pegamento de *frameworks* cuya evaluación no aporta valor académico ni de negocio.
 
-## 7.2. Property-Based Testing: Asedio Estocástico
+## 7.2. Property-Based Testing: Pruebas frente a Comportamiento Estocástico
 
 El Testing Unitario clásico (pruebas basadas en ejemplos) adolece de un sesgo cognitivo inevitable: el desarrollador humano diseña las aserciones pensando en los caminos lógicos que él mismo programó. En ecosistemas orquestados por Inteligencia Artificial, donde la entrada de datos (el JSON generado por el LLM) es altamente impredecible, este enfoque de caja blanca es matemáticamente insuficiente.
 
@@ -99,40 +99,40 @@ Para escalar la resistencia de la Arquitectura Hexagonal y garantizar que ningun
 
 ### 7.2.1. Inyección de Entropía Estocástica y Fuzzing
 
-La integración empírica de este paradigma se ha materializado haciendo uso de la librería científica `Hypothesis` [30]. Este *framework* actúa como un motor de **Fuzzing Dinámico**: en lugar de ejecutar el test una sola vez, somete la función a cientos o miles de iteraciones en milisegundos, inyectando "entropía" (dominios no autorizados en el registro de imágenes, solicitudes de RAM desorbitadas por encima de la cuota departamental, e inyección de secretos como `DB_PASSWORD` en los diccionarios de entorno).
+La integración empírica de este paradigma se ha materializado haciendo uso de la librería científica `Hypothesis` [32]. Este *framework* actúa como un motor de **Fuzzing Dinámico**: en lugar de ejecutar el test una sola vez, somete la función a cientos o miles de iteraciones en milisegundos, inyectando "entropía" (dominios no autorizados en el registro de imágenes, solicitudes de RAM desorbitadas por encima de la cuota departamental, e inyección de secretos como `DB_PASSWORD` en los diccionarios de entorno).
 
 A nivel algorítmico, el procedimiento de prueba que defiende al núcleo `DeploymentIntent` adopta la siguiente forma estructural:
 
 ```text
-PROPIEDAD_A_DEFENDER: "Cualquier intento de inyectar cadenas vacías o puertos 
-ilegales debe colapsar en un error controlado, JAMÁS en un Kernel Panic 
-o corrupción de memoria."
-
-INICIO
-  // Generador de Entropía (Estrategias de Hypothesis)
-  Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
-  Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
-
-  PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
-    INTENTAR
-      Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
-      
-      // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
-      ASERTAR (longitud(intencion.name) > 0)
-      ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
-
-    CAPTURAR ValidationError
-      // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
-      PASAR
-    CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
-      // Aserción Matemática 2: No debe haber errores no controlados.
-      FALLAR_TEST(
-        "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
-        "Detalle de la entropía letal: " + error_critico
-      )
-    FIN INTENTAR
-  FIN PARA
-FIN
+01 PROPIEDAD_A_DEFENDER: "Cualquier intento de inyectar cadenas vacías o puertos 
+02 ilegales debe colapsar en un error controlado, JAMÁS en un Kernel Panic 
+03 o corrupción de memoria."
+04 
+05 INICIO
+06   // Generador de Entropía (Estrategias de Hypothesis)
+07   Variable cadena_basura = Estrategia.Cadenas(min_size=0, max_size=1000000, chars=UNICODE)
+08   Variable puerto_basura = Estrategia.Enteros(min_value=-99999, max_value=99999)
+09 
+10   PARA CADA (nombre, puerto) INYECTADO POR EL GENERADOR HACER
+11     INTENTAR
+12       Variable intencion = NUEVO DeploymentIntent(name=nombre, port=puerto)
+13       
+14       // Aserción Matemática 1: Si no saltó error, los datos DEBEN ser válidos
+15       ASERTAR (longitud(intencion.name) > 0)
+16       ASERTAR (intencion.port ESTA_EN_RANGO [1, 65535])
+17 
+18     CAPTURAR ValidationError
+19       // Comportamiento Esperado: El núcleo bloqueó la basura estocástica.
+20       PASAR
+21     CAPTURAR CUALQUIER_OTRA_EXCEPCION COMO error_critico
+22       // Aserción Matemática 2: No debe haber errores no controlados.
+23       FALLAR_TEST(
+24         "Inestabilidad Crítica: El sistema no controló una entrada masiva. " +
+25         "Detalle de la entropía letal: " + error_critico
+26       )
+27     FIN INTENTAR
+28   FIN PARA
+29 FIN
 ```
 <p align="center"><i><b>Algoritmo 5:</b> Property-Based Test para Invariantes Hexagonales (Fuzzing).</i></p>
 
@@ -239,7 +239,7 @@ Las estrategias de prueba documentadas en las secciones previas (Unitarias, Prop
 
 Este fracaso se debe al **Problema del Oráculo (*The Oracle Problem*)**: en Ingeniería del Software clásico, el oráculo es el mecanismo que conoce la respuesta exacta esperada. Si sumamos `2 + 2`, el oráculo sabe que la salida debe ser `4`. En contraste, un Modelo de Lenguaje Estocástico (LLM) no genera salidas predecibles *byte* a *byte*. Una respuesta de la IA puede ser "He desplegado el servicio en el puerto 80" o "El servicio ya está activo en el puerto 80". Ambas son semánticamente correctas, pero una aserción estricta de igualdad de cadenas de texto (`assert salida == "esperada"`) fallaría de inmediato.
 
-Para auditar el estrato cognitivo del *Agentic Deployer*, el TFM abandona los asertos tradicionales en favor del paradigma emergente de las **Pruebas Metamórficas (*Metamorphic Testing*)** [31].
+Para auditar el estrato cognitivo del *Agentic Deployer*, el TFM abandona los asertos tradicionales en favor del paradigma emergente de las **Pruebas Metamórficas (*Metamorphic Testing*)** [33].
 
 ### 7.4.1. Pruebas Metamórficas vs Casos Prácticos (Stress Testing)
 
@@ -250,6 +250,8 @@ Por el contrario, **las Pruebas Metamórficas están diseñadas como un mecanism
 ### 7.4.2. Definición de Relaciones Metamórficas (MR)
 
 El *Metamorphic Testing* postula que, aunque es imposible predecir el texto exacto que generará la Inteligencia Artificial, sí es posible predecir cómo debería cambiar (o mantenerse) la salida si alteramos la entrada de una forma matemáticamente conocida. A esta transformación se le denomina **Relación Metamórfica (MR)**.
+
+> *Nota de alcance: las MR definidas en esta sección se aplican a la fase de extracción de entidades Zero-Shot (sin System Prompt de apoyo). Su objetivo es evaluar la resiliencia estructural intrínseca del modelo, no el rendimiento en producción asistida por la arquitectura.*
 
 Para el caso de uso de este sistema, la Relación Metamórfica de Identidad Semántica dictamina que: *La inyección de ruido léxico, faltas de ortografía o cambios en el nivel de formalidad en el 'prompt' del usuario no debe alterar los parámetros de la invocación a la herramienta JSON (Tool Call) que genera el LLM.*
 
@@ -271,7 +273,7 @@ Esta propiedad se formaliza y evalúa inyectando una batería de variaciones lé
   - *Prompt:* "El puerto 5432 es el que quiero usar. Lo que tienes que poner ahí es una base de datos PostgreSQL."
   - *Aserción:* A pesar de alterar el Orden Sujeto-Verbo-Objeto, la extracción de entidades JSON debe mantenerse inalterable.
 
-### 7.4.2. Resultados Empíricos y Tolerancia a la Ambigüedad
+### 7.4.3. Resultados Empíricos y Tolerancia a la Ambigüedad
 
 La ejecución de las 6 relaciones metamórficas se ha materializado en el módulo de pruebas [`test_metamorphic.py`](../app/tests/test_metamorphic.py). Para el análisis detallado de estas relaciones se ha seleccionado el modelo `qwen2.5:7b` (mediante `OllamaLLMClient`) como **modelo de referencia base**. Esta elección está deliberadamente alineada con el contexto institucional: representa un modelo generalista estándar, capaz de ejecutarse en hardware modesto (*On-Premise*) bajo estrictas restricciones de soberanía del dato, convirtiéndolo en el candidato idóneo para ilustrar las limitaciones cognitivas (y la necesidad de la arquitectura) antes de evaluar alternativas avanzadas o en la nube. La siguiente tabla resume los resultados empíricos de la batería metamórfica frente a este modelo base:
 
@@ -294,21 +296,21 @@ La ejecución de las 6 relaciones metamórficas se ha materializado en el módul
 | Motor de extracción evaluado | `OllamaLLMClient` (qwen2.5:7b) |
 <p align="center"><i><b>Tabla 7:</b> Métricas globales de la batería metamórfica.</i></p>
 
-### 7.4.3. Interpretación Cognitiva y Estrategias de Mitigación
+### 7.4.4. Interpretación Cognitiva y Estrategias de Mitigación
 
 El análisis de los fallos empíricos (MR-2, MR-3 y MR-4) aporta una evidencia fundamental sobre los límites cognitivos inherentes a los modelos **generalistas** cuando operan bajo restricciones de hardware extremo (modelos <8B parámetros fuertemente cuantizados). A diferencia de un modelo empresarial de la escala de 70B parámetros, la "ventana de atención" de un modelo pequeño generalista colapsa cuando se enfrenta a un exceso de ruido ambiental (MR-2) o cuando el contexto se diluye a través de múltiples turnos conversacionales incrementales (MR-4). En estas circunstancias, el modelo olvida la instrucción del sistema (*System Prompt*) de limitarse a generar JSON puro y revierte a un comportamiento de chatbot conversacional ("¡Por supuesto! Enseguida despliego su servicio..."), rompiendo el flujo arquitectónico de *Tool Calling*.
 
 **Mitigación vía Ingeniería de Prompts (Sufijos de Refuerzo):** Esta fragilidad estocástica inherente al tamaño del modelo puede mitigarse introduciendo anclas cognitivas dinámicas. Como estrategia de contingencia implementada en el prototipo (`USE_REINFORCEMENT_SUFFIX=true`), se propone la inyección de un **Sufijo de Refuerzo** (*Reinforcement Prompt Suffix*), concatenando programáticamente al final de cada turno de usuario una instrucción imperativa invisible. 
 
 Sin embargo, el escrutinio empírico sobre esta mitigación reveló una vulnerabilidad secundaria característica de los modelos <8B: la obediencia ciega a corto plazo. Al instruir al modelo con un imperativo absoluto (ej. *"Responde única y exclusivamente con el JSON"*), el modelo intentó ejecutar el *Tool Call* de forma prematura en turnos intermedios (ej. al conocer solo el nombre del proyecto), alucinando la estructura de los parámetros restantes y provocando errores de validación internos en la librería subyacente (`ValidationError`). Para estabilizar la mitigación, el sufijo debió condicionarse explícitamente: *"Si falta ALGUNO de estos tres, NO la invoques y pregunta al usuario"*. 
-Para estabilizar esta mitigación, se exploraron técnicas avanzadas como la *Cadena de Pensamiento* (Wei et al., 2022 [13]). Sin embargo, estos enfoques demostraron agotar la capacidad cognitiva del modelo, induciendo colapsos sintácticos en el JSON generado (un fenómeno documentado empíricamente en la **Sección 8.4. Experimentos Arquitectónicos**). 
+Para estabilizar esta mitigación, se exploraron técnicas avanzadas como la *Cadena de Pensamiento* (Wei et al., 2022 [14]). Sin embargo, estos enfoques demostraron agotar la capacidad cognitiva del modelo, induciendo colapsos sintácticos en el JSON generado (un fenómeno documentado empíricamente en la **Sección 8.4. Experimentos Arquitectónicos**). 
 
 Esta fragilidad estructural ratifica que la Ingeniería de Prompts es una solución de contingencia inestable para modelos generalistas pequeños sometidos a estrés conversacional. Para erradicar matemáticamente esta familia de fallos, el diseño arquitectónico debe transicionar hacia una de dos vías: la separación estructural mediante una Máquina de Estado Destilado (*Stateful Slot Filling*, documentada en la Sección 10.3.6), o la sustitución del motor cognitivo base por variantes hiper-especializadas en código y *Tool Calling* (como la familia *Coder*), cuyos excepcionales resultados de mitigación se exponen en la siguiente sección.
 
 > [!NOTE]
 > **Diseño dual de la evaluación metamórfica (CI/CD vs Evaluación Cognitiva).** Aunque la validación profunda del LLM generalista arrojó un 50% de éxito empírico, ejecutar inferencia algorítmica en cada ciclo de Integración Continua (CI) es inviable por costes computacionales y tiempos. Por ello, el módulo `test_metamorphic.py` implementa un diseño dual: inyectando `RUN_REAL_LLM=true` evalúa cognitivamente a Ollama; mientras que por defecto en el pipeline (ej. GitHub Actions) recae sobre el `FakeLLMClient` (un mock basado en expresiones regulares). Este mock, recientemente ajustado para soportar parafraseo e inglés, supera el 100% de las pruebas en < 0,15 s, garantizando la integridad estructural del CI/CD.
 
-### 7.4.4. Comparativa Cloud y LPU: El Colapso Zero-Shot
+### 7.4.5. Comparativa Cloud y LPU: El Colapso Zero-Shot
 
 Para contrastar las limitaciones del hardware local, la batería metamórfica fue ejecutada contra un abanico de modelos comerciales alojados en la nube y en clústeres LPU (Groq), configurando el orquestador con un mecanismo de *Backoff* asíncrono para sortear la estricta gobernanza de la capa gratuita (*HTTP 429 Rate Limit Exceeded*).
 

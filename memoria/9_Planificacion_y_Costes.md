@@ -272,6 +272,7 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 <p align="center"><i><b>Tabla 29:</b> OPEX Total Anual consolidado por Perfil de Adopción.</i></p>
 
 > *El coste eléctrico es prácticamente residual debido a que el sistema procesa una media de 50-200 solicitudes diarias. La GPU permanece en estado de reposo (Idle, consumiendo ~15-30W) el 99% del tiempo, activando picos de consumo máximo únicamente durante los escasos segundos que dura la inferencia.
+
 > **Para entornos institucionales productivos, la alternativa en la nube requiere modelos cognitivamente resilientes (nivel GPT-4o), asumiendo volúmenes escalados según el perfil (50, 100 y 200 solicitudes diarias respectivamente).
 
 ### 9.5.4. Análisis de Retorno de Inversión (ROI)

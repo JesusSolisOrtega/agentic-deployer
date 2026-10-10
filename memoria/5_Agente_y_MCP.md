@@ -8,7 +8,7 @@ Este capítulo desgrana paso a paso la integración del estándar abierto *Model
 
 En las arquitecturas iniciales de Inteligencia Artificial aplicada, la capacidad de un Modelo de Lenguaje para invocar código externo se lograba mediante integraciones fuertemente acopladas (*Vendor Lock-in*). Históricamente, el orquestador debía codificar a mano la firma de las herramientas (como diccionarios JSON rígidos) y empaquetarlas bajo especificaciones privativas (como la especificación *Function Calling* nativa de la API de OpenAI). Esta práctica vulneraba el Principio de Abierto/Cerrado (letra 'O' de S.O.L.I.D.), obligando a reescribir masivamente la base de código si la universidad decidía migrar hacia un proveedor de IA alternativo, como Anthropic o un clúster de Llama-3 local.
 
-Para superar este antipatrón arquitectónico, el sistema desarrollado adopta como estándar troncal el **Model Context Protocol (MCP)** [9], un protocolo abierto diseñado para estandarizar la forma en que los modelos fundacionales interactúan con fuentes de datos y herramientas de ejecución. El MCP actúa como una capa de abstracción universal (un *middleware* cognitivo), desacoplando por completo el catálogo de herramientas de las peculiaridades de la API del LLM subyacente.
+Para superar este antipatrón arquitectónico, el sistema desarrollado adopta como estándar troncal el **Model Context Protocol (MCP)** [10], un protocolo abierto diseñado para estandarizar la forma en que los modelos fundacionales interactúan con fuentes de datos y herramientas de ejecución. El MCP actúa como una capa de abstracción universal (un *middleware* cognitivo), desacoplando por completo el catálogo de herramientas de las peculiaridades de la API del LLM subyacente.
 
 ### 5.1.1. Introspección Dinámica de Funciones (Generación de JSON Schemas)
 
@@ -19,43 +19,43 @@ Para mitigar este riesgo, el Servidor MCP implementado en el *Agentic Deployer* 
 El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilustra cómo el sistema transforma una función Python pura en una representación semántica universal (*Tool Definition*) inteligible para cualquier LLM:
 
 ```text
-ENTRADA:
- funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
-
-SALIDA:
- json_schema -> Estructura estándar JSON-RPC de Tool Calling
-
-INICIO
-  Variable esquema = NUEVO Diccionario JSON
-  esquema["name"] = funcion_objetivo.obtenerNombre()
-  esquema["description"] = funcion_objetivo.obtenerDocstring()
-  
-  // Inspección del AST (Abstract Syntax Tree)
-  Variable parametros = funcion_objetivo.obtenerFirmaLexica()
-  esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
-  
-  PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
-    Variable tipo_json = "string" // Por defecto
-    
-    // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
-    SI anotacion_de_tipo ES Entero ENTONCES
-      tipo_json = "integer"
-    SINO SI anotacion_de_tipo ES Booleano ENTONCES
-      tipo_json = "boolean"
-    FIN SI
-    
-    esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
-      "type" -> tipo_json,
-      "description" -> extraerDescripcion(parametro)
-    )
-    
-    SI parametro ES obligatorio ENTONCES
-      AÑADIR parametro A esquema["parameters"]["required"]
-    FIN SI
-  FIN PARA
-  
-  RETORNAR esquema
-FIN
+01 ENTRADA:
+02  funcion_objetivo -> Referencia en memoria a un método (ej. desplegar_app)
+03 
+04 SALIDA:
+05  json_schema -> Estructura estándar JSON-RPC de Tool Calling
+06 
+07 INICIO
+08   Variable esquema = NUEVO Diccionario JSON
+09   esquema["name"] = funcion_objetivo.obtenerNombre()
+10   esquema["description"] = funcion_objetivo.obtenerDocstring()
+11   
+12   // Inspección del AST (Abstract Syntax Tree)
+13   Variable parametros = funcion_objetivo.obtenerFirmaLexica()
+14   esquema["parameters"] = NUEVO Objeto Tipo(Objeto)
+15   
+16   PARA CADA (parametro, anotacion_de_tipo) EN parametros HACER
+17     Variable tipo_json = "string" // Por defecto
+18     
+19     // Mapeo Inyectivo de Tipos (Python -> JSON Schema)
+20     SI anotacion_de_tipo ES Entero ENTONCES
+21       tipo_json = "integer"
+22     SINO SI anotacion_de_tipo ES Booleano ENTONCES
+23       tipo_json = "boolean"
+24     FIN SI
+25     
+26     esquema["parameters"]["properties"][parametro] = NUEVO Diccionario(
+27       "type" -> tipo_json,
+28       "description" -> extraerDescripcion(parametro)
+29     )
+30     
+31     SI parametro ES obligatorio ENTONCES
+32       AÑADIR parametro A esquema["parameters"]["required"]
+33     FIN SI
+34   FIN PARA
+35   
+36   RETORNAR esquema
+37 FIN
 ```
 <p align="center"><i><b>Algoritmo 2:</b> Introspección Dinámica de Contratos de Herramientas.</i></p>
 
@@ -114,7 +114,7 @@ Para garantizar la viabilidad a largo plazo del *Agentic Deployer*, el diseño d
 
 ### 5.2.1. El Contrato Abstracto (Patrones *Adapter* y *Factory*)
 
-El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [23]: el patrón **Adapter** y el patrón **Factory Method**.
+El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [25]: el patrón **Adapter** y el patrón **Factory Method**.
 
 En la capa de aplicación, el `AgentOrchestrator` jamás invoca directamente a ninguna librería de IA. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece la "Firma Matemática de la Inferencia":
 
@@ -136,7 +136,7 @@ El sistema implementa dos adaptadores concretos que satisfacen este contrato:
 
 **`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube y deserializa la respuesta JSON.
 
-**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [24], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama [20] (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
+**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [26], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama [22] (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
 
 ```text
 PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
@@ -212,7 +212,7 @@ El *Agentic Deployer* maneja, por su propia naturaleza operativa, información e
 
 El diseño agnóstico soluciona este paradigma permitiendo la **conmutación por políticas de clasificación**:
 - **Escenario de Baja Clasificación:** Para entornos de investigación pública (despliegue de servidores web estáticos o *sandboxes* de prueba sin datos sensibles), el sistema puede apuntar mediante el *Factory* a la API de OpenAI, aprovechando la velocidad de inferencia suprema y la baja latencia de la nube.
-- **Escenario de Alta Clasificación (Air-Gapped):** Cuando la provisión involucra servicios confidenciales (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones altera la configuración del entorno para inyectar el adaptador de Ollama [20]. Bajo esta topología, la inferencia probabilística se resuelve físicamente en servidores con aceleración GPU (Nvidia/AMD) alojados en el sótano del propio Centro de Procesamiento de Datos (CPD) de la universidad. Ni un solo token abandona la intranet institucional, garantizando la inviolabilidad del secreto sin sacrificar la interfaz agéntica natural de la que disfruta el usuario.
+- **Escenario de Alta Clasificación (Air-Gapped):** Cuando la provisión involucra servicios confidenciales (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones altera la configuración del entorno para inyectar el adaptador de Ollama [22]. Bajo esta topología, la inferencia probabilística se resuelve físicamente en servidores con aceleración GPU (Nvidia/AMD) alojados en el sótano del propio Centro de Procesamiento de Datos (CPD) de la universidad. Ni un solo token abandona la intranet institucional, garantizando la inviolabilidad del secreto sin sacrificar la interfaz agéntica natural de la que disfruta el usuario.
 
 Esta capacidad de hibridación (Nube Pública vs *Bare-Metal* Local), resuelta elegantemente gracias a los patrones de diseño orientados a objetos, convierte al prototipo desarrollado en este TFM en una plataforma madura, auditable y, sobre todo, legalmente compatible con los estándares de gobernanza ITIL aplicados en la gran industria.
 
@@ -220,7 +220,7 @@ Esta capacidad de hibridación (Nube Pública vs *Bare-Metal* Local), resuelta e
 
 La mera exposición de un catálogo de herramientas a un Modelo de Lenguaje no garantiza la ejecución autónoma de una tarea compleja. Cuando a un modelo fundacional se le instruye para que actúe en un entorno dinámico (como es un clúster de Kubernetes, cuyo estado puede mutar durante la propia inferencia), los enfoques tradicionales de Petición-Respuesta (*Zero-Shot Prompting*) fracasan abruptamente. Si el modelo asume un contexto inicial falso o comete un error sintáctico en su primer intento, carece de mecanismos intrínsecos para rectificar, desembocando en estados de fallo catastrófico (*Catastrophic Failure*).
 
-Para dotar al *Agentic Deployer* de verdadera autonomía heurística y resiliencia ante excepciones, el orquestador implementa el patrón **ReAct (Reasoning and Acting)**, un paradigma propuesto por Yao et al. [8] en la literatura académica reciente, que sinergiza la capacidad de razonamiento discursivo con la ejecución imperativa de acciones.
+Para dotar al *Agentic Deployer* de verdadera autonomía heurística y resiliencia ante excepciones, el orquestador implementa el patrón **ReAct (Reasoning and Acting)**, un paradigma propuesto por Yao et al. [9] en la literatura académica reciente, que sinergiza la capacidad de razonamiento discursivo con la ejecución imperativa de acciones.
 
 ### 5.3.1. Arquitectura del Bucle Incondicional de Razonamiento y Acción
 
@@ -264,49 +264,49 @@ flowchart TD
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
 
 ```text
-ENTRADA: 
- peticion_usuario -> Cadena de texto natural
- contexto_historico -> Memoria de la sesión actual
-
-SALIDA: 
- respuesta_final -> Cadena de texto natural o Markdown
-
-INICIO
-  AÑADIR peticion_usuario A contexto_historico
-  Variable turno_actual = 0
-  Variable MAX_TURNOS = 5 // Prevención de bucles infinitos (Infinite Loop)
-
-  MIENTRAS turno_actual < MAX_TURNOS HACER
-    // 1. Inferencia del LLM (Thought + Action)
-    Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
-    
-    SI respuesta_llm ES texto_plano ENTONCES
-      // El Agente decide que ha terminado y se dirige al humano
-      RETORNAR respuesta_llm
-    FIN SI
-
-    SI respuesta_llm ES invocacion_herramienta ENTONCES
-      Variable nombre_funcion = respuesta_llm.obtenerNombre()
-      Variable argumentos = respuesta_llm.obtenerArgumentos()
-      Variable resultado_accion
-      
-      INTENTAR
-        // 2 y 3. Ejecución y Pausa
-        resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
-      CAPTURAR ExcepcionHttp COMO error
-        // Serialización del error para que el LLM lo entienda
-        resultado_accion = error.obtenerMensajeHumano() 
-      FIN INTENTAR
-
-      // 4. Observación
-      AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
-    FIN SI
-    
-    turno_actual = turno_actual + 1
-  FIN MIENTRAS
-  
-  LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
-FIN
+01 ENTRADA: 
+02  peticion_usuario -> Cadena de texto natural
+03  contexto_historico -> Memoria de la sesión actual
+04 
+05 SALIDA: 
+06  respuesta_final -> Cadena de texto natural o Markdown
+07 
+08 INICIO
+09   AÑADIR peticion_usuario A contexto_historico
+10   Variable turno_actual = 0
+11   Variable MAX_TURNOS = 5 // Prevención de bucles infinitos (Infinite Loop)
+12 
+13   MIENTRAS turno_actual < MAX_TURNOS HACER
+14     // 1. Inferencia del LLM (Thought + Action)
+15     Variable respuesta_llm = InvocacionRed(contexto_historico, herramientas_mcp)
+16     
+17     SI respuesta_llm ES texto_plano ENTONCES
+18       // El Agente decide que ha terminado y se dirige al humano
+19       RETORNAR respuesta_llm
+20     FIN SI
+21 
+22     SI respuesta_llm ES invocacion_herramienta ENTONCES
+23       Variable nombre_funcion = respuesta_llm.obtenerNombre()
+24       Variable argumentos = respuesta_llm.obtenerArgumentos()
+25       Variable resultado_accion
+26       
+27       INTENTAR
+28         // 2 y 3. Ejecución y Pausa
+29         resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
+30       CAPTURAR ExcepcionHttp COMO error
+31         // Serialización del error para que el LLM lo entienda
+32         resultado_accion = error.obtenerMensajeHumano() 
+33       FIN INTENTAR
+34 
+35       // 4. Observación
+36       AÑADIR "Herramienta retornó: " + resultado_accion A contexto_historico
+37     FIN SI
+38     
+39     turno_actual = turno_actual + 1
+40   FIN MIENTRAS
+41   
+42   LANZAR Excepcion("Límite de razonamiento excedido. El Agente está atascado.")
+43 FIN
 ```
 <p align="center"><i><b>Algoritmo 3:</b> Bucle de Orquestación Cognitiva (ReAct Loop).</i></p>
 

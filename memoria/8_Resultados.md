@@ -38,7 +38,7 @@ La siguiente tabla refleja el impacto temporal (medido en minutos operativos) de
 | **Costo Cognitivo Técnico N3** | **Alto** (Redacción código) | **Mínimo** (Auditoría visual) | **-** |
 <p align="center"><i><b>Tabla 9:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
 
-La métrica más definitoria de esta arquitectura no es la velocidad de escritura del YAML, sino la **eliminación del tiempo muerto de negociación**. Al absorber la ambigüedad lingüística en tiempo real a través del patrón ReAct (Capítulo 5), el investigador obtiene sus recursos en la misma mañana que los solicitó, frente a los 2 o 3 días hábiles que exige la burocracia del correo electrónico. 
+La métrica más definitoria de esta arquitectura no es la velocidad de escritura del YAML, sino la **eliminación del tiempo muerto de negociación**. Es fundamental distinguir que el modelo ITSM convencional contabiliza *tiempo transcurrido* (incluyendo latencias asíncronas de comunicación), mientras que el modelo agéntico opera casi íntegramente en *tiempo activo*. Al absorber la ambigüedad lingüística en tiempo real a través del patrón ReAct (Capítulo 5), el investigador obtiene sus recursos en la misma mañana que los solicitó, frente a los 2 o 3 días hábiles que exige la burocracia del correo electrónico. 
 
 Simultáneamente, el ingeniero de sistemas universitario recupera su jornada laboral para dedicarse a tareas de alto impacto (optimización de redes, parches críticos de seguridad), relegando el *Agentic Deployer* al rol de "intérprete automatizado" bajo su estricto gobierno. Este retorno de inversión (ROI) operativo justifica financieramente la implantación del prototipo en entornos corporativos.
 
@@ -49,7 +49,7 @@ Las métricas temporales del apartado anterior pierden su validez si el sistema 
 > [!NOTE]
 > **Nota de Reproducibilidad:** Las transcripciones documentadas a lo largo de este capítulo y en los Anexos se corresponden con interacciones reales ejecutadas contra la API local de Ollama (utilizando el modelo `qwen2.5:7b`). Para garantizar el escrutinio académico independiente, todas estas sesiones son reproducibles descargando el repositorio del proyecto e iniciando el agente conversacional siguiendo las instrucciones del `README.md`. No se han alterado ni embellecido las respuestas estocásticas del LLM.
 
-El escenario simula un vector de ataque conocido como *Prompt Injection* (Inyección de Prompt) [32], o alternativamente, el comportamiento de un investigador negligente que exige configuraciones expresamente prohibidas por las normativas de ciberseguridad universitaria.
+El escenario simula un vector de ataque conocido como *Prompt Injection* (Inyección de Prompt) [34], o alternativamente, el comportamiento de un investigador negligente que exige configuraciones expresamente prohibidas por las normativas de ciberseguridad universitaria.
 
 ### 8.2.1. El Vector de Ataque Cognitivo
 
@@ -98,7 +98,7 @@ El modelo asimila esta corrección externa de forma autónoma:
   *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
 
 **Conclusión del Escenario Práctico:**
-La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege matemáticamente a la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la asombrosa empatía lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
+La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege matemáticamente a la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la flexibilidad lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
 
 La transcripción completa de este escenario, incluyendo los mensajes JSON intercambiados entre el agente y el backend, se encuentra disponible en el repositorio del proyecto bajo la ruta [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json).
 
@@ -413,7 +413,7 @@ Se instruyó al LLM con un sufijo estricto ("Responde SOLO con JSON").
 * **Resultado:** El modelo intentó invocar la herramienta en el Turno 2 (cuando solo conocía el nombre del proyecto), alucinando el resto de parámetros (puerto e imagen) para cumplir con la orden sintáctica de generar un JSON inmediatamente. Hubo un fallo lógico por obediencia ciega.
 
 ### 8.4.2. Paradigma 2: Cadena de Pensamiento (*Chain of Thought*) (Fallo Sintáctico)
-Se aplicó la técnica de Wei et al. (2022) [13], instruyendo al modelo para que, antes de generar el JSON, enumerara explícitamente en texto los parámetros que tenía y razonara si debía invocar la herramienta.
+Se aplicó la técnica de Wei et al. (2022) [14], instruyendo al modelo para que, antes de generar el JSON, enumerara explícitamente en texto los parámetros que tenía y razonara si debía invocar la herramienta.
 * **Resultado:** El modelo superó el Turno 2 con éxito, razonando correctamente que le faltaban datos y preguntando al usuario. Sin embargo, en el Turno 3, al intentar generar su razonamiento en texto seguido del formato estricto del *Tool Call*, la sintaxis colapsó arrojando un `ValidationError`.
 * **Conclusión:** Se comprobó empíricamente el **Principio de la Manta Corta**: un modelo de 7B no tiene capacidad de atención suficiente para sostener razonamiento complejo (texto) y formateo estricto (JSON) en la misma inferencia. Si se arregla la lógica, se rompe la sintaxis.
 

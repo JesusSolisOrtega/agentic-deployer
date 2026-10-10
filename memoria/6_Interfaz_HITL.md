@@ -20,7 +20,7 @@ Otorgar credenciales de escritura directas (ej. un token con permisos de *Cluste
 
 ### 6.1.2. Responsabilidad Legal, ITIL y la Asimetría de Contexto
 
-Más allá de la viabilidad técnica, la adopción del patrón HITL es una exigencia legal y normativa. Los marcos de buenas prácticas de la industria, como **ITIL 4** (*Information Technology Infrastructure Library*) en su práctica de "Release Management" [25], así como los estándares ISO/IEC 27000 sobre ciberseguridad, exigen explícitamente el principio de trazabilidad y gobernanza de las acciones de red.
+Más allá de la viabilidad técnica, la adopción del patrón HITL es una exigencia legal y normativa. Los marcos de buenas prácticas de la industria, como **ITIL 4** (*Information Technology Infrastructure Library*) en su práctica de "Release Management" [27], así como los estándares ISO/IEC 27000 sobre ciberseguridad, exigen explícitamente el principio de trazabilidad y gobernanza de las acciones de red.
 
 Desde una perspectiva jurídica, un modelo matemático (los pesos de una red neuronal almacenados en RAM) carece de personalidad jurídica. Si el *Agentic Deployer* instanciara una topología errónea que expusiera públicamente expedientes sensibles de investigadores (causando una brecha del RGPD), la responsabilidad recaería legalmente sobre el operador humano de la universidad, independientemente de que la orden original la redactase la IA.
 
@@ -81,53 +81,53 @@ Sin una salvaguarda arquitectónica, estas peticiones paralelas generarían una 
 Para neutralizar este vector, la transición entre vértices del DAG se blinda mediante algoritmos de comprobación atómica (*Test-and-Set* lógicos) o mecanismos de **Optimistic Locking** (Bloqueo Optimista). A continuación se expone la fundamentación algorítmica de esta defensa en el núcleo Hexagonal:
 
 ```text
-ENTRADA:
- id_peticion -> UUID del registro a transicionar
- nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
-
-SALIDA:
- Registro_Actualizado (Si la transición es lícita)
- LANZA HttpConflictError (409) si hay violación de estado
-
-INICIO
-  // 1. Adquisición y comprobación (Atomicidad)
-  Variable registro = ObtenerRegistroBaseDeDatos(id_peticion)
-  
-  SI registro ES NULO ENTONCES
-    LANZAR HttpNotFoundError(404)
-  FIN SI
-
-  // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
-  SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
-    LANZAR HttpConflictError(
-      409, 
-      "Conflicto de Mutación. El registro ya había sido procesado previamente " +
-      "(Estado Actual: " + registro.estado + ")."
-    )
-  FIN SI
-  
-  // 3. Mutación del Estado mediante el Repositorio (Bloqueo Atómico)
-  registro.estado = nuevo_estado
-  registro.fecha_modificacion = ObtenerTiempoSistemaActual()
-  
-  // 4. Activación de Adaptadores Secundarios (Side-Effects)
-  SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
-    INTENTAR
-      K8sAdapter.ejecutar_despliegue(registro.intencion)
-      registro.estado = "DEPLOYED" // Segunda transición
-    CAPTURAR ExcepcionIO COMO error
-      registro.estado = "FAILED"
-    FIN INTENTAR
-  FIN SI
-  
-  RETORNAR registro
-FIN
+01 ENTRADA:
+02  id_peticion -> UUID del registro a transicionar
+03  nuevo_estado -> El estado de destino (APPROVED o REJECTED) solicitado por el Humano
+04 
+05 SALIDA:
+06  Registro_Actualizado (Si la transición es lícita)
+07  LANZA HttpConflictError (409) si hay violación de estado
+08 
+09 INICIO
+10   // 1. Adquisición y comprobación (Atomicidad)
+11   Variable registro = ObtenerRegistroBaseDeDatos(id_peticion)
+12   
+13   SI registro ES NULO ENTONCES
+14     LANZAR HttpNotFoundError(404)
+15   FIN SI
+16 
+17   // 2. Control Invariante del DAG: Solo se muta desde PENDING_APPROVAL
+18   SI registro.estado NO ES IGUAL A "PENDING_APPROVAL" ENTONCES
+19     LANZAR HttpConflictError(
+20       409, 
+21       "Conflicto de Mutación. El registro ya había sido procesado previamente " +
+22       "(Estado Actual: " + registro.estado + ")."
+23     )
+24   FIN SI
+25   
+26   // 3. Mutación del Estado mediante el Repositorio (Bloqueo Atómico)
+27   registro.estado = nuevo_estado
+28   registro.fecha_modificacion = ObtenerTiempoSistemaActual()
+29   
+30   // 4. Activación de Adaptadores Secundarios (Side-Effects)
+31   SI nuevo_estado ES IGUAL A "APPROVED" ENTONCES
+32     INTENTAR
+33       K8sAdapter.ejecutar_despliegue(registro.intencion)
+34       registro.estado = "DEPLOYED" // Segunda transición
+35     CAPTURAR ExcepcionIO COMO error
+36       registro.estado = "FAILED"
+37     FIN INTENTAR
+38   FIN SI
+39   
+40   RETORNAR registro
+41 FIN
 ```
 <p align="center"><i><b>Algoritmo 4:</b> Transición Inmutable de la Máquina de Estados (FSM_Transition).</i></p>
 
 Gracias a este algoritmo determinista, si ocurre una pulsación doble, el primer *thread* (hilo de ejecución HTTP) cruzará el bloque de la Línea 18 y mutará la base de datos a `REJECTED`. El segundo *thread*, desfasado por milisegundos, evaluará la condición invariante de la Línea 18, detectará que el estado ya no es `PENDING_APPROVAL`, y abortará la transacción devolviendo inmediatamente un error `409 Conflict` a la capa frontal. 
 
-Esta rigurosidad garantiza que, a los ojos de la universidad, el *Agentic Deployer* posea la misma inmutabilidad transaccional (*ACID properties*) [26] que un sistema bancario transaccional, mitigando significativamente la estocasticidad que rodea a los sistemas de IA.
+Esta rigurosidad garantiza que, a los ojos de la universidad, el *Agentic Deployer* posea la misma inmutabilidad transaccional (*ACID properties*) [28] que un sistema bancario transaccional, mitigando significativamente la estocasticidad que rodea a los sistemas de IA.
 
 ## 6.3. El Dashboard Asíncrono de Operaciones
 

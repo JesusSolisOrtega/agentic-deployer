@@ -8,7 +8,7 @@ El presente capítulo desglosa la respuesta ingenieril a esta disyuntiva, articu
 
 La documentación de arquitecturas de software modernas, caracterizadas por su naturaleza distribuida y asíncrona, resulta ineficaz cuando se aborda mediante diagramas de bloques informales o estándares excesivamente rígidos como UML (*Unified Modeling Language*). Para superar esta limitación y dotar al Trabajo de Fin de Máster de una representación rigurosa, no ambigua y jerárquica, se ha adoptado el **Modelo C4**.
 
-El Modelo C4, concebido por el ingeniero de software Simon Brown [21], se basa en la abstracción jerárquica, asemejándose al funcionamiento de una herramienta de cartografía digital (como *Google Maps*). Permite al observador iniciar el análisis desde una vista macroscópica de los sistemas y los usuarios, y realizar un *zoom-in* progresivo hacia los contenedores de ejecución, los componentes lógicos internos y, finalmente, el código fuente subyacente. 
+El Modelo C4, concebido por el ingeniero de software Simon Brown [23], se basa en la abstracción jerárquica, asemejándose al funcionamiento de una herramienta de cartografía digital (como *Google Maps*). Permite al observador iniciar el análisis desde una vista macroscópica de los sistemas y los usuarios, y realizar un *zoom-in* progresivo hacia los contenedores de ejecución, los componentes lógicos internos y, finalmente, el código fuente subyacente. 
 
 En este análisis topológico del *Agentic Deployer*, nos centraremos en desglosar los dos niveles de abstracción más relevantes para comprender las fronteras de red y las responsabilidades corporativas: el Nivel 1 (Contexto) y el Nivel 2 (Contenedores).
 
@@ -32,9 +32,12 @@ El orquestador *Agentic Deployer* (el software central desarrollado en este TFM)
 
 ### 4.1.2. Nivel 2: Contenedores (Unidades de Ejecución)
 
-Una vez delimitadas las fronteras externas, el Nivel 2 del Modelo C4 somete a la caja central (*Agentic Deployer*) a un proceso de ampliación. En este nivel, se revela que la solución propuesta no es un monolito monolítico, sino un ecosistema distribuido compuesto por unidades de despliegue independientes, denominadas arquitectónicamente como "Contenedores" (no confundir con contenedores Docker, aunque en la práctica suelan encapsularse como tales).
+Una vez delimitadas las fronteras externas, el Nivel 2 del Modelo C4 somete a la caja central (*Agentic Deployer*) a un proceso de ampliación. En este nivel, se revela que la solución propuesta no es un monolito, sino un ecosistema distribuido compuesto por unidades de despliegue independientes, denominadas arquitectónicamente como "Contenedores".
 
-La decisión de fragmentar el sistema en múltiples procesos persigue maximizar la resiliencia operativa [22] y adherirse al principio de Separación de Preocupaciones (*Separation of Concerns*). Si un contenedor falla (por ejemplo, debido a un colapso en la inferencia del modelo), el resto de la plataforma debe continuar operando para garantizar la trazabilidad de los datos institucionales.
+> [!NOTE]
+> **Aclaración de Nomenclatura C4:** En la metodología de modelado C4, el término "Contenedor" representa una aplicación ejecutable o almacén de datos aislado (ej. un microservicio, una base de datos, una aplicación cliente). No debe confundirse estrictamente con un contenedor Docker (tecnología de virtualización), aunque en la práctica de la ingeniería moderna ambos conceptos suelan encapsularse mutuamente.
+
+La decisión de fragmentar el sistema en múltiples procesos persigue maximizar la resiliencia operativa [24] y adherirse al principio de Separación de Preocupaciones (*Separation of Concerns*). Si un contenedor falla (por ejemplo, debido a un colapso en la inferencia del modelo), el resto de la plataforma debe continuar operando para garantizar la trazabilidad de los datos institucionales.
 
 ```mermaid
 flowchart LR
@@ -191,7 +194,7 @@ classDiagram
 
 ## 4.2. Adopción de la Arquitectura Hexagonal (Ports and Adapters)
 
-El diseño del Contenedor Backend (el núcleo del sistema) requiere una fundamentación arquitectónica robusta. Como se exploró en el Estado del Arte (Capítulo 2), conceder autonomía operativa a un ente estocástico exige el establecimiento de fronteras deterministas estrictas. Para satisfacer este requisito, el núcleo del sistema se ha diseñado siguiendo el patrón arquitectónico de Puertos y Adaptadores (*Ports and Adapters*), comúnmente conocido como **Arquitectura Hexagonal** (propuesta formalmente por Alistair Cockburn) [15].
+El diseño del Contenedor Backend (el núcleo del sistema) requiere una fundamentación arquitectónica robusta. Como se exploró en el Estado del Arte (Capítulo 2), conceder autonomía operativa a un ente estocástico exige el establecimiento de fronteras deterministas estrictas. Para satisfacer este requisito, el núcleo del sistema se ha diseñado siguiendo el patrón arquitectónico de Puertos y Adaptadores (*Ports and Adapters*), comúnmente conocido como **Arquitectura Hexagonal** (propuesta formalmente por Alistair Cockburn) [16].
 
 Este patrón se fundamenta en estructurar el software en capas concéntricas, imponiendo un único sentido de dependencia: desde el exterior (tecnologías volátiles, bases de datos, APIs de IA) hacia el interior (lógica de negocio inmutable).
 
@@ -199,7 +202,7 @@ Este patrón se fundamenta en estructurar el software en capas concéntricas, im
 
 En el centro exacto del hexágono reside la Capa de Dominio. Esta capa representa la fuente de verdad de la lógica de negocio y debe ser completamente agnóstica a cualquier *framework* externo. En el contexto de este Trabajo de Fin de Máster, la capa de dominio modela las intenciones de infraestructura antes de que estas se traduzcan a código declarativo.
 
-Para dotar al núcleo de una inviolabilidad tipográfica estructural (esencial al operar en lenguajes interpretados), el sistema no manipula estructuras de datos dinámicas (como diccionarios JSON crudos emitidos por el LLM). En su lugar, el orquestador obliga a mapear cualquier solicitud externa hacia una Entidad de Dominio rígidamente definida. El contrato principal de este núcleo es la entidad `DeploymentIntent` (Intención de Despliegue).
+Para dotar al núcleo de una seguridad de tipos estricta (esencial al operar en lenguajes interpretados), el sistema no manipula estructuras de datos dinámicas (como diccionarios JSON crudos emitidos por el LLM). En su lugar, el orquestador obliga a mapear cualquier solicitud externa hacia una Entidad de Dominio rígidamente definida. El contrato principal de este núcleo es la entidad `DeploymentIntent` (Intención de Despliegue).
 
 En términos de Ingeniería de Software, esta entidad actúa como un contrato que impone **invariantes de dominio**. Se define de la siguiente manera conceptual:
 
@@ -293,83 +296,83 @@ Para abstraer la lógica subyacente de la sintaxis específica del lenguaje Pyth
 
 ```text
 
-ENTRADA: 
- intencion -> Objeto de tipo DeploymentIntent (Invariantes básicos garantizados)
- politicas_locales -> Configuración del Sistema (Puertos vetados, repositorios)
-
-SALIDA: 
- VERDADERO (Si la intención cumple todas las políticas institucionales)
- LANZA Excepción de Seguridad (SecurityViolationError) en caso contrario
-
-INICIO
-  // FASE 1: Análisis Topológico de Red (Principio de Mínimo Privilegio)
-  Variable puerto_solicitado = intencion.obtenerPuerto()
-  
-  // Los puertos del sistema (Well-Known Ports) están reservados a root (0-1023)
-  SI puerto_solicitado < 1024 ENTONCES
-    LANZAR SecurityViolationError(
-      "Violación Crítica: Exposición en puerto privilegiado no permitida."
-    )
-  FIN SI
-
-  // FASE 2: Prevención de Deriva de Configuración (Configuration Drift)
-  Variable etiqueta_imagen = intencion.obtenerEtiquetaContenedor()
-  
-  // La etiqueta "latest" provoca inconsistencia en reconstrucciones futuras
-  SI etiqueta_imagen ES IGUAL A "latest" ENTONCES
-    LANZAR SecurityViolationError(
-      "Inestabilidad Operativa: Prohibido el uso de la etiqueta volátil ':latest'. " +
-      "Se requiere fijar explícitamente el parche semántico (ej. :1.21.0)."
-    )
-  FIN SI
-
-  // FASE 3: Control de Entorno (White-Listing de Registros de Imágenes)
-  Variable imagen_completa = intencion.obtenerImagen()
-  Variable repositorios_auditados = ["docker.io/", "quay.io/", "harbor.universidad.edu/"]
-  Variable repositorio_licito = FALSO
-  
-  PARA CADA prefijo_seguro EN repositorios_auditados HACER
-    SI imagen_completa INICIA CON prefijo_seguro ENTONCES
-      repositorio_licito = VERDADERO
-      ROMPER BUCLE
-    FIN SI
-  FIN PARA
-
-  SI repositorio_licito ES FALSO ENTONCES
-    LANZAR SecurityViolationError(
-      "Riesgo de Exfiltración: Registro de contenedores no auditado."
-    )
-  FIN SI
-
-  // FASE 4: Auditoría de Cuotas de Hardware (Resource Quotas)
-  Variable cpu_solicitada = ParsearMiliCores(intencion.obtenerCPU())
-  Variable ram_solicitada = ParsearMebibytes(intencion.obtenerRAM())
-
-  SI cpu_solicitada > 4000 O ram_solicitada > 8192 ENTONCES
-    LANZAR SecurityViolationError(
-      "Acaparamiento de Recursos: Límite de 4 Cores y 8Gi excedido."
-    )
-  FIN SI
-
-  // FASE 5: Detección Heurística de Secretos (Variables de Entorno)
-  Variable diccionario_entorno = intencion.obtenerVariablesEntorno()
-  Variable claves_prohibidas = ["password", "secret", "token", "key"]
-
-  PARA CADA clave EN diccionario_entorno HACER
-    SI clave CONTIENE ALGUNO DE claves_prohibidas ENTONCES
-      LANZAR SecurityViolationError(
-        "Fuga de Datos: Posible secreto detectado en texto plano."
-      )
-    FIN SI
-  FIN PARA
-
-  // Si el árbol de ejecución alcanza este punto, el flujo es seguro
-  RETORNAR VERDADERO
-FIN
+01 ENTRADA: 
+02  intencion -> Objeto de tipo DeploymentIntent (Invariantes básicos garantizados)
+03  politicas_locales -> Configuración del Sistema (Puertos vetados, repositorios)
+04 
+05 SALIDA: 
+06  VERDADERO (Si la intención cumple todas las políticas institucionales)
+07  LANZA Excepción de Seguridad (SecurityViolationError) en caso contrario
+08 
+09 INICIO
+10   // PASO 1: Análisis Topológico de Red (Principio de Mínimo Privilegio)
+11   Variable puerto_solicitado = intencion.obtenerPuerto()
+12   
+13   // Los puertos del sistema (Well-Known Ports) están reservados a root (0-1023)
+14   SI puerto_solicitado < 1024 ENTONCES
+15     LANZAR SecurityViolationError(
+16       "Violación Crítica: Exposición en puerto privilegiado no permitida."
+17     )
+18   FIN SI
+19 
+20   // PASO 2: Prevención de Deriva de Configuración (Configuration Drift)
+21   Variable etiqueta_imagen = intencion.obtenerEtiquetaContenedor()
+22   
+23   // La etiqueta "latest" provoca inconsistencia en reconstrucciones futuras
+24   SI etiqueta_imagen ES IGUAL A "latest" ENTONCES
+25     LANZAR SecurityViolationError(
+26       "Inestabilidad Operativa: Prohibido el uso de la etiqueta volátil ':latest'. " +
+27       "Se requiere fijar explícitamente el parche semántico (ej. :1.21.0)."
+28     )
+29   FIN SI
+30 
+31   // PASO 3: Control de Entorno (White-Listing de Registros de Imágenes)
+32   Variable imagen_completa = intencion.obtenerImagen()
+33   Variable repositorios_auditados = ["docker.io/", "quay.io/", "harbor.universidad.edu/"]
+34   Variable repositorio_licito = FALSO
+35   
+36   PARA CADA prefijo_seguro EN repositorios_auditados HACER
+37     SI imagen_completa INICIA CON prefijo_seguro ENTONCES
+38       repositorio_licito = VERDADERO
+39       ROMPER BUCLE
+40     FIN SI
+41   FIN PARA
+42 
+43   SI repositorio_licito ES FALSO ENTONCES
+44     LANZAR SecurityViolationError(
+45       "Riesgo de Exfiltración: Registro de contenedores no auditado."
+46     )
+47   FIN SI
+48 
+49   // PASO 4: Auditoría de Cuotas de Hardware (Resource Quotas)
+50   Variable cpu_solicitada = ParsearMiliCores(intencion.obtenerCPU())
+51   Variable ram_solicitada = ParsearMebibytes(intencion.obtenerRAM())
+52 
+53   SI cpu_solicitada > 4000 O ram_solicitada > 8192 ENTONCES
+54     LANZAR SecurityViolationError(
+55       "Acaparamiento de Recursos: Límite de 4 Cores y 8Gi excedido."
+56     )
+57   FIN SI
+58 
+59   // PASO 5: Detección Heurística de Secretos (Variables de Entorno)
+60   Variable diccionario_entorno = intencion.obtenerVariablesEntorno()
+61   Variable claves_prohibidas = ["password", "secret", "token", "key"]
+62 
+63   PARA CADA clave EN diccionario_entorno HACER
+64     SI clave CONTIENE ALGUNO DE claves_prohibidas ENTONCES
+65       LANZAR SecurityViolationError(
+66         "Fuga de Datos: Posible secreto detectado en texto plano."
+67       )
+68     FIN SI
+69   FIN PARA
+70 
+71   // Si el árbol de ejecución alcanza este punto, el flujo es seguro
+72   RETORNAR VERDADERO
+73 FIN
 ```
 <p align="center"><i><b>Algoritmo 1:</b> Validación Estricta de Entidades de Dominio Hexagonal (SecurityContextValidator).</i></p>
 
-La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(N) de complejidad temporal, donde N es el número de repositorios confiables), certifica que la creatividad de la Inteligencia Artificial queda confinada dentro de un subespacio matemático determinista. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
+La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(N) de complejidad temporal, donde N es el número de repositorios confiables), certifica que el comportamiento de la Inteligencia Artificial queda confinado dentro de un conjunto de reglas deterministas. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
 
 La siguiente figura resume visualmente el árbol de validación como diagrama de flujo:
 
@@ -401,7 +404,7 @@ El ciclo de vida del error sigue la siguiente orquestación de red:
 3. El Servidor MCP transmite este código de fallo a la Interfaz Cognitiva. En lugar de estrellar la aplicación Streamlit, el orquestador ReAct cataloga este fallo como una **Observación (*Observation*)**.
 4. La Observación es re-inyectada en la ventana de contexto del LLM.
 
-Esta gestión de excepciones invierte la carga operativa: el sistema no obliga al usuario humano a comprender por qué no puede usar el puerto 22. Es el propio LLM quien lee la excepción en texto plano, asume su equivocación, auto-corrige su estado interno y se dirige proactivamente al usuario con lenguaje natural, disculpándose y solicitándole que proponga un puerto alternativo (ej. el 8080). Esta simbiosis entre aserciones matemáticas (Backend) y diplomacia lingüística (LLM) es el pilar central del éxito de la solución propuesta.
+Esta gestión de excepciones invierte la carga operativa: el sistema no obliga al usuario humano a comprender por qué no puede usar el puerto 22. Es el propio LLM quien lee la excepción en texto plano, asume su equivocación, auto-corrige su estado interno y se dirige proactivamente al usuario con lenguaje natural, disculpándose y solicitándole que proponga un puerto alternativo (ej. el 8080). Esta simbiosis entre aserciones matemáticas (Backend) y comunicación en lenguaje natural (LLM) es el pilar central del éxito de la solución propuesta.
 
 ## 4.4. Patrón de Abstracción: *Golden Paths* y Expansión Sintáctica
 
@@ -436,7 +439,7 @@ La síntesis de todas las decisiones arquitectónicas presentadas en este capít
 
 El modelado formal de la traza de ejecución completa abarca desde la excitación del sistema por parte del investigador, hasta la mutación del entorno físico aprobada por el técnico. Dada la complejidad asíncrona de la arquitectura, esta coreografía de red se divide en tres fases secuenciales diferenciadas para facilitar su visualización y análisis.
 
-### 4.5.1. Fase 1: Negociación Estocástica (Interacción LLM)
+### 4.5.1. Etapa 1: Negociación Estocástica (Interacción LLM)
 
 El flujo es disparado por un estímulo no tipado (lenguaje natural). La latencia en esta fase es altamente variable (puede oscilar entre 1 y 15 segundos), dependiendo del peso de la inferencia del LLM (ej. GPT-4o en la nube frente a Llama-3 en hardware local). El bucle ReAct itera hasta converger en una intención matemática (`ToolCall`).
 
@@ -449,16 +452,16 @@ sequenceDiagram
   participant LLM as LLM (Ollama / OpenAI)
 
   rect rgb(220, 235, 255)
-    Note over I,LLM: FASE 1 — Negociación Estocástica
+    Note over I,LLM: ETAPA 1 — Negociación Estocástica
     I->>Chat: Mensaje en lenguaje natural
     Chat->>Orch: run(user_message)
     Orch->>LLM: [system_prompt + historial] → chat(messages, tools)
     LLM-->>Orch: Thought + ToolCall(name, arguments)
   end
 ```
-<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Fase 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención.</i></p>
+<p align="center"><i><b>Figura 8:</b> Diagrama de Secuencia E2E (Etapa 1). Negociación cognitiva entre el Investigador y el LLM hasta alcanzar una intención.</i></p>
 
-### 4.5.2. Fase 2: Frontera de Intercepción Determinista (Validación)
+### 4.5.2. Etapa 2: Frontera de Intercepción Determinista (Validación)
 
 Este bloque constituye el "Embrague" del sistema. El Servidor MCP cruza el límite hacia el Backend. Aquí, la latencia debe ser del orden de microsegundos, dado que la ejecución de Pydantic y el `SecurityContextValidator` es computacionalmente trivial. Se incluyen tanto el **camino feliz** (*Happy Path*) como el **camino de error** (violación de seguridad → HTTP 422 → autocorrección del LLM) para documentar la resiliencia de la arquitectura. Si el flujo aprueba el cortafuegos, el sistema no ejecuta la acción; la "congela" en la base de datos como pendiente, desvinculando la responsabilidad de la IA.
 
@@ -473,7 +476,7 @@ sequenceDiagram
   participant Store as SQLiteRepository
   participant LLM as LLM
 
-  Note over Orch,LLM: FASE 2A — Flujo de Éxito: Petición conforme
+  Note over Orch,LLM: ETAPA 2A — Flujo de Éxito: Petición conforme
   Orch->>MCP: dispatch_tool(name, args)
   MCP->>API: POST /mcp/intent
   API->>UseCase: execute(DeploymentIntent)
@@ -497,7 +500,7 @@ sequenceDiagram
   participant Sec as SecurityValidator
   participant LLM as LLM
 
-  Note over Orch,LLM: FASE 2B — Flujo de Error: Violación de seguridad
+  Note over Orch,LLM: ETAPA 2B — Flujo de Error: Violación de seguridad
   Orch->>MCP: dispatch_tool("ubuntu:latest", 22)
   MCP->>API: POST /mcp/intent {port: 22}
   API->>UseCase: execute(DeploymentIntent)
@@ -508,9 +511,9 @@ sequenceDiagram
   MCP-->>Orch: Observación: {error: 422}
   Orch->>LLM: [error 422] → autocorrección
 ```
-<p align="center"><i><b>Figura 9:</b> Diagrama de Secuencia E2E (Fase 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
+<p align="center"><i><b>Figura 9:</b> Diagrama de Secuencia E2E (Etapa 2). (Arriba) Camino feliz. (Abajo) Camino de error y autocorrección.</i></p>
 
-### 4.5.3. Fase 3: Ejecución Autoritaria (Ciclo HITL)
+### 4.5.3. Etapa 3: Ejecución Autoritaria (Ciclo HITL)
 
 Esta fase es operativamente asíncrona respecto a las dos anteriores. La latencia ya no depende del procesador, sino de la voluntad del Técnico Humano (puede demorarse minutos u horas). El técnico sondea el backend de forma puramente determinista. Únicamente al inyectar su autorización, el Backend despierta el flujo diferido y excita al Adaptador de Kubernetes mediante un bypass arquitectónico directo a los puertos de salida. Es en este último milisegundo donde los valores abstractos se materializan físicamente.
 
@@ -524,7 +527,7 @@ sequenceDiagram
   participant Dash as Dashboard HITL
 
   rect rgb(255, 250, 220)
-    Note over Store,Dash: FASE 3 — Human-In-The-Loop (asíncrona)
+    Note over Store,Dash: ETAPA 3 — Human-In-The-Loop (asíncrona)
     SIC->>Dash: Abre Dashboard → GET /hitl/pending
     Dash->>API: GET /hitl/pending
     API->>Store: get_all()
@@ -557,6 +560,6 @@ sequenceDiagram
     end
   end
 ```
-<p align="center"><i><b>Figura 10:</b> Diagrama de Secuencia E2E (Fase 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución.</i></p>
+<p align="center"><i><b>Figura 10:</b> Diagrama de Secuencia E2E (Etapa 3). Decisión asíncrona del técnico humano, separando la inferencia de la ejecución.</i></p>
 
 El diseño *End-to-End* expuesto garantiza la separación irrompible de preocupaciones: la IA actúa exclusivamente como **facilitadora de la sintaxis abstracta**, mientras que la ingeniería de sistemas tradicional retiene el monopolio absoluto sobre el **acceso de escritura al estado productivo**.
