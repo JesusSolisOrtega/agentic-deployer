@@ -28,3 +28,19 @@ Para facilitar la lectura y comprensión técnica de este documento, a continuac
 | **SIC** | Servicio de Informática y Comunicaciones | Departamento institucional (típicamente universitario o gubernamental) encargado de administrar la infraestructura tecnológica y soporte a usuarios. |
 | **TTM** | Time To Market / Time To Mitigation | Tiempo desde la concepción de una necesidad (ej. necesito una web) hasta que el servicio está operativo y disponible. |
 <p align="center"><i><b>Tabla 40:</b> Glosario de Acrónimos y Términos Técnicos.</i></p>
+
+---
+
+## Términos Técnicos Anglosajones
+
+Los siguientes términos en inglés se emplean en el texto en su forma original por carecer de traducción establecida y de uso generalizado en el sector. Se documentan aquí para facilitar la comprensión de lectores con menor familiaridad con la terminología técnica internacional.
+
+| Término | Traducción aproximada | Uso en el TFM |
+|---|---|---|
+| **Air-Gapped** | «Red aislada» o «entorno desconectado» | Se refiere a infraestructuras de red totalmente aisladas de Internet (sin ninguna conexión externa), empleadas en entornos de alta seguridad (administración pública, defensa). En el TFM es relevante para los escenarios de despliegue on-premise con Ollama sin conectividad exterior. |
+| **Boilerplate** | «Código repetitivo» o «código de plantilla» | Fragmentos de código estandarizados y repetitivos que deben incluirse en múltiples lugares con pocas o ninguna alteración (ej. configuraciones base de FastAPI, imports estándar). Se distingue del código de lógica de negocio por su naturaleza formulaica. |
+| **Garbage Collector** | «Recolector de basura» | Componente del entorno de ejecución (ej. CPython) responsable de liberar automáticamente la memoria ocupada por objetos que ya no son accesibles por ninguna parte del programa. En el TFM se menciona en el contexto de los nodos de sumidero de la FSM (registros `REJECTED` que el GC ignora). |
+| **Overhead** | «Sobrecarga» o «coste adicional» | Recursos computacionales (tiempo de CPU, memoria, latencia de red) consumidos por la infraestructura de soporte de un sistema, más allá del trabajo útil que este realiza. En el TFM se usa principalmente para referirse a la sobrecarga del protocolo TCP/IP vs. `stdio`. |
+| **Scaffolding** | «Andamiaje» o «generación de estructura inicial» | Proceso de generación automática de la estructura de código base de un proyecto (directorios, ficheros de configuración, módulos de entrada) a partir de plantillas o herramientas CLI. En el TFM se usa en el contexto de la asistencia de la IA generativa para acelerar la fase inicial de cada sprint. |
+<p align="center"><i><b>Tabla 41:</b> Términos técnicos anglosajones empleados en la memoria.</i></p>
+

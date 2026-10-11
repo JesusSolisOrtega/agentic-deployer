@@ -247,6 +247,8 @@ La adopción de modelos locales evita los gastos recurrentes (OPEX) a cambio de 
 
 **Opción 2 — API en la nube**
 
+Si la organización opta por delegar la inferencia cognitiva en proveedores externos (asumiendo que sus políticas de gobernanza admiten la transferencia de telemetría a terceros), el adaptador agnóstico `OpenAILLMClient` permite conectar de forma transparente con APIs comerciales en la nube. La siguiente tabla modela el impacto económico operativo anual según las tarifas vigentes por millón de tokens:
+
 | Proveedor | Modelo | Precio entrada | Precio salida | Estimación anual* |
 |---|---|---|---|---|
 | OpenAI | GPT-4o-mini | 0,15 $/MTok | 0,60 $/MTok | **~160–650 €/año** |
@@ -289,7 +291,7 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 | **Ahorro total anual** | | | | **~20.330 €** |
 <p align="center"><i><b>Tabla 30:</b> Cálculo del ahorro anual operativo (Escenario de Perfil B).</i></p>
 
-> **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la "Negociación de requisitos" es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa.
+> **Nota sobre el cálculo de tiempos:** El valor de 1.440 minutos (~24 horas) para la «Negociación de requisitos» es una estimación conservadora basada en el SLA (*Service Level Agreement*) típico de un Service Desk universitario, donde el intercambio asíncrono de tickets o correos electrónicos (solicitud → falta de datos → respuesta del investigador → nueva validación) consume al menos un día hábil (24h de tiempo de reloj) hasta alcanzar un estado de intención completa. **Es importante subrayar que el cálculo del ahorro (29 min) se refiere al tiempo de trabajo activo del técnico** — el tiempo que este dedica efectivamente a analizar, reformular y clarificar los requisitos con el investigador — y no al tiempo total transcurrido (*elapsed time*) del proceso ITSM (los 1.440 min). Estos 29 minutos se obtienen de restar el tiempo de atención con el sistema (0,5 min de chat con la IA) al trabajo activo equivalente en el flujo ITSM clásico (~30 min de dedicación activa del técnico). El ROI recoge, por tanto, la eficiencia en el esfuerzo humano directo, no la reducción del SLA total, que depende además de los tiempos de respuesta del investigador y las ventanas de atención del equipo.
 
 **ROI a 3 años — Perfil B con Ollama (Nivel Básico Coder, 7B)**
 
@@ -305,6 +307,22 @@ El valor generado se cuantifica a partir de la reducción de tiempo operativo do
 
 > **Período de retorno (Payback Period): ~5 meses** tras la implantación.
 > **ROI a 3 años: ~522%**
+
+#### Análisis de Sensibilidad del ROI
+
+La variable más sensible del modelo de ROI es la línea base de tiempo activo del técnico en el proceso ITSM de negociación de requisitos. La tabla de referencia asume ~30 min de trabajo activo por solicitud como escenario central. A continuación se presentan dos escenarios alternativos que ilustran el comportamiento del ROI ante variaciones de esta hipótesis:
+
+| Escenario | Tiempo activo base (negociación) | Ahorro/solicitud | Ahorro anual total | ROI a 3 años |
+|---|---|---|---|---|
+| **Optimista** (SLA ya eficiente, proceso bien documentado) | ~10 min | ~9,5 min | **~9.500 €** | **~241%** |
+| **Intermedio** (proceso estándar del sector) | ~20 min | ~19,5 min | **~16.250 €** | **~417%** |
+| **Central** (línea base de referencia del TFM) | ~30 min | ~29,5 min | **~20.330 €** | **~522%** |
+
+> Los escenarios optimista e intermedio asumen que el CAPEX (7.700 €) y el OPEX anual (1.540 €) son idénticos al escenario central. El ahorro de traducción YAML y validación de políticas se mantiene constante en todos los escenarios (~8.330 €/año), ya que no depende de la negociación inicial sino de la automatización técnica.
+
+**Interpretación:** Incluso en el escenario más optimista (un proceso ITSM previo ya muy ágil de 10 minutos), el sistema mantiene un ROI del **241% a 3 años** con un payback estimado de ~12 meses, conservando la rentabilidad de la inversión. Este análisis refuerza la robustez del argumento económico frente a distintas hipótesis de partida sobre la eficiencia de los procesos manuales preexistentes.
+
+
 
 ---
 

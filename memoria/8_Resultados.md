@@ -49,7 +49,7 @@ Las métricas temporales del apartado anterior pierden su validez si el sistema 
 > [!NOTE]
 > **Nota de Reproducibilidad:** Las transcripciones documentadas a lo largo de este capítulo y en los Anexos se corresponden con interacciones reales ejecutadas contra la API local de Ollama (utilizando el modelo `qwen2.5:7b`). Para garantizar el escrutinio académico independiente, todas estas sesiones son reproducibles descargando el repositorio del proyecto e iniciando el agente conversacional siguiendo las instrucciones del `README.md`. No se han alterado ni embellecido las respuestas estocásticas del LLM.
 
-El escenario simula un vector de ataque conocido como *Prompt Injection* (Inyección de Prompt) [34], o alternativamente, el comportamiento de un investigador negligente que exige configuraciones expresamente prohibidas por las normativas de ciberseguridad universitaria.
+El escenario simula un vector de ataque conocido como *Prompt Injection* (Inyección de Prompt) [36], o alternativamente, el comportamiento de un investigador negligente que exige configuraciones expresamente prohibidas por las normativas de ciberseguridad universitaria.
 
 ### 8.2.1. El Vector de Ataque Cognitivo
 
@@ -79,7 +79,7 @@ El núcleo evalúa la intención de forma puramente algorítmica y detecta dos v
 1. El uso de la etiqueta volátil `:latest` está vetado para evitar la deriva de configuración (*Configuration Drift*).
 2. La exposición del puerto `22` vulnera el principio de Mínimo Privilegio y expone el clúster a ataques de fuerza bruta.
 
-En consecuencia, el código de Python aborta la transición en la FSM y arroja una excepción asíncrona. El *framework* FastAPI serializa esta caída de forma estándar, devolviendo al Servidor MCP el siguiente error explícito:
+En consecuencia, el motor de validación aborta la transición en la FSM y emite una excepción de dominio. El *framework* FastAPI serializa este rechazo de forma estándar, devolviendo al Servidor MCP el siguiente error explícito:
 
 `HTTP 422 Unprocessable Entity: "Security Violation: Port 22 is reserved for administrative tasks. The use of :latest tag is forbidden by institutional policy."`
 
@@ -98,7 +98,7 @@ El modelo asimila esta corrección externa de forma autónoma:
   *"Lamento informarte de que el Servicio de Informática ha bloqueado automáticamente la petición por motivos de ciberseguridad institucional. Concretamente, las normativas no permiten el uso de la etiqueta ':latest' ni la apertura del puerto 22 (SSH). Para poder proceder con tu servidor, ¿podrías indicarme una versión específica y estable de Ubuntu (por ejemplo, '22.04') y confirmar si podemos usar un puerto de aplicación estándar superior al 1024?"*
 
 **Conclusión del Escenario Práctico:**
-La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege matemáticamente a la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la flexibilidad lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
+La demostración certifica empíricamente que la arquitectura diseñada cumple sus dos mandatos fundacionales. Por un lado, protege de forma determinista la infraestructura física de la irracionalidad humana (y de la estocasticidad de la IA). Por otro lado, aprovecha la flexibilidad lingüística del LLM para transformar una excepción técnica frustrante en una experiencia guiada, didáctica y resiliente, elevando drásticamente el nivel de madurez tecnológica de la organización.
 
 La transcripción completa de este escenario, incluyendo los mensajes JSON intercambiados entre el agente y el backend, se encuentra disponible en el repositorio del proyecto bajo la ruta [`demos/prompt_injection/escenario2_prompt_injection.json`](../demos/prompt_injection/escenario2_prompt_injection.json).
 
@@ -106,7 +106,7 @@ La transcripción completa de este escenario, incluyendo los mensajes JSON inter
 
 ## 8.3. Walkthrough Completo: Del Lenguaje Natural al Manifiesto YAML
 
-Esta sección documenta de forma forense tres escenarios de ejecución real del sistema. Para la ejecución de estos escenarios prácticos se ha mantenido deliberadamente el modelo generalista de referencia `qwen2.5:7b` (ejecutándose localmente mediante Ollama con *Zero Data Retention*), el cual obtuvo un 50% de éxito en las pruebas metamórficas de estrés (Sección 7.4.2), en lugar de utilizar la variante hiper-especializada *Coder* (100%). Esta decisión argumentativa busca demostrar empíricamente cómo la arquitectura propuesta (el bucle ReAct y el núcleo Hexagonal) es capaz de absorber y corregir la estocasticidad de un modelo imperfecto en el mundo real, garantizando despliegues seguros sin depender exclusivamente de las capacidades intrínsecas de la red neuronal.
+Esta sección documenta de forma forense tres escenarios de ejecución real del sistema. Para la ejecución de estos escenarios prácticos se ha mantenido deliberadamente el modelo generalista de referencia `qwen2.5:7b` (ejecutándose localmente mediante Ollama con *Zero Data Retention*), el cual obtuvo un 50% de éxito en las pruebas metamórficas de estrés (Sección 7.4.3, Tabla 7), en lugar de utilizar la variante hiper-especializada *Coder* (100%, Sección 7.4.5, Tabla 8). Esta decisión argumentativa busca demostrar empíricamente cómo la arquitectura propuesta (el bucle ReAct y el núcleo Hexagonal) es capaz de absorber y corregir la estocasticidad de un modelo imperfecto en el mundo real, garantizando despliegues seguros sin depender exclusivamente de las capacidades intrínsecas de la red neuronal.
 
 Los artefactos de evidencia se encuentran en el directorio [`demos/`](../demos/) del repositorio.
 
@@ -398,13 +398,13 @@ Sin embargo, la inclusión empírica de **Qwen 2.5 Coder (7B)** demuestra que la
 
 Adicionalmente, la evaluación de **Qwen 3.8 (27B)** mediante la arquitectura de inferencia LPU de **Groq** corroboró la eficacia del sistema, manteniendo latencias de ~2 segundos por ciclo. Estos resultados validan la robustez del diseño arquitectónico propuesto (desacoplamiento mediante el patrón *Adapter*), evidenciando que la fiabilidad de la orquestación puede optimizarse tanto mediante aceleración en la nube como a través de la hiper-especialización local.
 
-> **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.3 (Limitaciones del Prototipo)**.
+> **Nota sobre Limitaciones de Hardware:** Las métricas de tiempo y rendimiento empírico expuestas en esta sección están fuertemente condicionadas por la infraestructura física local utilizada para el prototipo (GPU de portátil). Un análisis detallado de cómo esta restricción ha impactado en los tiempos de inferencia y en la incapacidad de los modelos más pequeños (Mistral, Llama 3.2) para ejecutar *Tool Calling* adecuadamente se documenta en la **Sección 10.2.8 (Limitaciones del Prototipo)**.
 
 ---
 
 ## 8.4. Experimentos Arquitectónicos: Superando el Límite Cognitivo (7B)
 
-A lo largo del desarrollo, se detectó que el modelo Qwen 2.5 (7B) sufría de "obediencia ciega" al intentar rellenar los parámetros del *Tool Call* de forma prematura. Para evaluar la viabilidad de distintas arquitecturas cognitivas que mitigaran este fallo en hardware limitado, se diseñó un banco de pruebas específico documentado en `demos/demo_state_machine.py` y `demos/demo_reinforcement_suffix.py`.
+A lo largo del desarrollo, se detectó que el modelo Qwen 2.5 (7B) sufría de «obediencia ciega» al intentar rellenar los parámetros del *Tool Call* de forma prematura. Para evaluar la viabilidad de distintas arquitecturas cognitivas que mitigaran este fallo en hardware limitado, se diseñó un banco de pruebas experimental sistemático.
 
 Se evaluaron tres paradigmas arquitectónicos frente al mismo escenario (un usuario solicitando un despliegue por fases):
 
@@ -413,26 +413,44 @@ Se instruyó al LLM con un sufijo estricto ("Responde SOLO con JSON").
 * **Resultado:** El modelo intentó invocar la herramienta en el Turno 2 (cuando solo conocía el nombre del proyecto), alucinando el resto de parámetros (puerto e imagen) para cumplir con la orden sintáctica de generar un JSON inmediatamente. Hubo un fallo lógico por obediencia ciega.
 
 ### 8.4.2. Paradigma 2: Cadena de Pensamiento (*Chain of Thought*) (Fallo Sintáctico)
-Se aplicó la técnica de Wei et al. (2022) [14], instruyendo al modelo para que, antes de generar el JSON, enumerara explícitamente en texto los parámetros que tenía y razonara si debía invocar la herramienta.
+Se aplicó la técnica de *Cadena de Pensamiento* (*Chain of Thought*) [14], instruyendo al modelo para que, antes de generar el JSON, enumerara explícitamente en texto los parámetros que tenía y razonara si debía invocar la herramienta.
 * **Resultado:** El modelo superó el Turno 2 con éxito, razonando correctamente que le faltaban datos y preguntando al usuario. Sin embargo, en el Turno 3, al intentar generar su razonamiento en texto seguido del formato estricto del *Tool Call*, la sintaxis colapsó arrojando un `ValidationError`.
 * **Conclusión:** Se comprobó empíricamente el **Principio de la Manta Corta**: un modelo de 7B no tiene capacidad de atención suficiente para sostener razonamiento complejo (texto) y formateo estricto (JSON) en la misma inferencia. Si se arregla la lógica, se rompe la sintaxis.
 
-### 8.4.3. Paradigma 3: Llenado de Huecos con Estado (*Stateful Slot Filling*)
-Como prueba de concepto definitiva, se separó la arquitectura. El LLM se limitó exclusivamente a ser un extractor de entidades (*"Lee el texto y extrae el puerto, imagen y nombre"*), actualizando una plantilla JSON en memoria. La lógica de control (decidir cuándo llamar a la herramienta) recayó en un script de Python determinista.
-* **Resultado:** Éxito del 100%. El modelo extrajo los datos aislados en cada turno sin colapsar. En el Turno 3, Python detectó que la plantilla estaba completa y ejecutó la herramienta sin error.
+### 8.4.3. Paradigma 3: Llenado de Huecos con Estado (*Stateful Slot Filling*) y Destilación de Contexto
+
+Para erradicar la sobrecarga cognitiva expuesta en los paradigmas anteriores, se diseñó una solución fundamentada en la literatura clásica de seguimiento del estado del diálogo (*Dialogue State Tracking*) y extracción de ranuras (*Slot Filling*), formalizada por **Mrkšić et al. [37]**, combinada con principios de **Destilación de Contexto (*Context Distillation*)** [38][39].
+
+#### Fundamentación Teórica y Segregación de Responsabilidades
+
+En una arquitectura conversacional agéntica estándar (como ReAct), el orquestador reinyecta iterativamente la transcripción completa del diálogo en la ventana de contexto del LLM. Como se constató en las Pruebas Metamórficas (Sección 7.4), este enfoque acumula ruido léxico, dispersa la atención y fuerza al modelo a desempeñar simultáneamente tres funciones cognitivas complejas en una sola inferencia estocástica: (1) recordar el historial previo, (2) razonar si dispone de todos los parámetros necesarios y (3) formatear la llamada a la herramienta en un JSON estricto.
+
+El patrón de *Stateful Slot Filling* descompone esta sobrecarga separando la arquitectura en dos planos ortogonales:
+
+1. **Plano Cognitivo Pasivo (Extracción Semántica por Turno):** El modelo de lenguaje opera exclusivamente como un extractor de entidades acotado al último mensaje del usuario. No se le exige decidir si debe ejecutar la herramienta ni interactuar con el entorno; su cometido se restringe a mapear las variables presentes en el texto a una estructura de ranuras discretas (`{"name": null, "image": null, "internal_port": null}`), descartando el ruido conversacional periférico (saludos, despedidas, fórmulas de cortesía).
+2. **Plano Determinista de Control (Máquina de Estados Finita):** La capa de software tradicional mantiene el vector de estado estructurado en memoria. Tras cada turno conversacional, la máquina de estados evalúa formalmente la satisfacción de precondiciones comprobando qué ranuras (*slots*) han sido cubiertas. Si faltan parámetros obligatorios, el orquestador genera deterministamente la solicitud de clarificación al usuario. Únicamente cuando el esquema de tipos queda completamente satisfecho, el sistema ensambla y despacha de forma autónoma la invocación formal a la herramienta MCP.
+
+#### Evaluación Experimental del Paradigma
+
+Este paradigma se evaluó empíricamente en el banco de pruebas, sometiéndolo al mismo diálogo multi-turno por fases evaluado en los paradigmas 1 y 2:
+* **Turno 1:** El usuario solicita desplegar `app-test`. El LLM extrae de forma aislada `{"name": "app-test"}`. La máquina de estados detecta la ausencia de imagen y puerto, reteniendo el estado en memoria y emitiendo la solicitud de los datos faltantes.
+* **Turno 2:** El usuario especifica la imagen `node:18`. El LLM extrae `{"image": "node:18"}`. La capa de control actualiza el vector de estado y solicita el puerto. A diferencia del Paradigma 1, el modelo no alucina parámetros porque no se le exige generar la llamada a la herramienta.
+* **Turno 3:** El usuario indica el puerto `3000`. El LLM extrae `{"internal_port": 3000}`. El orquestador constata que el esquema de tipos está completo y ejecuta la herramienta MCP con éxito absoluto.
+
+* **Resultado:** Éxito del 100%. La segregación de responsabilidades neutralizó tanto la obediencia ciega como los errores de sintaxis, permitiendo que incluso modelos generalistas con severas limitaciones de atención completaran la orquestación sin fallos.
 
 ### 8.4.4. Comparativa Multi-Modelo: Locales vs Cloud Comercial
 
 Para dotar de mayor rigor empírico al estudio, los dos experimentos arquitectónicos descritos anteriormente (*Chain of Thought* y *Stateful Slot Filling*) se replicaron contra los demás modelos locales del catálogo (**Qwen 2.5 Coder (7B)**, **Llama 3.2 (3B)** y **Mistral (7B)**), así como contra un ecosistema representativo de modelos comerciales en la nube (**Gemini 3.5 Flash**, **Cohere Command R+**, **Ministral 8B** y **Qwen 27B vía Groq**).
 
-El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño, y contrastar este comportamiento con el soporte nativo de los modelos *Cloud* diseñados para ecosistemas agénticos.
+El objetivo era verificar si los fallos sintácticos y lógicos eran exclusivos de Qwen o si constituían un patrón endémico de los modelos cuantizados de pequeño tamaño, contrastando este comportamiento con motores comerciales diseñados para ecosistemas agénticos. Esta comparativa transversal permite explorar empíricamente cómo reacciona el estado del arte ante distintas técnicas de contención cognitiva, identificando qué paradigmas arquitectónicos logran desacoplar con éxito la lógica de control del razonamiento lingüístico.
 
 
 
 | Modelo / Paradigma | ReAct Clásico (Sin Sufijo) | ReAct con *Chain of Thought* | Máquina de Estado Destilado (*Stateful*) |
 | :--- | :--- | :--- | :--- |
 | **Qwen 2.5 Coder (7B)** | **Éxito 100%** (Hiper-especialización local) | **Éxito 100%** (Sintaxis robusta) | **Éxito 100%** (Precisión absoluta) |
-| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2) |  Colapso Sintáctico (`ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Orquestación por Python) |
+| **Qwen 2.5 (7B)** | Fallo Lógico (Obediencia ciega en Turno 2) |  Colapso Sintáctico (`ValidationError` al mezclar texto y JSON) |  **Éxito 100%** (Control determinista de estado) |
 | **Llama 3.2 (3B)** | Fallo Sintáctico (`ValidationError` por inyectar "None") |  Colapso Inmediato (Incapaz de estructurar la base) |  **Éxito Parcial** (Extrae `"null"` como string) |
 | **Mistral (7B)** | Fallo Lógico/Degradación (Olvida el formato en turnos largos) |  Colapso por Bucle (Alucina repitiendo tokens) |  **Éxito 100%** (Aísla extracción semántica) |
 | **Gemini Flash** | **Éxito 100%** (Atención superior, no alucina) | **Éxito 100%** (Sintaxis robusta) | **Éxito 100%** (Extracción pasiva perfecta) |

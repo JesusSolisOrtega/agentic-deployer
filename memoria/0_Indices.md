@@ -67,6 +67,7 @@
   - B.6. Fase 6 — Redacción y Cierre
   - B.7. Fase 7 — Consolidación de Excelencia Técnica
 - **Anexo C. Glosario de Acrónimos y Términos**
+  - Términos Técnicos Anglosajones
 
 
 <div style='page-break-after: always;'></div>
@@ -137,6 +138,7 @@ El presente Trabajo de Fin de Máster hace uso intensivo de modelado visual y ps
 - **Tabla 38:** Retrospectiva de la Fase 6 (Redacción y Cierre). *(Anexo B)*
 - **Tabla 39:** Retrospectiva de la Fase 7 (Consolidación de Excelencia Técnica). *(Anexo B)*
 - **Tabla 40:** Glosario de Acrónimos y Términos Técnicos. *(Anexo C)*
+- **Tabla 41:** Términos técnicos anglosajones empleados en la memoria. *(Anexo C)*
 
 ### Índice de Algoritmos (Pseudocódigo)
 

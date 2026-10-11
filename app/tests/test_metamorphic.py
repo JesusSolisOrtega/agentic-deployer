@@ -4,9 +4,12 @@ Metamorphic Tests for the Agent's intent extraction system.
 These tests evaluate that the LLM (or the FakeLLM in its absence) complies with
 essential metamorphic relations in natural language processing:
 
-1. MR-1 (Permutation): The order in which parameters are given should not alter the result.
+1. MR-1 (Order Permutation): The order in which parameters are given should not alter the result.
 2. MR-2 (Noise/Robustness): Adding greetings, farewells, or irrelevant text should not alter the result.
 3. MR-3 (Case Invariance): Changes in uppercase/lowercase should not affect extraction.
+4. MR-4 (Incremental Composition): Providing parameters across multiple conversational turns must match single-turn extraction.
+5. MR-5 (Semantic Paraphrasing): Synonymous phrasing and grammatical variations must yield identical parameters.
+6. MR-6 (Language Invariance / Cross-Lingual): Providing requests in Spanish vs. English must yield the same tool call.
 """
 
 import os
