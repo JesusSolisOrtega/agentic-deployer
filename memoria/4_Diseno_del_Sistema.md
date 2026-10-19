@@ -372,7 +372,7 @@ Para abstraer la lógica subyacente de la sintaxis específica del lenguaje Pyth
 ```
 <p align="center"><i><b>Algoritmo 1:</b> Validación Estricta de Entidades de Dominio Hexagonal (SecurityContextValidator).</i></p>
 
-La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(N) de complejidad temporal, donde N es el número de repositorios confiables), certifica que el comportamiento de la Inteligencia Artificial queda confinado dentro de un conjunto de reglas deterministas. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
+La adopción de este árbol de decisión, fuertemente condicionado de manera imperativa (O(R + K) de complejidad temporal, donde R es el número de repositorios confiables y K el número de claves de entorno a validar), certifica que el comportamiento de la Inteligencia Artificial queda confinado dentro de un conjunto de reglas deterministas. El LLM es libre de deducir el nombre del servicio o la cantidad de RAM necesaria, pero es el algoritmo Hexagonal quien dictamina los límites infranqueables del tablero de juego.
 
 La siguiente figura resume visualmente el árbol de validación como diagrama de flujo:
 

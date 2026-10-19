@@ -40,7 +40,7 @@ Esta aproximación es coherente con las recomendaciones de gestión ágil de pro
 
 ### 9.2.1. Diagrama de Planificación
 
-La planificación se estructura en **5 sprints temáticos** más una fase transversal de redacción y una fase de consolidación de excelencia, con un esfuerzo total estimado de **~300 horas** (±15% de margen de contingencia estándar). Las fechas son referencias aproximadas sujetas al principio de flexibilidad enunciado en la sección anterior.
+La planificación se estructura en **5 sprints temáticos** más una fase transversal de redacción y una fase de consolidación de excelencia, con un esfuerzo total **estimado** de **~300 horas** (±15% de margen de contingencia estándar). Las fechas son referencias aproximadas sujetas al principio de flexibilidad enunciado en la sección anterior. El esfuerzo real registrado al cierre del proyecto fue de **~340 horas** (+13%); el desglose de desviaciones por fase se documenta en la §9.3.
 
 ```mermaid
 gantt
@@ -154,8 +154,8 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 | Perfil | Tarifa/hora | Horas | Coste de oportunidad |
 |---|---|---|---|
 | **Alumno Investigador** (Ingeniero Junior — equivalente mercado) | 22 €/h | ~340h | ~7.480 € |
-| **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~24h *(sesiones periódicas)* | ~1.800 € |
-| **Subtotal Recursos Humanos** | | **~364h** | **~9.280 €** |
+| **Tutor Académico** (Perfil Senior / Supervisor I+D) | 75 €/h | ~45h *(sesiones periódicas + revisión documental + feedback)* | ~3.375 € |
+| **Subtotal Recursos Humanos** | | **~385h** | **~10.855 €** |
 <p align="center"><i><b>Tabla 21:</b> Costes de Recursos Humanos (CAPEX equivalente).</i></p>
 
 > **Nota metodológica:** Los valores representan el coste de oportunidad equivalente de mercado: la inversión económica que representaría este proyecto si se ejecutase bajo contrato profesional. El alumno no percibe remuneración; el tutor es compensado institucionalmente al margen de este cálculo.
@@ -179,10 +179,10 @@ El proyecto fue desarrollado utilizando recursos de código abierto e infraestru
 
 | Categoría | Coste |
 |---|---|
-| Recursos Humanos (coste de oportunidad) | ~9.280 € |
+| Recursos Humanos (coste de oportunidad) | ~10.855 € |
 | Infraestructura y herramientas | ~261 € |
-| **Coste Total del Proyecto** | **~9.541 €** |
-| **Coste por hora efectiva** | **~26,2 €/h** |
+| **Coste Total del Proyecto** | **~11.116 €** |
+| **Coste por hora efectiva** | **~28,9 €/h** |
 <p align="center"><i><b>Tabla 23:</b> Subtotal y costes totales de la fase de desarrollo.</i></p>
 
 ---

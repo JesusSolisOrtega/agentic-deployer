@@ -30,13 +30,15 @@ La siguiente tabla refleja el impacto temporal (medido en minutos operativos) de
 
 | Fase Operativa (ITSM) | Modelo ITSM Convencional | Modelo Agéntico (TFM) | Reducción del TTM (%) |
 | :--- | :--- | :--- | :--- |
-| **1. Negociación de Requisitos** | 1.440 min (Asíncrono vía Email) | 0.5 min (Chat Streamlit IA) | **~99.9%** |
+| **1. Negociación de Requisitos** | 1.440 min† (Asíncrono vía Email) | 0.5 min (Chat Streamlit IA) | **~99.9%** |
 | **2. Traducción a Código (YAML)** | 15 min (Técnico N3 manual) | 0.01 min (Tool Calling LLM) | **~99.9%** |
 | **3. Validación de Políticas** | 5 min (Revisión manual / CI/CD) | 0.001 min (Backend Hexagonal) | **~99.9%** |
 | **4. Aprobación y Despliegue** | 2 min (`kubectl apply`) | 2 min (Clic en el Dashboard) | **0% (Mismo esfuerzo)** |
 | **Tiempos Muertos (Cola)** | 2.880 min (Ticket en espera) | 60 min (Cola del Dashboard) | **~97.9%** |
 | **Costo Cognitivo Técnico N3** | **Alto** (Redacción código) | **Mínimo** (Auditoría visual) | **-** |
 <p align="center"><i><b>Tabla 9:</b> Impacto temporal operativo (ITSM tradicional vs Agentic Deployer).</i></p>
+
+> † El valor de **1.440 min representa *tiempo transcurrido* (*elapsed time*)**, no esfuerzo activo del técnico. Incluye la latencia asíncrona de comunicación entre departamentos (esperas de respuesta a correo electrónico). El técnico del SIC no dedica este tiempo de forma continuada; en cambio, el modelo agéntico opera íntegramente en tiempo activo, sin intervalos de espera burocrática. Véase §9.5.4 para la distinción completa entre *elapsed time* y esfuerzo activo.
 
 La métrica más definitoria de esta arquitectura no es la velocidad de escritura del YAML, sino la **eliminación del tiempo muerto de negociación**. Es fundamental distinguir que el modelo ITSM convencional contabiliza *tiempo transcurrido* (incluyendo latencias asíncronas de comunicación), mientras que el modelo agéntico opera casi íntegramente en *tiempo activo*. Al absorber la ambigüedad lingüística en tiempo real a través del patrón ReAct (Capítulo 5), el investigador obtiene sus recursos en la misma mañana que los solicitó, frente a los 2 o 3 días hábiles que exige la burocracia del correo electrónico. 
 
@@ -363,6 +365,8 @@ Esta prueba empírica certifica que el sistema es resiliente: choca contra la ba
 | 3. Ciclo HITL — CMS WordPress | 2 | 27,84 s | PENDING_APPROVAL | `escenario3_hitl_completo.json` |
 | 4. Autocorrección Multi-turno | 2 | 26,10 s | PENDING_APPROVAL | `escenario4_autocorreccion.json` |
 <p align="center"><i><b>Tabla 15:</b> Comparativa E2E de métricas operativas (multi-escenario).</i></p>
+
+> \* En el **Escenario 2**, el estado final `PENDING_APPROVAL` no indica una operación exitosa en espera de aprobación humana, sino el resultado del confinamiento perimetral del sistema: el LLM propuso reiteradamente configuraciones inseguras (puerto 22) que fueron rechazadas por el `SecurityContextValidator`, de forma que el agente nunca logró registrar una intención válida. El asterisco denota que este `PENDING_APPROVAL` corresponde a intentos bloqueados y no a una intención aprobable pendiente de revisión.
 
 Los resultados empíricos arrojan métricas de latencia de entre 12 y 45 segundos, coherentes con la inferencia de un modelo de 7 billones de parámetros (Qwen 2.5) en hardware local sin paralelización masiva. Lo más destacable radica en la dinámica de iteraciones:
 - El **Escenario 1** (Happy Path) se resolvió en 1 sola iteración (13 segundos), demostrando que el agente es capaz de inferir parámetros complejos (como requerimientos semánticos de red) desde el primer intento.

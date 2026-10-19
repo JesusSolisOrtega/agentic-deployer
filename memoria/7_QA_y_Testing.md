@@ -280,6 +280,8 @@ La ejecución de las 6 relaciones metamórficas se ha materializado en el módul
 | **MR-6:** Invarianza lingüística | Cambiar el idioma base del usuario a Inglés | `"Despliega una base de datos postgres:14 en el puerto 5432..."` ↔ `"Deploy a postgres:14 database on port 5432..."` | Éxito | Idéntica |
 <p align="center"><i><b>Tabla 6:</b> Resultados empíricos de las Pruebas Metamórficas por Relación frente a Qwen 2.5 (7B).</i></p>
 
+> **Nota aclaratoria sobre las entradas de prueba:** Los valores utilizados en las relaciones metamórficas (p. ej., `nginx:latest` en el puerto 80 en MR-2) son vectores de entrada diseñados para evaluar la capacidad de **extracción semántica del LLM en aislamiento**, no para representar configuraciones válidas del sistema completo. En la ejecución real del *Agentic Deployer*, estas entradas serían interceptadas y rechazadas por el `SecurityContextValidator` (§4.3) antes de alcanzar la capa de persistencia. Las pruebas metamórficas verifican únicamente la invarianza del módulo de comprensión lingüística, con independencia de las políticas de seguridad institucional.
+
 | Métrica global | Valor |
 |---|---|
 | Relaciones metamórficas ejecutadas | 6 |

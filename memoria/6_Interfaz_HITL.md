@@ -38,9 +38,9 @@ Para materializar el control del flujo operativo detallado en la sección anteri
 
 Una FSM, fundamentada en la teoría de autómatas, es un modelo computacional matemático. Establece que una entidad solo puede existir en un estado mutuamente excluyente en un momento temporal *T*, y que los cambios entre estos estados (Transiciones) obedecen a un conjunto finito y predefinido de reglas direccionales.
 
-### 6.2.1. Modelado del Grafo Dirigido Acíclico (DAG)
+### 6.2.1. Modelado del Grafo de Transición de Estados
 
-En la arquitectura del *Agentic Deployer*, el ciclo de vida de una `DeploymentIntent` (la intención generada por la IA) se modela formalmente como un **Grafo Dirigido Acíclico (DAG)**. El carácter "acíclico" es una condición *sine qua non* de la seguridad del sistema: por definición formal del autómata, es imposible que el estado de una petición fluya hacia atrás en el tiempo. Una vez que una orden es procesada físicamente por el clúster de Kubernetes, el registro no puede revertir a su estado de pendencia.
+En la arquitectura del *Agentic Deployer*, el ciclo de vida de una `DeploymentIntent` (la intención generada por la IA) se modela formalmente como un **grafo de transición de estados dirigido y acíclico**. El carácter "acíclico" es una condición *sine qua non* de la seguridad del sistema: por definición formal del autómata, es imposible que el estado de una petición fluya hacia atrás en el tiempo. Una vez que una orden es procesada físicamente por el clúster de Kubernetes, el registro no puede revertir a su estado de pendencia.
 
 Los vértices de este grafo (Estados) y sus aristas dirigidas (Transiciones Autorizadas) se definen mediante **seis nodos** mutuamente excluyentes:
 
@@ -68,7 +68,7 @@ stateDiagram-v2
   DEPLOYED --> [*] : Estado Terminal Final
   FAILED --> [*] : Estado Terminal
 ```
-<p align="center"><i><b>Figura 13:</b> Grafo Dirigido Acíclico (DAG) que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
+<p align="center"><i><b>Figura 13:</b> Grafo de transición de estados que rige la Máquina de Estados Finita (FSM) del sistema.</i></p>
 
 ### 6.2.2. Prevención de Concurrencia y *Race Conditions*
 

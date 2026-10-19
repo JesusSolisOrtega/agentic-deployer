@@ -71,10 +71,10 @@
 | Horas dedicadas | 45h | ~50h | +11% |
 | Tests suite completa (Unit/PBT/MR) | ~35 | 51 | +46% |
 | Mutantes eliminados | >90% | >95% | +5pp |
-| Relaciones metamórficas | 3 MR | 4 MR | +33% |
+| Relaciones metamórficas | 3 MR | 6 MR | +100% |
 <p align="center"><i><b>Tabla 37:</b> Retrospectiva del Sprint 5 (QA Avanzado).</i></p>
 
-**Hitos completados:** Pipeline de QA integral implantado en `scripts/run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 4 Relaciones Metamórficas, Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
+**Hitos completados:** Pipeline de QA integral implantado en `scripts/run_tests.sh` (Linter, Type-checking, Pytest, Mutmut, Playwright, Locust), Mutation Testing (12 mutantes mitigados), 6 Relaciones Metamórficas (MR-1 a MR-6), Pruebas de Carga (Locust, p99 < 200ms), Playwright E2E sobre Dashboard.
 
 **Notas:** La detección de 12 mutantes supervivientes en `mcp_server.py` fue el hallazgo más valioso del sprint, requiriendo la creación de `test_mcp_server.py` focalizado. Justifica empíricamente la adopción de Mutation Testing (Cap. 7.3).
 
@@ -91,7 +91,7 @@
 
 **Hitos completados:** Redacción íntegra (11 capítulos), Diagramación Mermaid (17 figuras), Anexos YAML y de Planificación.
 
-**Notas:** La memoria creció por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
+**Notas:** La memoria creció por encima de las previsiones iniciales. La inclusión de diagramas formales (C4, Arquitectura Hexagonal, FSM, secuencias E2E, pirámide de testing) y los tres *walkthroughs* forenses completos (Cap. 8.3) elevaron la densidad técnica de forma sustancial. La desviación de horas (+16%) fue contenida respecto al incremento de extensión (+43–82% de páginas) gracias al uso del asistente de IA (Google Gemini Advanced) como multiplicador de productividad en la fase de redacción técnica —un efecto ya documentado en §9.3 y §9.6. El documento final de más de 100 páginas es el indicador más tangible del rigor y exhaustividad del trabajo.
 
 ---
 
