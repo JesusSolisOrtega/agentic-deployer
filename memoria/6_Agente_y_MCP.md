@@ -1,18 +1,20 @@
-# Capítulo 5. Desarrollo del Agente Cognitivo y MCP
+# Capítulo 6. Desarrollo del Agente Cognitivo y MCP
 
-Sobre los cimientos deterministas del Capítulo 4, este capítulo detalla la implementación del núcleo heurístico del *Agentic Deployer*: el motor cognitivo que transforma el lenguaje natural en operaciones de infraestructura mediante la integración del estándar *Model Context Protocol* (MCP), el diseño abstracto del cliente de inferencia y el bucle de razonamiento *ReAct*.
+Sobre los cimientos deterministas del Capítulo 5, este capítulo detalla la implementación del núcleo heurístico del *Agentic Deployer*: el motor cognitivo que transforma el lenguaje natural en operaciones de infraestructura mediante la integración del estándar *Model Context Protocol* (MCP), el diseño abstracto del cliente de inferencia y el bucle de razonamiento *ReAct*.
 
-## 5.1. Implementación del Servidor *Model Context Protocol* (MCP)
+> **Nota sobre terminología:** A lo largo de este capítulo se emplea el acrónimo **LLM** (*Large Language Model*, Modelo de Lenguaje Grande), que designa a la familia de redes neuronales de gran escala entrenadas sobre corpus masivos de texto. No debe confundirse con otras denominaciones coloquiales; el término preciso en la literatura es *Large Language Model*.
+
+## 6.1. Implementación del Servidor *Model Context Protocol* (MCP)
 
 En las arquitecturas iniciales de Inteligencia Artificial aplicada, la capacidad de un Modelo de Lenguaje para invocar código externo se lograba mediante integraciones fuertemente acopladas (*Vendor Lock-in*). Históricamente, el orquestador debía codificar a mano la firma de las herramientas (como diccionarios JSON rígidos) y empaquetarlas bajo especificaciones privativas (como la especificación *Function Calling* nativa de la API de OpenAI). Esta práctica vulneraba el Principio de Abierto/Cerrado (letra 'O' de S.O.L.I.D.), obligando a reescribir masivamente la base de código si la universidad decidía migrar hacia un proveedor de IA alternativo, como Anthropic o un clúster de Llama-3 local.
 
-Para superar este antipatrón arquitectónico, el sistema desarrollado adopta como estándar troncal el **Model Context Protocol (MCP)** [10], un protocolo abierto diseñado para estandarizar la forma en que los modelos fundacionales interactúan con fuentes de datos y herramientas de ejecución. El MCP actúa como una capa de abstracción universal (un *middleware* cognitivo), desacoplando por completo el catálogo de herramientas de las peculiaridades de la API del LLM subyacente.
+Para superar este antipatrón arquitectónico, el sistema desarrollado adopta como estándar troncal el **Model Context Protocol (MCP)** [13], un protocolo abierto diseñado para estandarizar la forma en que los modelos fundacionales interactúan con fuentes de datos y herramientas de ejecución. El MCP actúa como una capa de abstracción universal (un *middleware* cognitivo), desacoplando por completo el catálogo de herramientas de las peculiaridades de la API del LLM subyacente.
 
-### 5.1.1. Introspección Dinámica de Funciones (Generación de JSON Schemas)
+### 6.1.1. Introspección Dinámica de Funciones (Generación de JSON Schemas)
 
 El mayor desafío en la ingeniería de Agentes Autónomos reside en la sincronización del contrato de la herramienta. Si un ingeniero de sistemas modifica el código de la función de despliegue para exigir un nuevo parámetro (por ejemplo, `memoria_ram`), el esquema JSON que se envía al LLM debe actualizarse simultáneamente; de lo contrario, la inferencia fallará, produciendo una desincronización de estado (*Schema Drift*).
 
-Para mitigar este riesgo, el Servidor MCP implementado en el *Agentic Deployer* (ubicado en el Contenedor B de la arquitectura C4) hace uso intensivo de técnicas de **Introspección Estática y Dinámica de Tipos**. En lugar de requerir que el programador defina los JSON Schemas manualmente, el SDK de MCP (utilizando la librería nativa `inspect` de Python) lee la firma matemática de las funciones en tiempo de ejecución.
+Para mitigar este riesgo, el Servidor MCP implementado en el *Agentic Deployer* (ubicado en el Contenedor B de la arquitectura C4) hace uso intensivo de técnicas de **Introspección Estática y Dinámica de Tipos**. En lugar de requerir que el desarrollador defina los JSON Schemas manualmente, el SDK de MCP (utilizando el módulo nativo `inspect` de Python) lee las anotaciones de tipo y parámetros de las funciones en tiempo de ejecución.
 
 El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilustra cómo el sistema transforma una función Python pura en una representación semántica universal (*Tool Definition*) inteligible para cualquier LLM:
 
@@ -57,9 +59,9 @@ El proceso algorítmico, detallado a continuación en pseudocódigo formal, ilus
 ```
 <p align="center"><i><b>Algoritmo 2:</b> Introspección Dinámica de Contratos de Herramientas.</i></p>
 
-La adopción de este algoritmo garantiza que la base de código posea una **Única Fuente de Verdad (*Single Source of Truth*)**. El desarrollador del SIC simplemente anota sus funciones de infraestructura con *Type Hints* (ej. `puerto: int`) y *Docstrings*. El servidor MCP, al inicializarse, barre el código, extrae la semántica, genera el esquema JSON dinámico y lo inyecta en el orquestador. Esta capacidad autorreflexiva reduce la deuda técnica prácticamente a cero.
+La adopción de este algoritmo garantiza que la base de código posea una **Única Fuente de Verdad (*Single Source of Truth*)**. El desarrollador simplemente anota sus funciones de infraestructura con *Type Hints* (ej. `puerto: int`) y *Docstrings*. El servidor MCP, al inicializarse, inspecciona el código, extrae las anotaciones, genera el esquema JSON dinámico y lo inyecta en el orquestador. Esta aproximación reduce el riesgo de inconsistencias entre la firma de las funciones y sus esquemas asociados.
 
-### 5.1.2. Aislamiento de Red mediante Transporte *stdio*
+### 6.1.2. Aislamiento de Red mediante Transporte *stdio*
 
 El estándar MCP ofrece múltiples vectores para la transmisión del protocolo JSON-RPC, siendo los más destacados *Server-Sent Events* (SSE) sobre protocolo HTTP y flujos de Entrada/Salida Estándar (*stdio*).
 
@@ -71,9 +73,9 @@ Esta decisión acarrea tres beneficios arquitectónicos fundamentales para el TF
 
 1. **Latencia Sub-milisegundo (Inter-Process Communication):** Al emplear `stdio`, el Agente y el Servidor MCP se comunican directamente a través de tuberías del kernel de Linux (*Pipes IPC*), evitando por completo la pila de red (OSI Layer 4-7). La invocación de una herramienta pasa de tardar ~20ms (HTTP local) a menos de ~1ms, lo cual es crítico para no interrumpir el flujo cognitivo del LLM.
 2. **Superficie de Ataque Cero (Zero-Trust Network):** A diferencia de un puerto HTTP (que puede ser escaneado mediante herramientas como Nmap, o falsificado mediante *Server-Side Request Forgery*), un proceso comunicado por `stdio` no expone ningún puerto de red al sistema operativo. Es topológicamente inviable que un atacante externo invoque herramientas de infraestructura si no posee acceso al árbol de procesos padre del agente.
-3. **Simplicidad de Despliegue (Sidecar Pattern):** Al no requerir balanceadores de carga internos ni certificados TLS de comunicación este-oeste, el Servidor MCP se empaqueta junto al Orquestador Cognitivo como un contenedor acoplado (*Sidecar*), asegurando que siempre que el frontend esté vivo, su catálogo de herramientas estará garantizado.
+3. **Simplicidad de Despliegue (Sidecar Pattern):** Al no requerir balanceadores de carga internos ni certificados TLS para la comunicación interna entre servicios, el Servidor MCP se ejecuta junto al orquestador en un patrón de contenedor acoplado (*Sidecar*), simplificando la disponibilidad de las herramientas.
 
-La simbiosis entre la introspección dinámica de tipos y el aislamiento a nivel de kernel convierte al Servidor MCP del proyecto en un catálogo de herramientas altamente seguro, universal e instantáneo.
+La combinación entre la introspección dinámica de tipos y la comunicación local por tuberías (`stdio`) proporciona un catálogo de herramientas seguro, interoperable y de baja latencia.
 
 El siguiente diagrama ilustra el ciclo de vida completo de un mensaje MCP, desde el momento en que el Agente decide invocar una herramienta hasta que recibe el resultado:
 
@@ -100,7 +102,24 @@ sequenceDiagram
     Orch->>LLM: [Observation: resultado de la herramienta]
     LLM-->>Orch: Respuesta final en lenguaje natural
 ```
-<p align="center"><i><b>Figura 11:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
+<p align="center"><i><b>Figura 14:</b> Ciclo de vida completo de un mensaje MCP. El protocolo JSON-RPC define tres fases: inicialización (handshake y descubrimiento de herramientas), ejecución (invocación y respuesta) y observación (retroalimentación al LLM).</i></p>
+
+#### 6.1.2.1. Desglose del Flujo de Mensajería JSON-RPC
+
+La interacción modelada en la Figura 14 se estructura en dos fases operativas diferenciadas:
+
+1. **Fase de Inicialización y Negociación de Capacidades (única por sesión):**
+   - El `AgentOrchestrator` remite un mensaje `initialize` al servidor MCP mediante JSON-RPC, declarando la versión del protocolo y sus capacidades soportadas.
+   - El servidor MCP responde con sus metadatos y confirma la compatibilidad de la conexión.
+   - A continuación, el orquestador solicita el catálogo de operaciones disponibles mediante `tools/list`. El servidor devuelve una lista estructurada con los nombres de las funciones, descripciones textuales y esquemas JSON estrictos de los parámetros esperados (`inputSchema`).
+   - El orquestador inyecta estas definiciones estructuradas junto al *System Prompt* en la ventana de contexto del modelo LLM (Ollama o Cloud).
+
+2. **Fase de Ejecución y Observación (iterativa por turno de diálogo):**
+   - Cuando el modelo deduce la necesidad de invocar una acción de infraestructura, emite un objeto `tool_call` estructurado (por ejemplo, `deploy_congress_web` con sus argumentos correspondientes).
+   - El orquestador intercepta dicha intención y despacha un mensaje `tools/call` al servidor MCP a través de los canales estándar `stdio`.
+   - El servidor MCP transforma los argumentos recibidos en una llamada HTTP REST tipada (`POST /mcp/intent`) hacia el backend FastAPI en el puerto `:8000`.
+   - Tras superar la validación determinista del dominio, el backend registra la solicitud en estado `PENDING_APPROVAL` y responde con un código `HTTP 201 Created` y el identificador unívoco asignado (`deployment_id`).
+   - El servidor MCP encapsula esta respuesta en un objeto de observación y la retorna al orquestador, el cual la reinyecta en el contexto del LLM para que este elabore la respuesta final explicativa en lenguaje natural orientada al usuario.
 
 > **Nota de implementación (distinción entre modos de transporte MCP):** Conviene enfatizar la distinción operativa entre los dos modos de transporte soportados por la arquitectura del servidor MCP:
 > 1. **Modo Integrado *In-Memory* (utilizado en el MVP con Streamlit):** Las definiciones de herramientas y sus despachadores se importan directamente en el mismo espacio de memoria del intérprete Python (`TOOL_REGISTRY`, `TOOL_DEFINITIONS`). La ejecución de la herramienta es una llamada nativa a función Python en memoria (`in-process`), lo que elimina por completo cualquier serialización JSON-RPC o *pipe* IPC, reduciendo el retardo a una escala de microsegundos. Este enfoque se adoptó para simplificar la orquestación del MVP y evitar la gestión de subprocesos concurrentes en el contenedor de Streamlit.
@@ -108,15 +127,15 @@ sequenceDiagram
 >
 > Ambas modalidades son funcionalmente equivalentes e intercambiables gracias al desacoplamiento del `AgentOrchestrator`, que consume el contrato de herramientas con total independencia del mecanismo de transporte subyacente.
 
-## 5.2. Diseño de la Abstracción Multiproveedor y Soberanía del Dato
+## 6.2. Diseño de la Abstracción Multiproveedor y Soberanía del Dato
 
 La vertiginosa evolución de la Inteligencia Artificial Generativa ha consolidado un mercado oligopólico liderado por grandes corporaciones tecnológicas proveedoras de inferencia en la nube (*AI-as-a-Service*). En el desarrollo de sistemas de software empresarial, acoplar el código fuente (el *Core Business*) a los kits de desarrollo de software (SDK) específicos de OpenAI, Anthropic o Google supone un riesgo inasumible de obsolescencia tecnológica y pérdida de poder de negociación.
 
 Para garantizar la viabilidad a largo plazo del *Agentic Deployer*, el diseño del orquestador cognitivo abraza el principio de agnósticismo absoluto frente al proveedor algorítmico. Esta sección desgrana la fundamentación técnica que permite al sistema conmutar dinámicamente entre motores de inferencia dispares sin requerir recompilación, así como la implicación de este diseño en las políticas de confidencialidad de la información.
 
-### 5.2.1. El Contrato Abstracto (Patrones *Adapter* y *Factory*)
+### 6.2.1. El Contrato Abstracto (Patrones *Adapter* y *Factory*)
 
-El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [27]: el patrón **Adapter** y el patrón **Factory Method**.
+El aislamiento del proveedor se consigue orquestando una arquitectura basada en la conjunción de dos patrones de diseño clásicos de la banda de los cuatro (GoF) [30]: el patrón **Adapter** y el patrón **Factory Method**.
 
 En la capa de aplicación, el `AgentOrchestrator` jamás invoca directamente a ninguna librería de IA. Su comunicación se dirige exclusivamente hacia una Interfaz de Clase Base Abstracta (ABC en Python) denominada `LLMClient`. Esta interfaz establece el contrato formal de inferencia:
 
@@ -125,7 +144,7 @@ CONTRATO ABSTRACTO: Interfaz Cliente LLM (LLMClient)
 
 ESTADO INTERNO:
  - historial_conversacion -> Lista estructurada de mensajes (Rol, Contenido)
- - sistema_base -> Prompt fundacional (personalidad y reglas del Agente)
+ - sistema_base -> Prompt base del sistema (directrices operativas y reglas del Agente)
 
 MÉTODO chat(messages, tools):
   ENTRADA: messages -> historial; tools -> JSON Schemas del servidor MCP
@@ -134,49 +153,49 @@ MÉTODO chat(messages, tools):
    - Objeto tipo ToolCall (id, nombre_función, argumentos_json)
 ```
 
-El sistema implementa dos adaptadores concretos que satisfacen este contrato:
+El sistema implementa tres adaptadores principales que satisfacen este contrato:
 
-**`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube y deserializa la respuesta JSON.
+**`OpenAILLMClient`** — Formatea el historial bajo la especificación REST de OpenAI (`messages`, `tools`, `tool_choice`), negocia el *handshake* TLS hacia la API en la nube (o endpoints compatibles) y deserializa la respuesta JSON.
 
-**`OllamaLLMClient`** — Implementado de forma completamente nativa con la librería `httpx` [28], sin ninguna dependencia en el paquete `openai`. El cliente se comunica directamente con la API REST local de Ollama [24] (`POST /api/chat`), garantizando que **ni un solo token de inferencia abandona la red privada institucional**:
+**`OllamaLLMClient`** — Implementado de forma nativa sobre el cliente oficial de Ollama con soporte de transporte HTTP asíncrono [31] (`ollama.Client`), conectándose a la instancia local (`http://localhost:11434`). Garantiza que **ni un solo token de inferencia abandona la red privada institucional**:
 
 ```text
-PSEUDOCÓDIGO: Implementación Nativa del Cliente Ollama
+PSEUDOCÓDIGO: Implementación del Cliente Local Ollama
 
 CLASE OllamaLLMClient IMPLEMENTA LLMClient:
   ATRIBUTOS:
     modelo: Cadena (ej. "qwen2.5-coder:7b")
-    url_base: Cadena (ej. "http://localhost:11434")
+    servidor_host: Cadena (ej. "http://localhost:11434")
+    cliente_ollama: ClienteSDK(host=servidor_host)
 
   MÉTODO chat(mensajes, herramientas):
-    Variable payload = NUEVO Diccionario(
+    Variable parametros = NUEVO Diccionario(
       "model" -> modelo,
-      "messages" -> mensajes,
-      "stream" -> FALSO
+      "messages" -> mensajes
     )
     SI herramientas EXISTE ENTONCES
-      payload["tools"] = herramientas
+      parametros["tools"] = herramientas
     FIN SI
 
-    // Petición HTTP POST síncrona a la API local
-    Variable respuesta = PeticionHttp(url_base + "/api/chat", json=payload)
-    
-    SI respuesta.codigo_estado != 200 ENTONCES
-      LANZAR ExcepcionHttp("Error en la inferencia LLM local")
+    // Inferencia local síncrona mediante el SDK de Ollama
+    Variable respuesta = cliente_ollama.chat(parametros)
+    Variable mensaje = respuesta.message
+
+    SI mensaje.tool_calls EXISTE ENTONCES
+      Variable llamadas_herramienta = ListaVacia()
+      PARA CADA llamada EN mensaje.tool_calls HACER
+        llamadas_herramienta.Agregar(
+          NUEVO ToolCall(llamada.function.name, llamada.function.arguments)
+        )
+      FIN PARA
+      RETORNAR NUEVO AgentResponse(content=mensaje.content, tool_calls=llamadas_herramienta)
     FIN SI
 
-    Variable mensaje = respuesta.cuerpo_json["message"]
-
-    SI mensaje CONTIENE "tool_calls" ENTONCES
-      Variable llamada = mensaje["tool_calls"][0]
-      RETORNAR NUEVO AgentResponse(
-        tool_call = NUEVO ToolCall(llamada["name"], llamada["arguments"])
-      )
-    FIN SI
-
-    RETORNAR NUEVO AgentResponse(content=mensaje["content"])
+    RETORNAR NUEVO AgentResponse(content=mensaje.content)
 FIN CLASE
 ```
+
+**`FakeLLMClient`** — Implementación determinista basada en reglas y expresiones regulares utilizada para pruebas unitarias, benchmarks sin consumo de GPU y demostraciones portables.
 
 La instanciación en memoria recae sobre un patrón **Factory**. Durante la fase de inicialización (*bootstrapping*) del contenedor web, el sistema lee la variable de entorno `LLM_PROVIDER`. La clase Factory evalúa esta variable e inyecta la implementación correcta en el Orquestador mediante *Dependency Injection*:
 
@@ -200,35 +219,35 @@ FIN
 Esta Inyección de Dependencias permite **permutar el motor cognitivo con un simple reinicio del proceso y cambio de variable de entorno**, sin modificar una sola línea de la lógica de negocio ni del servidor MCP.
 
 
-### 5.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5 Coder)
+### 6.2.2. Justificación de la Elección del Modelo Local (Qwen 2.5 Coder)
 
 El ecosistema *open-source* actual ofrece múltiples modelos de lenguaje capaces de ejecutarse en hardware local con recursos restringidos (ej. 6 GB VRAM). Para este entorno de pruebas, se optó finalmente por desplegar la variante especializada **Qwen 2.5 Coder (7B)** de Alibaba Cloud, descartando a sus homólogos generalistas como Llama 3.2, Mistral, o el propio Qwen 2.5 base.
 
-Esta elección responde a la necesidad de garantizar una alta eficacia en la invocación de herramientas (*Tool Calling*). La variante Coder incorpora un ajuste fino (*fine-tuning*) exhaustivo sobre corpus de código fuente, lo que le confiere una robustez superior en la generación y manipulación de estructuras JSON complejas frente a modelos puramente conversacionales. Durante la experimentación, mientras que modelos generalistas como *Llama 3.2* o *Mistral* evidenciaron una degradación sintáctica recurrente bajo estrés operativo, **Qwen 2.5 Coder (7B)** demostró ser la única solución local de su categoría capaz de superar íntegramente la batería de Pruebas Metamórficas, exhibiendo la mayor estabilidad estructural frente a la entropía lingüística y posibilitando la correcta orquestación del bucle ReAct (véase el análisis empírico en el Capítulo 8).
+Esta elección responde a la necesidad de garantizar una alta eficacia en la invocación de herramientas (*Tool Calling*). La variante Coder incorpora un ajuste fino (*fine-tuning*) exhaustivo sobre corpus de código fuente, lo que le confiere una robustez superior en la generación y manipulación de estructuras JSON complejas frente a modelos puramente conversacionales. Durante la experimentación, mientras que modelos generalistas como *Llama 3.2* o *Mistral* generaron con frecuencia JSON inválido o ignoraron el esquema de herramientas al procesar entradas ruidosas, **Qwen 2.5 Coder (7B)** demostró ser la única solución local de su categoría capaz de superar íntegramente la batería de Pruebas Metamórficas, exhibiendo la mayor estabilidad estructural frente a la entropía lingüística y posibilitando la correcta orquestación del bucle ReAct (véase el análisis empírico en el Capítulo 9).
 
-### 5.2.3. Soberanía del Dato en Entornos Institucionales
+### 6.2.3. Soberanía del Dato en Entornos Institucionales
 
 La abstracción multiproveedor, más allá de ser una práctica higiénica de Ingeniería del Software, responde a un requerimiento de ciberseguridad crítico en el contexto de las administraciones públicas y el sector académico: la **Soberanía del Dato** y el cumplimiento normativo (RGPD/GDPR).
 
 El *Agentic Deployer* maneja, por su propia naturaleza operativa, información extremadamente sensible. Durante la negociación lingüística (fase heurística del bucle de ReAct), un investigador distraído podría deslizar inadvertidamente tokens de acceso a bases de datos, contraseñas de red corporativas (secretos) o direcciones IP reservadas que revelan la topología interna del Servicio de Informática. Enviar estas trazas en texto plano hacia servidores ubicados fuera de las fronteras europeas (como es el caso de los clústeres por defecto de algunas empresas americanas) constituye una vulneración de las políticas de retención de datos.
 
-El diseño agnóstico soluciona este paradigma permitiendo la **conmutación por políticas de clasificación**:
-- **Escenario de Baja Clasificación:** Para entornos de investigación pública (despliegue de servidores web estáticos o *sandboxes* de prueba sin datos sensibles), el sistema puede apuntar mediante el *Factory* a la API de OpenAI, aprovechando la velocidad de inferencia suprema y la baja latencia de la nube.
-- **Escenario de Alta Clasificación (Air-Gapped):** Cuando la provisión involucra servicios confidenciales (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones altera la configuración del entorno para inyectar el adaptador de Ollama [24]. 
+El diseño agnóstico permite adaptar la configuración según el nivel de sensibilidad de los datos manejados:
+- **Datos no sensibles:** Para entornos de investigación pública (despliegue de servidores web estáticos o *sandboxes* de prueba), el sistema puede apuntar mediante el *Factory* a la API de OpenAI, aprovechando la baja latencia de la nube.
+- **Datos confidenciales (entorno aislado):** Cuando la provisión involucra servicios con datos sensibles (como bases de datos sanitarias o expedientes de alumnado), el equipo de Operaciones reconfigura la variable de entorno `LLM_PROVIDER` para inyectar el adaptador de Ollama [26].
 
-  Bajo esta topología, la inferencia probabilística se resuelve físicamente en servidores con aceleración GPU (Nvidia/AMD) alojados en el propio Centro de Procesamiento de Datos (CPD) institucional. Ni un solo token abandona la intranet universitaria, garantizando la confidencialidad estricta sin sacrificar la asistencia agéntica fluida hacia el usuario.
+  Bajo esta configuración, la inferencia se ejecuta en servidores con aceleración GPU (Nvidia/AMD) alojados en el propio Centro de Procesamiento de Datos (CPD) institucional, de modo que ningún dato abandona la intranet universitaria.
 
-Esta capacidad de hibridación (Nube Pública vs *Bare-Metal* Local), articulada mediante patrones de diseño orientados a objetos, convierte al prototipo en una plataforma madura, auditable y plenamente compatible con los estándares de gobernanza institucional.
+Esta capacidad de conmutar entre inferencia en la nube e inferencia local, implementada mediante el patrón *Adapter* y la inyección de dependencias, permite al prototipo adaptarse a distintos requisitos de privacidad y auditoría sin modificar la lógica de negocio.
 
-## 5.3. Bucle Cognitivo y Resiliencia Estocástica (Patrón ReAct)
+## 6.3. Bucle Cognitivo y Resiliencia Estocástica (Patrón ReAct)
 
-La mera exposición de un catálogo de herramientas a un Modelo de Lenguaje no garantiza la ejecución autónoma de una tarea compleja. Cuando a un modelo fundacional se le instruye para que actúe en un entorno dinámico (como es un clúster de Kubernetes, cuyo estado puede mutar durante la propia inferencia), los enfoques tradicionales de Petición-Respuesta (*Zero-Shot Prompting*) fracasan abruptamente. Si el modelo asume un contexto inicial falso o comete un error sintáctico en su primer intento, carece de mecanismos intrínsecos para rectificar, desembocando en estados de fallo catastrófico (*Catastrophic Failure*).
+La mera exposición de un catálogo de herramientas a un Modelo de Lenguaje no garantiza la ejecución autónoma de una tarea compleja. Cuando a un modelo de lenguaje se le instruye para que actúe en un entorno dinámico (como un clúster de Kubernetes, cuyo estado puede mutar durante la propia inferencia), los enfoques directos de Petición-Respuesta (*Zero-Shot Prompting*) resultan insuficientes. Si el modelo asume un contexto inicial falso o comete un error sintáctico en su primer intento, carece de mecanismos intrínsecos para rectificar, desembocando en estados de fallo no recuperables.
 
-Para dotar al *Agentic Deployer* de verdadera autonomía heurística y resiliencia ante excepciones, el orquestador implementa el patrón **ReAct (Reasoning and Acting)**, un paradigma propuesto por Yao et al. [9] en la literatura académica reciente, que sinergiza la capacidad de razonamiento discursivo con la ejecución imperativa de acciones.
+Para superar estas limitaciones, el orquestador implementa el patrón **ReAct (Reasoning and Acting)** [9], que articula la descomposición del razonamiento discursivo con la invocación secuencial de herramientas.
 
-### 5.3.1. Arquitectura del Bucle Acotado de Razonamiento y Acción
+### 6.3.1. Arquitectura del Bucle Acotado de Razonamiento y Acción
 
-El patrón ReAct altera la topología conversacional subyacente. En lugar de procesar la petición del usuario y devolver un código de respuesta monolítico, el Agente Cognitivo inicia una máquina de estados iterativa con un **bucle acotado** (`MIENTRAS turno_actual < MAX_TURNOS`). Esta cota máxima de turnos cognitivos evita bucles infinitos ante respuestas inesperadas del LLM y es un requisito determinista de la arquitectura. Cada iteración de este bucle (*Turno Cognitivo*) obliga a la Inteligencia Artificial a transitar secuencialmente por cuatro fases inmutables:
+El patrón ReAct modifica la estructura de la interacción. En lugar de procesar la petición del usuario y devolver una única respuesta estática, el agente ejecuta una máquina de estados iterativa con un **bucle acotado** (`MIENTRAS turno_actual < MAX_TURNOS`). Esta cota máxima de turnos cognitivos evita bucles indefinidos ante respuestas inesperadas del modelo. Cada iteración de este bucle transita secuencialmente por cuatro etapas:
 
 1. **Pensamiento (*Thought*):** El modelo deduce lógicamente el siguiente paso basándose en el historial. Esta externalización del monólogo interno (derivada de las técnicas *Chain-of-Thought*) reduce sustancialmente la tasa de alucinaciones.
 2. **Acción (*Action*):** El modelo invoca una función específica del catálogo MCP, inyectándole los argumentos sintácticos deducidos (ej. `deploy_intent(name="api", port=80)`).
@@ -237,7 +256,7 @@ El patrón ReAct altera la topología conversacional subyacente. En lugar de pro
 
 El modelo reevalúa el estado global tras la observación y decide si necesita ejecutar una nueva acción o si la tarea ha concluido. Cuando dictamina que el objetivo se ha cumplido, transiciona a la fase final (*Final Answer*), devolviendo el control al usuario humano.
 
-Como se ilustra en la **Figura 12**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
+Como se ilustra en la **Figura 15**, este proceso rompe con el paradigma de petición-respuesta estático, instaurando un flujo de retroalimentación dinámica.
 
 <div style="max-width: 10cm; margin: 0 auto;">
 
@@ -263,7 +282,7 @@ flowchart TD
 ```
 
 </div>
-<p align="center"><i><b>Figura 12:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
+<p align="center"><i><b>Figura 15:</b> Diagrama de flujo del bucle cognitivo ReAct (Reasoning and Acting).</i></p>
 
 Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a continuación su arquitectura mediante pseudocódigo:
 
@@ -298,7 +317,7 @@ Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a c
 28         // 2 y 3. Ejecución y Pausa
 29         resultado_accion = EjecutarProcesoLocal(nombre_funcion, argumentos)
 30       CAPTURAR ExcepcionHttp COMO error
-31         // Serialización del error para que el LLM lo entienda
+31         // Serialización del error para su interpretación por el LLM
 32         resultado_accion = error.obtenerMensajeHumano() 
 33       FIN INTENTAR
 34 
@@ -316,16 +335,16 @@ Para ilustrar el funcionamiento de este motor de orquestación, se formaliza a c
 
 La inclusión explícita de la constante `MAX_TURNOS` es un mecanismo de salvaguarda (*Fail-Safe*) crítico en sistemas autónomos, garantizando que un LLM confundido no agote las cuotas de facturación de la API externa (consumo masivo de tokens) iterando indefinidamente sobre un fallo irresoluble.
 
-### 5.3.2. *Feedback Loop* de Seguridad y Autocorrección
+### 6.3.2. *Feedback Loop* de Seguridad y Autocorrección
 
-El verdadero poder arquitectónico del bucle ReAct emerge en la rama `CAPTURAR ExcepcionHttp` (línea 25 del Algoritmo 3). En la topología descrita en el Capítulo 4, el núcleo Hexagonal (Backend) blinda la infraestructura arrojando errores implacables (ej. un `422 Unprocessable Entity`) cuando el agente intenta vulnerar políticas (como abrir el puerto 22).
+La principal ventaja operativa del bucle ReAct reside en la rama `CAPTURAR ExcepcionHttp` (línea 25 del Algoritmo 3). En la topología descrita en el Capítulo 5, el núcleo Hexagonal (Backend) protege la infraestructura emitiendo respuestas de error deterministas (ej. un código HTTP `422 Unprocessable Entity`) cuando el agente intenta vulnerar políticas (como abrir el puerto 22).
 
-En sistemas convencionales, esta excepción HTTP provocaría la terminación abrupta de la sesión, obligando al usuario a iniciar la tarea desde cero. Sin embargo, el *Agentic Deployer* instaura un mecanismo de resiliencia cognitiva denominado **Feedback Loop**. 
+En sistemas convencionales, esta excepción HTTP provocaría la terminación abrupta de la sesión, obligando al usuario a reiniciar el flujo. Sin embargo, el *Agentic Deployer* instaura un mecanismo de resiliencia cognitiva denominado **Feedback Loop**. 
 
-Cuando el Servidor MCP intercepta el error `422`, no detiene el orquestador. Por el contrario, inyecta la traza de la excepción directamente como una **Observación** en la memoria RAM de corto plazo del LLM.
-Este flujo produce un comportamiento cibernético emergente:
-1. El Agente lee que su *Action* previa fracasó por violación de puerto.
-2. Su capa estocástica razona (*Thought*) que el puerto 22 está prohibido por políticas de seguridad institucionales.
-3. De forma autónoma, el Agente omite lanzar una excepción al usuario. En su lugar, itera una nueva *Action*, recalculando un puerto lícito (ej. el puerto 8000), o bien genera una *Final Answer* informando diplomáticamente al usuario del rechazo técnico y solicitándole alternativas.
+Cuando el Servidor MCP intercepta el error `422`, no detiene el orquestador. Por el contrario, inyecta la traza de la excepción directamente como una **Observación** en el contexto de trabajo del LLM.
+Este flujo produce un comportamiento autorregulado:
+1. El Agente lee que su *Action* previa fue rechazada por vulneración de la política de puertos.
+2. Su capa de inferencia razona (*Thought*) que el puerto 22 está restringido por la normativa institucional.
+3. De forma autónoma, el Agente no propaga la excepción como un fallo irresoluble al usuario; en su lugar, ejecuta una nueva *Action* recalculando un puerto lícito (ej. el puerto 8000), o bien genera una *Final Answer* notificando con precisión técnica al usuario sobre el rechazo y solicitando instrucciones alternativas.
 
-Este *Feedback Loop* transforma un sistema estocástico (propenso a alucinaciones) en un ecosistema auto-regulado. Traslada la responsabilidad de la depuración de errores (*debugging*) desde el investigador humano hacia el propio modelo de inteligencia artificial. Así, la Arquitectura Hexagonal y el bucle ReAct no solo conviven, sino que se necesitan mutuamente: el Hexágono actúa como la jaula determinista, y el ReAct permite que el Agente itere sobre las restricciones hasta encontrar el *Golden Path* correcto.
+Este ciclo de retroalimentación aporta resiliencia frente a errores sintácticos o de validación de parámetros, trasladando la necesidad de corrección hacia el propio modelo de lenguaje antes de requerir intervención directa del usuario. De este modo, la arquitectura hexagonal actúa como marco determinista de validación, mientras que el bucle ReAct permite al agente ajustar los parámetros hasta satisfacer las restricciones del *Golden Path* correspondiente.

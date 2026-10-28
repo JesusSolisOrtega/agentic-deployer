@@ -44,15 +44,21 @@ Thumbs.db
 # ── Scratch & Temporal Files ──────────────────────────────────
 /outputs/
 /promt TFM
+/prompt*
 /run_tests_only.sh
 /test
+.temp_cuerpo.pdf
 
+# ── Memoria & Compilación Documental ──────────────────────────
 # Ignorar todos los markdowns de lluvia de ideas en la raíz
 /*.md
 # Pero conservar el README y el compilado final del TFM
 !/README.md
 !/TFM_Completo.md
 memoria/diagrams_cache/
+memoria/portada.pdf
+memoria/INFORME_REVISION_TUTOR.md
+informe de cambios.md
 TFM_Completo.pdf
 
 # Bases de datos SQLite

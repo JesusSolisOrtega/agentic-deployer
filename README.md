@@ -1,8 +1,12 @@
 # Agentic Deployer: Orquestación de Infraestructura con IA Generativa
 
-**Trabajo de Fin de Máster (TFM)**
+**Trabajo de Fin de Máster (TFM)**  
+*Máster Universitario en Ingeniería del Software: Cloud, Datos y Gestión TI*  
+*Escuela Internacional de Posgrado — Universidad de Sevilla*  
+**Autor:** Jesús Solís Ortega | **Dirección:** Manuel Resinas Arias de Reyna  
+**Convocatoria:** Noviembre 2026
 
-Este repositorio contiene la prueba de concepto y el producto mínimo viable (MVP) del "Agentic Deployer", un sistema diseñado para gobernar el comportamiento estocástico de los Modelos de Lenguaje Grandes (LLM) y utilizarlos como motores de provisión de infraestructura en entornos corporativos críticos.
+Este repositorio contiene la prueba de concepto y el producto mínimo viable (MVP) del «Agentic Deployer», un sistema diseñado para gobernar el comportamiento estocástico de los Modelos de Lenguaje de Gran Escala (LLM) y utilizarlos como motores de provisión de infraestructura en entornos corporativos críticos.
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -16,6 +20,8 @@ El proyecto demuestra que es posible delegar la abstracción de operaciones comp
 
 El sistema requiere **Python 3.11 o superior**.
 
+### Instalación Manual Paso a Paso
+
 ```bash
 # 1. Crear y activar el entorno virtual
 python3 -m venv .venv
@@ -24,80 +30,125 @@ source .venv/bin/activate
 # 2. Instalar dependencias del proyecto
 pip install -r requirements.txt
 
-# 3. Configurar navegadores para los tests E2E
+# 3. Configurar el motor de navegador para tests E2E
 playwright install chromium
+
+# 4. Inicializar variables de entorno a partir de la plantilla
+cp .env.example .env
 ```
+
+> **Alternativa automatizada:** Se provee el script `scripts/install.sh`, el cual automatiza los pasos anteriores e inicializa el modelo local de Ollama:
+> ```bash
+> chmod +x scripts/install.sh
+> ./scripts/install.sh
+> ```
 
 ## ⚙️ Ejecución del Proyecto
 
-El sistema se divide en dos grandes bloques de ejecución paralelos: el Backend de Operaciones (Hexagonal) y la Interfaz Cognitiva del Usuario.
+El sistema se compone de dos subsistemas desacoplados que deben ejecutarse de forma concurrente en terminales independientes con el entorno virtual activado (`source .venv/bin/activate`): el Backend de Operaciones (Hexagonal) y la Interfaz de Chat del Asistente.
 
 ### 1. Levantar el Backend (FastAPI + Panel HITL)
-Este servidor expone el contrato de herramientas MCP y sirve la interfaz estática para el Técnico de Operaciones.
+
+Expone la API REST, el contrato de herramientas MCP y sirve la interfaz estática para el Técnico de Operaciones:
+
 ```bash
 uvicorn app.infrastructure.main:app --reload --port 8000
 ```
+
 - **Panel de Aprobación (HITL):** [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
+- **Documentación Interactiva (Swagger/OpenAPI):** [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 2. Levantar el Agente LLM (Chat UI)
+### 2. Levantar el Agente LLM (Chat UI con Streamlit)
 
-El sistema soporta **tres modos de proveedor LLM** seleccionables vía variable de entorno:
+La interfaz conversacional se ejecuta sobre Streamlit y escucha en el puerto `8501`:
 
-**Modo recomendado — Ollama (gratuito, local, Zero Data Retention):**
+**Modo Recomendado — Ollama (local, privado, Zero Data Retention):**
 ```bash
-# 1. Instalar Ollama: https://ollama.com
-ollama serve                        # Iniciar servidor (otra terminal)
-ollama pull qwen2.5-coder:7b              # Descargar modelo (~4.7 GB)
+# En una terminal auxiliar, iniciar el servicio local y descargar el modelo:
+ollama serve
+ollama pull qwen2.5-coder:7b
 
-# 2. Lanzar el chat con Ollama
+# Lanzar el chat conectado a Ollama:
 LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5-coder:7b streamlit run app/agent_layer/chat_app.py
 ```
 
-**Modo OpenAI:**
-```bash
-OPENAI_API_KEY=sk-... LLM_PROVIDER=openai streamlit run app/agent_layer/chat_app.py
-```
-
-**Modo Demo (sin IA, para pruebas rápidas):**
+**Modo Demo (Determinista, sin dependencias de GPU ni API Keys externas):**
 ```bash
 streamlit run app/agent_layer/chat_app.py   # LLM_PROVIDER=fake por defecto
 ```
 
-**Modos adicionales (Cohere, Mistral, Groq):**
-Se soporta a través de proxies universales integrados en el código. Requiere configurar su API key en el archivo `.env`. (Ver [`.env.example`](.env.example)).
+**Modo OpenAI / Modelos Comerciales:**
+```bash
+OPENAI_API_KEY=sk-... LLM_PROVIDER=openai streamlit run app/agent_layer/chat_app.py
+```
 
-> Ver [`.env.example`](.env.example) para la lista completa de variables de configuración.
+> La aplicación estará accesible en: [http://localhost:8501](http://localhost:8501)
+
+### 3. Flujo de Operación Manual Completo (HITL)
+
+Para verificar el ciclo de vida completo de una solicitud de infraestructura:
+
+1. **Interacción Conversacional:** Acceder a [http://localhost:8501](http://localhost:8501). Introducir una solicitud en lenguaje natural (ejemplo: *"Necesito desplegar la web para el congreso de Inteligencia Artificial del departamento"* o hacer clic en los botones de plantilla sugeridos).
+2. **Razonamiento y Validación:** El agente analiza el requerimiento, deduce los parámetros (CPU, RAM, imagen de contenedor), valida las políticas de seguridad y ejecuta la herramienta MCP correspondiente, registrando la intención en el backend en estado `PENDING`.
+3. **Revisión Técnica:** Acceder al Panel de Operaciones en [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html). En la bandeja de entrada aparecerá la tarjeta de despliegue con el desglose técnico y las validaciones superadas.
+4. **Decisión Humana:** El operador hace clic en **«Aprobar»** (o **«Rechazar»**). La máquina de estados transiciona a `DEPLOYED`, ejecutando la provisión y registrando la auditoría de la operación.
 
 ## 🧪 Aseguramiento de Calidad Avanzado (QA)
 
-Para garantizar la estabilidad del sistema frente al ruido inyectado por la IA, este TFM implementa un *Pipeline* de pruebas agresivo y multicapa, superando la cobertura clásica:
+Para verificar el comportamiento determinista del sistema frente a la naturaleza estocástica de los modelos de lenguaje, el proyecto implementa un pipeline de pruebas multicapa que complementa la cobertura de código convencional con técnicas avanzadas de verificación:
 
-- **Testing Unitario y de Integración:** Validación matemática del Dominio.
-- **Pruebas Basadas en Propiedades (Hypothesis):** Fuzzing de entropía masiva contra el validador de seguridad.
-- **Mutation Testing (Mutmut):** Generación de clones maliciosos para auditar la solidez de las propias pruebas.
-- **Pruebas Metamórficas:** Evaluación del LLM ante ruido léxico, faltas de ortografía e inversión sintáctica.
-- **Testing E2E (Playwright) y Carga (Locust):** Auditoría del flujo HITL y rendimiento de la API.
+- **Testing Unitario y de Integración:** Validación exhaustiva de invariantes de dominio y contratos de puertos hexagonales.
+- **Pruebas Basadas en Propiedades (*Property-Based Testing* con Hypothesis):** Fuzzing generativo sobre el validador de políticas de seguridad (`SecurityContextValidator`).
+- **Mutation Testing (Mutmut):** Inyección sistemática de mutantes sintácticos para evaluar la capacidad de detección de la suite de pruebas.
+- **Pruebas Metamórficas:** Evaluación de robustez del LLM ante perturbaciones semánticas, ruido léxico y reordenaciones sintácticas.
+- **Testing E2E (Playwright) y Evaluación de Carga (Locust):** Verificación del flujo asíncrono HITL y auditoría de latencia de la API.
 
 ### Ejecución de la Suite de Pruebas
 
-Para mayor comodidad y rigor, el proyecto incluye un script de *pipeline* continuo (`scripts/run_tests.sh`) que ejecuta de forma desatendida y secuencial todas las capas de calidad: linters, análisis de tipos, pruebas de interfaz (E2E), pruebas estocásticas y de propiedades, inyección de mutantes lógicos (mutmut) y pruebas de carga (Locust).
+El repositorio incluye un script de ejecución integral (`scripts/run_tests.sh`) que ejecuta de forma desatendida y secuencial todas las capas de calidad: linters, análisis de tipos, pruebas de interfaz (E2E), pruebas estocásticas y de propiedades, mutación lógica (mutmut) y pruebas de carga (Locust).
 
 ```bash
-# Otorgar permisos y ejecutar el pipeline completo (recomendado):
+# Otorgar permisos y ejecutar el pipeline completo:
 chmod +x scripts/run_tests.sh
 ./scripts/run_tests.sh
 ```
 
 Alternativamente, se pueden ejecutar bloques aislados:
 ```bash
-python -m pytest app/tests/ -v      # Dominio y PBT
-python -m pytest tests/test_ui.py -v # E2E Interfaz (requiere FastAPI activo)
-mutmut run                          # Auditoría de mutantes
+python -m pytest app/tests/ -v                                        # Dominio, PBT y metamórficos
+python -m pytest tests/test_ui.py -v                                  # E2E Interfaz (requiere FastAPI activo)
+mutmut run --paths-to-mutate app/application/security_validator.py     # Auditoría de mutantes sobre el validador
 ```
 
-## 📄 Memoria del Proyecto
+Para restablecer el repositorio y eliminar cachés de pruebas y reportes generados:
+```bash
+chmod +x scripts/clean.sh
+./scripts/clean.sh
+```
 
-Toda la fundamentación teórica, diagramas arquitectónicos, decisiones de diseño y análisis de resultados se encuentran documentados en los archivos Markdown dentro del directorio `/memoria`. Se proveen scripts (como `scripts/combinar_tfm_y_toc.py`) para compilar un documento único listo para su exportación a PDF.
+## 📄 Memoria del Proyecto y Flujo de Compilación
+
+La memoria académica completa, diagramas arquitectónicos (C4 y UML), especificaciones formales y análisis de resultados experimentales se encuentran redactados en el directorio [`/memoria`](memoria/). La estructura capitular sigue la plantilla oficial del grupo de investigación **Diverso Lab** (Universidad de Sevilla).
+
+Se provee un conjunto de herramientas en [`scripts/`](scripts/) para la consolidación, verificación y ensamblado del documento final:
+
+```bash
+# 1. Validar y reordenar citas bibliográficas según el estándar IEEE (1..45 secuencial)
+python scripts/reordenar_citas.py
+
+# 2. Generar el documento consolidado preliminar
+python scripts/combinar_tfm_y_toc.py
+
+# 3. Exportar TFM_Completo.md a PDF desde Typora (guardar como TFM_Completo.pdf)
+
+# 4. Inyectar números de página físicos en los índices con alineación tabular formal (flexbox dot-leaders)
+python scripts/actualizar_indices_con_paginas.py
+
+# 5. Ensamblar el PDF definitivo sustituyendo la portada por la cubierta institucional vectorial
+python scripts/ensamblar_pdf_definitivo.py
+```
+
+> **Nota:** La compilación de la portada institucional y el ensamblado de PDFs requieren `weasyprint`, `poppler-utils` (`pdftotext`, `pdfunite`) y `ghostscript` instalados en el sistema anfitrión.
 
 ## 🔌 Integración con Clientes MCP Externos
 

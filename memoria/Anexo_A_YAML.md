@@ -1,9 +1,9 @@
 # Anexo A. Manifiesto Kubernetes Generado — Escenario 1 (Happy Path)
 
-> **Referencia:** Sección 8.3.1 — *Walkthrough Forense: Portal Web para Congreso Académico*
+> **Referencia:** Sección 9.2.1 — *Walkthrough: Portal Web para Congreso Académico*
 > **Artefacto fuente:** [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml)
 
-Este anexo contiene el manifiesto YAML completo generado automáticamente por el `FakeK8sAdapter` del *Agentic Deployer* a partir de una petición en lenguaje natural del investigador (véase Sección 8.3.1). El manifiesto es una salida declarativa autocontenida compuesta por tres recursos Kubernetes estándar:
+Este anexo contiene el manifiesto YAML completo generado automáticamente por el `FakeK8sAdapter` del *Agentic Deployer* a partir de una petición en lenguaje natural del investigador (véase Sección 9.2.1). El manifiesto es una salida declarativa autocontenida compuesta por tres recursos Kubernetes estándar:
 
 1. **`Deployment`** — Define la especificación del pod, la imagen de contenedor, los recursos (CPU/RAM), los health checks y el contexto de seguridad.
 2. **`Service`** — Expone el Deployment dentro del clúster mediante un `ClusterIP` estándar, enrutando el tráfico del puerto 80 al `containerPort` 8080.
@@ -29,7 +29,7 @@ kubectl apply -f dep-7f3a2c1b_congreso-ia-departamento.yaml
 | **Estado final** | `DEPLOYED` (tras aprobación HITL) |
 | **Timestamp** | 2026-09-27T10:14:34+02:00 |
 | **Adaptador** | `FakeK8sAdapter` (producción: `RealK8sAdapter` vía `kubernetes-client`) |
-<p align="center"><i><b>Tabla 32:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
+<p align="center"><i><b>Tabla 38:</b> Contexto de Generación del Manifiesto YAML (Escenario 1).</i></p>
 
 ---
 
@@ -144,14 +144,15 @@ spec:
         port:
          number: 80
 ```
+<p align="center"><i><b>Listado 2:</b> Manifiesto Kubernetes completo generado por el FakeK8sAdapter del Agentic Deployer (Deployment + Service + Ingress) para el Escenario 1 (Happy Path).</i></p>
 
 ---
 
 ## A.3. Relación con el Código Fuente
 
-El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/k8s_adapter.py`](../app/infrastructure/k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
+El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/fake_k8s_adapter.py`](../app/infrastructure/fake_k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
 
-En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Cap. 10.3.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
+En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Sección 10.3.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
 
 ```python
 # Futura implementación RealK8sAdapter (pseudocódigo)
@@ -165,4 +166,4 @@ apps_v1.create_namespaced_deployment(
 )
 ```
 
-La arquitectura hexagonal garantiza que este cambio de adaptador no requiere modificar ninguna línea de la lógica de negocio (Cap. 4.2.2), validando el Principio de Inversión de Dependencias (DIP) como núcleo de la estrategia de evolución tecnológica del sistema.
+La arquitectura hexagonal garantiza que este cambio de adaptador no requiere modificar ninguna línea de la lógica de negocio (Sección 5.3.2), validando el Principio de Inversión de Dependencias (DIP) como núcleo de la estrategia de evolución tecnológica del sistema.
