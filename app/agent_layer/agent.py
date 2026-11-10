@@ -463,12 +463,27 @@ class OllamaLLMClient(LLMClient):  # pragma: no cover
         Converts OpenAI-format tool definitions to Ollama-compatible format
         and maps the response back to the common AgentResponse dataclass.
         """
+        import copy
         client = self._ollama.Client(host=self.host)
+
+        # Adapt messages: Ollama Python SDK requires function.arguments to be a dict
+        ollama_messages = []
+        for m in messages:
+            m_copy = copy.deepcopy(m)
+            if "tool_calls" in m_copy and m_copy["tool_calls"]:
+                for tc in m_copy["tool_calls"]:
+                    fn = tc.get("function", {})
+                    if isinstance(fn.get("arguments"), str):
+                        try:
+                            fn["arguments"] = json.loads(fn["arguments"])
+                        except Exception:
+                            pass
+            ollama_messages.append(m_copy)
 
         # Ollama accepts OpenAI-compatible tool definitions directly
         kwargs: dict = {
             "model": self.model,
-            "messages": messages,
+            "messages": ollama_messages,
         }
         if tools:
             kwargs["tools"] = tools

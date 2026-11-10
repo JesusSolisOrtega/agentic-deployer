@@ -358,7 +358,7 @@ class TestMCPTools:
         sent = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1]["json"]
         assert sent["name"] == "ai-congress-2025"
         assert sent["action"] == "CREATE"
-        assert sent["image"] == "nginx:alpine"
+        assert sent["image"] == "docker.io/library/nginx:alpine"
         assert sent["internal_port"] == 8080
         assert sent["cpu"] == "1"
         assert json.loads(result)["id"] == "abc123"
@@ -378,7 +378,7 @@ class TestMCPTools:
         sent = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1]["json"]
         assert sent["name"] == "cms-computer-science"
         assert sent["action"] == "CREATE"
-        assert sent["image"] == "wordpress:6.4"
+        assert sent["image"] == "docker.io/library/wordpress:6.4"
         assert sent["cpu"] == "500m"
         assert sent["ram"] == "1024Mi"
         assert json.loads(result)["id"] == "def456"
@@ -399,7 +399,7 @@ class TestMCPTools:
         sent = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1]["json"]
         assert sent["name"] == "api-test"
         assert sent["action"] == "CREATE"
-        assert sent["image"] == "python:3.11-slim"
+        assert sent["image"] == "docker.io/library/python:3.11-slim"
         assert sent["internal_port"] == 8000
         assert json.loads(result)["id"] == "py789"
 

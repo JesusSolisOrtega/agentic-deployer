@@ -53,16 +53,16 @@
     /* Layout                                                             */
     /* ------------------------------------------------------------------ */
     .shell {
-      max-width: 960px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 48px 24px;
+      padding: 24px 16px;
     }
 
     /* ------------------------------------------------------------------ */
     /* Header                                                             */
     /* ------------------------------------------------------------------ */
     .header {
-      margin-bottom: 36px;
+      margin-bottom: 24px;
     }
 
     .header__badge {
@@ -78,7 +78,7 @@
       border: 1px solid var(--amber-border);
       padding: 4px 12px;
       border-radius: 999px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .header__badge::before {
@@ -96,7 +96,7 @@
     }
 
     .header h1 {
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
       margin-bottom: 4px;
@@ -104,7 +104,7 @@
 
     .header p {
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     /* ------------------------------------------------------------------ */
@@ -112,32 +112,34 @@
     /* ------------------------------------------------------------------ */
     .stats {
       display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .stat-card {
       flex: 1;
+      min-width: 120px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px 20px;
+      padding: 12px 14px;
       transition: var(--transition);
     }
 
     .stat-card:hover { border-color: var(--accent); }
 
     .stat-card__label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .stat-card__value {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-primary);
     }
@@ -149,19 +151,20 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      overflow: hidden;
+      overflow-x: auto;
       box-shadow: var(--shadow);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12px;
+      min-width: 680px;
     }
 
     thead th {
       text-align: left;
-      padding: 14px 18px;
+      padding: 10px 12px;
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
@@ -169,6 +172,7 @@
       color: var(--text-muted);
       background: var(--bg-card);
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
     tbody tr {
@@ -180,8 +184,9 @@
     tbody tr:hover { background: var(--bg-hover); }
 
     tbody td {
-      padding: 14px 18px;
+      padding: 10px 12px;
       vertical-align: middle;
+      white-space: nowrap;
     }
 
     .cell-id {
@@ -193,8 +198,12 @@
 
     .cell-image {
       font-family: 'Courier New', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* ------------------------------------------------------------------ */
@@ -230,15 +239,16 @@
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 8px 18px;
+      padding: 6px 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       transition: var(--transition);
+      white-space: nowrap;
     }
 
     .btn--approve {
@@ -529,21 +539,23 @@
           <td class="cell-id">${d.id}</td>
           <td>${d.intent.name}</td>
           <td>${actionBadge}</td>
-          <td class="cell-image">${imagen}</td>
+          <td class="cell-image" title="${imagen}">${imagen}</td>
           <td>${puerto}</td>
           <td>${d.intent.cpu} / ${d.intent.ram}</td>
           <td><span class="badge badge--pending">Pendiente</span></td>
-          <td style="display:flex;gap:6px;">
-            <button
-              class="${btnClass}"
-              id="approve-btn-${d.id}"
-              onclick="approveDeployment('${d.id}', this)"
-            >${btnText}</button>
-            <button
-              class="btn btn--reject"
-              id="reject-btn-${d.id}"
-              onclick="rejectDeployment('${d.id}', this)"
-            >Rechazar</button>
+          <td style="white-space:nowrap;">
+            <div style="display:inline-flex;gap:6px;align-items:center;">
+              <button
+                class="${btnClass}"
+                id="approve-btn-${d.id}"
+                onclick="approveDeployment('${d.id}', this)"
+              >${btnText}</button>
+              <button
+                class="btn btn--reject"
+                id="reject-btn-${d.id}"
+                onclick="rejectDeployment('${d.id}', this)"
+              >Rechazar</button>
+            </div>
           </td>
         </tr>`;
       }).join('');

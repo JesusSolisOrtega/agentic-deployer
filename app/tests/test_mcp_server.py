@@ -74,7 +74,8 @@ def test_deploy_static_website(mock_send_intent):
     mock_send_intent.assert_called_once()
     payload = mock_send_intent.call_args[0][0]
     assert payload["name"] == "my-site"
-    assert payload["image"] == "nginx:alpine"
+    assert payload["image"] == "docker.io/library/nginx:alpine"
+    assert payload["internal_port"] == 8080
 
 @patch("app.agent_layer.mcp_server._send_intent")
 # pyrefly: ignore [implicit-any-parameter, unannotated-return]
@@ -85,7 +86,9 @@ def test_deploy_database(mock_send_intent):
     mock_send_intent.assert_called_once()
     payload = mock_send_intent.call_args[0][0]
     assert payload["name"] == "postgres-db"
+    assert payload["image"] == "docker.io/library/postgres:15"
     assert payload["internal_port"] == 5432
+    assert payload["storage"] == "10Gi"
 
 @patch("app.agent_layer.mcp_server.requests.get")
 # pyrefly: ignore [implicit-any-parameter, unannotated-return]

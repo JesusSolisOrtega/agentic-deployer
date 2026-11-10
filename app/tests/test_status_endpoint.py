@@ -22,7 +22,10 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def _clean_store() -> None:
-    """Cleans the SQLite store before each test."""
+    """Cleans the SQLite store before and after each test."""
+    with sqlite3.connect(repository.db_path) as conn:
+        conn.execute("DELETE FROM deployments")
+    yield
     with sqlite3.connect(repository.db_path) as conn:
         conn.execute("DELETE FROM deployments")
 

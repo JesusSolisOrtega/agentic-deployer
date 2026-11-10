@@ -13,6 +13,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -44,6 +45,12 @@ app.add_middleware(
 _frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if _frontend_dir.is_dir():
     app.mount("/frontend", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
+
+
+@app.get("/", include_in_schema=False)
+def root_redirect() -> RedirectResponse:
+    """Redirect root path to the HITL operator dashboard."""
+    return RedirectResponse(url="/frontend/")
 
 # Dependency injection (manual, no DI framework — prototype)
 repository = SQLiteDeploymentRepository()

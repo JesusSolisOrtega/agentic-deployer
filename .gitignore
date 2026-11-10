@@ -43,23 +43,40 @@ Thumbs.db
 
 # ── Scratch & Temporal Files ──────────────────────────────────
 /outputs/
+/bin/
 /promt TFM
 /prompt*
-/run_tests_only.sh
 /test
 .temp_cuerpo.pdf
 
 # ── Memoria & Compilación Documental ──────────────────────────
-# Ignorar todos los markdowns de lluvia de ideas en la raíz
+# Ignorar todos los markdowns en la raíz excepto README.md
 /*.md
-# Pero conservar el README y el compilado final del TFM
 !/README.md
-!/TFM_Completo.md
-memoria/diagrams_cache/
-memoria/portada.pdf
-memoria/INFORME_REVISION_TUTOR.md
-informe de cambios.md
+
+# PDFs de compilación intermedia en la raíz
+/*.pdf
 TFM_Completo.pdf
+TFM_JesusSolisOrtega.pdf
+TFM_JesusSolisOrtega_DEFINITIVO.pdf
+
+# Artefactos y documentación administrativa de la memoria
+memoria/diagrams_cache/
+memoria/img/
+memoria/portada.pdf
+memoria/portada_oficial.pdf
+memoria/INFORME_REVISION_TUTOR.md
+memoria/Guia de TFM*.pdf
+memoria/plantillas/
+memoria/presentation/
+informe de cambios.md
+
+# Scripts de compilación documental del TFM (no requeridos para desarrollo/reproducibilidad)
+scripts/actualizar_indices_con_paginas.py
+scripts/combinar_tfm_y_toc.py
+scripts/ensamblar_pdf_definitivo.py
+scripts/generar_portada_pdf.py
+scripts/reordenar_citas.py
 
 # Bases de datos SQLite
 *.db

@@ -20,8 +20,8 @@ Para el correcto despliegue del sistema en un entorno anfitrión local o servido
 
 1. **Clonación del repositorio e ingreso al directorio raíz:**
    ```bash
-   git clone <url-del-repositorio>/TFM.git
-   cd TFM
+   git clone https://github.com/JesusSolisOrtega/agentic-deployer.git
+   cd agentic-deployer
    ```
 
 2. **Creación y activación del entorno virtual de Python:**
@@ -50,10 +50,11 @@ cp .env.example .env
 ```
 
 Los parámetros fundamentales configurables en dicho archivo comprenden:
-* `LLM_PROVIDER`: Proveedor de inferencia cognitivo (`ollama`, `openai` o `fake`).
-* `OLLAMA_BASE_URL`: Dirección de escucha del servidor local de Ollama (por defecto `http://localhost:11434`).
-* `OLLAMA_MODEL`: Identificador del modelo local a cargar (por defecto `qwen2.5-coder:7b`).
-* `OPENAI_API_KEY`: Clave de autenticación en caso de seleccionar el proveedor cloud comercial.
+* `LLM_PROVIDER`: Proveedor de inferencia cognitivo (`ollama`, `gemini`, `openai` o `fake`).
+* `OLLAMA_HOST`: Dirección de escucha del servidor local de Ollama (por defecto `http://localhost:11434`).
+* `OLLAMA_MODEL`: Identificador del modelo local a cargar (por defecto `qwen2.5:7b` o `qwen2.5-coder:7b`).
+* `OPENAI_API_KEY` / `GEMINI_API_KEY`: Claves de autenticación en caso de seleccionar proveedores cloud.
+* `BACKEND_URL`: URL base del middleware REST (por defecto `http://localhost:8000`).
 * `DATABASE_PATH`: Ruta al fichero de persistencia SQLite (`agentic_deployer.db`).
 
 *(Nota: Se provee el script ejecutable `scripts/install.sh`, el cual automatiza todos los pasos anteriores e inicializa la descarga del modelo local en entornos compatibles).*
@@ -82,7 +83,7 @@ En una primera terminal con el entorno virtual activado, se inicia el servidor d
 uvicorn app.infrastructure.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-* **Panel de Control HITL:** [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
+* **Panel de Control HITL:** [http://localhost:8000/frontend/](http://localhost:8000/frontend/) (con redirección automática desde [http://localhost:8000](http://localhost:8000))
 * **Documentación interactiva OpenAPI (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### C.2.2. Interfaz Conversacional del Agente (Streamlit)
@@ -94,8 +95,8 @@ En una segunda terminal independiente con el entorno virtual activo, se lanza la
   # En terminal auxiliar, arrancar el servicio de modelos si no estuviera activo:
   ollama serve
   
-  # Lanzar la interfaz agéntica:
-  LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5-coder:7b streamlit run app/agent_layer/chat_app.py
+  # Lanzar la interfaz agéntica conectada al modelo local:
+  LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5:7b streamlit run app/agent_layer/chat_app.py
   ```
 
 * **Modo Demostración Rápida (Determinista, sin consumo de GPU ni API Keys):**
@@ -112,31 +113,36 @@ En una segunda terminal independiente con el entorno virtual activo, se lanza la
 ### C.3.1. Formulación de Solicitudes en Lenguaje Natural
 
 1. El usuario accede a la interfaz conversacional en el puerto `8501`.
-2. En la caja de texto inferior, introduce una petición de servicio en lenguaje libre. Ejemplos válidos:
-   * *«Necesito desplegar una API en Python para publicar los datos del proyecto de investigación.»*
-   * *«Quiero instalar un gestor de contenidos WordPress para el congreso del departamento.»*
-   * *«Despliega un portal web estático con Nginx para documentación.»*
+2. En la caja de texto inferior (o mediante los botones de sugerencia rápida), introduce una petición de servicio en lenguaje libre. Ejemplos válidos:
+   * *«Necesito una web para el congreso 'congreso-ia-2025' con tráfico medio.»*
+   * *«Necesito un WordPress para el departamento de informatica.»*
+   * *«Desplegar una API en Python para publicar datos de investigación.»*
+   * *«Necesito una base de datos PostgreSQL con 10 GB de almacenamiento.»*
+   * *«Quiero dar de baja el servicio web-antigua.»*
 3. **Interacción y negociación:** Si la petición omite detalles obligatorios o infringe políticas de seguridad, el agente razona sobre las observaciones devueltas por el validador y formula preguntas asistidas para consensuar parámetros seguros.
-4. **Registro de la intención:** Una vez acordados los parámetros válidos, el agente invoca la herramienta MCP y registra la intención de despliegue en la base de datos en estado de cuarentena (`PENDING_APPROVAL`), proporcionando al usuario el identificador único del despliegue (ej. `dep-7f3a2c1b`).
+4. **Registro de la intención:** Una vez acordados los parámetros válidos, el agente invoca la herramienta MCP correspondiente y registra la intención de despliegue en la base de datos en estado de cuarentena (`PENDING_APPROVAL`), proporcionando al usuario el identificador único del despliegue (ej. `120a9ea1`).
 
 ### C.3.2. Supervisión Técnica en el Dashboard HITL
 
-1. El operador técnico del SIC accede al Dashboard de Aprobación en [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html).
+1. El operador técnico del SIC accede al Dashboard de Aprobación en [http://localhost:8000/frontend/](http://localhost:8000/frontend/).
 2. En la sección **«Solicitudes Pendientes»**, inspecciona la tarjeta técnica generada por la IA:
    * Parámetros de cómputo (límites de CPU y memoria).
-   * Imagen de contenedor auditada y puerto de servicio.
-   * Manifiesto declarativo generado y resultado del análisis de seguridad.
+   * Imagen de contenedor auditada del registro institucional y puerto de servicio.
+   * Manifiesto declarativo generado y resultado del análisis de políticas de seguridad.
 3. **Decisión del operador:**
-   * **Aprobar:** Al pulsar el botón de confirmación, la FSM transiciona al estado `DEPLOYED`, invocando la provisión de infraestructura y archivando la traza criptográfica de auditoría.
-   * **Rechazar:** Si el operador detecta alguna anomalía administrativa, pulsa rechazar, pasando la solicitud al estado terminal inmutable `REJECTED`.
+   * **Aprobar:** Al pulsar el botón verde de confirmación, la FSM transiciona al estado `DEPLOYED`, simulando la provisión en OpenShift/Kubernetes y archivando la traza criptográfica de auditoría.
+   * **Rechazar:** Si el operador detecta alguna anomalía administrativa o de cuota, pulsa el botón rojo **Rechazar**, pasando la solicitud al estado terminal inmutable `REJECTED`.
 
 ### C.3.3. Notificación Asíncrona y Canal de Retorno
 
-El investigador puede consultar en todo momento el avance de su solicitud desde el panel lateral de la interfaz de chat en Streamlit o mediante el endpoint REST:
+El investigador puede consultar en todo momento el avance de su solicitud sin necesidad de recargar la página:
 
-```bash
-curl -X GET "http://localhost:8000/hitl/status/dep-7f3a2c1b"
-```
+1. **Desde la interfaz de chat (Streamlit):** Mediante la sección inferior **«📬 Mis Solicitudes Pendientes»**, pulsando el botón **«🔄 Actualizar»**, o preguntándole al propio asistente conversacional:
+   > *«¿Cuál es el estado de la solicitud 120a9ea1?»*
+2. **Mediante el endpoint REST de trazabilidad:**
+   ```bash
+   curl -X GET "http://localhost:8000/hitl/status/120a9ea1"
+   ```
 
-El sistema responderá con el estado actual de la Máquina de Estados (`PENDING_APPROVAL`, `DEPLOYED` o `REJECTED`) junto con las marcas temporales de validación, garantizando la trazabilidad integral del servicio.
+El sistema responderá con el estado actual de la Máquina de Estados (`PENDING_APPROVAL`, `DEPLOYED` o `REJECTED`) junto con las especificaciones técnicas del contenedor, garantizando la trazabilidad integral del servicio.
 

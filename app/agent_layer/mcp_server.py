@@ -92,7 +92,7 @@ def deploy_congress_web(
     payload = {
         "name": project_name,
         "action": "CREATE",
-        "image": "nginx:alpine",
+        "image": "docker.io/library/nginx:alpine",
         "internal_port": 8080,
         "cpu": resources["cpu"],
         "ram": resources["ram"],
@@ -113,7 +113,7 @@ def deploy_department_cms(department_name: str) -> str:
     payload = {
         "name": f"cms-{department_name}",
         "action": "CREATE",
-        "image": "wordpress:6.4",
+        "image": "docker.io/library/wordpress:6.4",
         "internal_port": 8080,
         "cpu": "500m",
         "ram": "1024Mi",
@@ -133,7 +133,7 @@ def deploy_python_app(project_name: str, python_version: str = "3.12") -> str:
     payload = {
         "name": project_name,
         "action": "CREATE",
-        "image": f"python:{python_version}-slim",
+        "image": f"docker.io/library/python:{python_version}-slim",
         "internal_port": 8000,
         "cpu": "250m",
         "ram": "256Mi",
@@ -168,8 +168,8 @@ def deploy_static_website(project_name: str, domain: str) -> str:
     payload = {
         "name": project_name,
         "action": "CREATE",
-        "image": "nginx:alpine",
-        "internal_port": 80,
+        "image": "docker.io/library/nginx:alpine",
+        "internal_port": 8080,
         "cpu": "100m",
         "ram": "64Mi",
     }
@@ -189,10 +189,11 @@ def deploy_database(db_type: str, version: str, storage_gb: int) -> str:
     payload = {
         "name": f"{db_type}-db",
         "action": "CREATE",
-        "image": f"{db_type}:{version}",
+        "image": f"docker.io/library/{db_type}:{version}",
         "internal_port": 5432 if db_type == "postgres" else 6379 if db_type == "redis" else 3306,
         "cpu": "1",
         "ram": "2Gi",
+        "storage": f"{storage_gb}Gi",
     }
     result = _send_intent(payload)
     return json.dumps(result, ensure_ascii=False)
