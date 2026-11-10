@@ -298,6 +298,13 @@ La documentación formal completa del proyecto se encuentra disponible en el dir
 
 ---
 
-## ⚖️ Licencia
+## ⚖️ Licencia y Régimen de Explotación
 
-Este proyecto está publicado bajo la licencia **MIT**. La memoria académica y los diagramas arquitectónicos se distribuyen bajo licencia **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+Copyright (C) 2026 Jesús Solís Ortega.
+
+* **Software y Código Fuente:** Publicado bajo los términos de la **GNU Affero General Public License v3.0 (GNU AGPLv3)**. Consulta el archivo [`LICENSE`](LICENSE) para acceder al texto íntegro de la licencia.
+  * *Uso Abierto y Académico:* Se autoriza la copia, ejecución, inspección y modificación del software para fines personales, educativos, de investigación y proyectos sin ánimo de lucro, con la obligación recíproca de compartir las modificaciones y el código fuente derivado bajo esta misma licencia si se ofrece el software a través de una red telemática (Sección 13).
+  * *Licenciamiento Comercial y Consultoría:* Si representa a una entidad u organización que desea integrar, desplegar u operar esta plataforma en entornos corporativos privativos sin acogerse a las obligaciones de la licencia AGPLv3, o precisa soporte de arquitectura y adaptación a medida para OpenShift/Kubernetes, contacte directamente con el autor:  
+    📫 **Jesús Solís Ortega** — [jesussolisortega@gmail.com](mailto:jesussolisortega@gmail.com)
+
+* **Memoria Técnica y Documentación:** La memoria académica del Trabajo de Fin de Máster y sus especificaciones formales se distribuyen bajo licencia **Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)**.
