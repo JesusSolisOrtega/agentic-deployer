@@ -1,179 +1,183 @@
-# Agentic Deployer: Plataforma Interna de Despliegue (IDP) en OpenShift Gobernada por Agentes IA y Protocolo MCP
+# Agentic Deployer: Internal Developer Platform (IDP) on OpenShift Governed by AI Agents and the MCP Protocol
 
-**Trabajo de Fin de Máster (TFM)**  
-*Máster Universitario en Ingeniería del Software: Cloud, Datos y Gestión TI*  
-*Escuela Internacional de Posgrado — Universidad de Sevilla*  
-**Autor:** Jesús Solís Ortega | **Tutor:** Dr. Manuel Resinas Arias de Reyna  
-**Convocatoria:** Curso Académico 2025/2026  
+<p align="center">
+  <b>English Version</b> | <b><a href="README.es.md">Versión en Español</a></b>
+</p>
+
+**Master's Thesis (TFM)**  
+*Master's Degree in Software Engineering: Cloud, Data and IT Management*  
+*International Postgraduate School — University of Seville*  
+**Author:** Jesús Solís Ortega | **Advisor:** Dr. Manuel Resinas Arias de Reyna  
+**Academic Year:** 2025/2026  
 
 ---
 
-Este repositorio contiene la implementación de referencia del **Agentic Deployer**, una Plataforma Interna de Despliegue (*Internal Developer Platform*, IDP) que delega la interpretación y provisión de infraestructura a agentes fundamentados en Modelos de Lenguaje de Gran Escala (LLM). El sistema gobierna el comportamiento estocástico de la Inteligencia Artificial mediante contratos declarativos bajo el estándar **Model Context Protocol (MCP)**, una arquitectura desacoplada de Puertos y Adaptadores (Hexagonal) y una máquina de estados finita con intervención humana obligatoria (**Human-In-The-Loop**, HITL).
+This repository contains the reference implementation of **Agentic Deployer**, an Internal Developer Platform (IDP) that delegates the interpretation and provisioning of infrastructure workloads to Large Language Model (LLM) agents. The system governs the stochastic behavior of Artificial Intelligence through declarative contracts based on the **Model Context Protocol (MCP)** open standard, a decoupled Ports and Adapters (Hexagonal) architecture, and an immutable finite state machine with mandatory **Human-In-The-Loop (HITL)** governance.
 
 ---
 
-## 🏗️ Arquitectura y Estructura del Repositorio
+## 🏗️ Architecture and Repository Structure
 
-El diseño desacopla de forma estricta el razonamiento de la IA de la ejecución privilegiada en el clúster de contenedores, garantizando que el modelo cognitivo nunca acceda directamente a las credenciales del centro de datos ni a la API de Kubernetes/OpenShift.
+The architecture strictly isolates AI reasoning from privileged execution within the container cluster, guaranteeing that the cognitive model never directly accesses datacenter credentials or the Kubernetes/OpenShift API.
 
 ```text
 agentic-deployer/
 ├── app/
-│   ├── domain/               # Capa Núcleo: Modelos puros (DeploymentIntent) y contratos de puertos (DeployPort)
-│   │   ├── exceptions.py     # Excepciones de dominio y violaciones de seguridad
-│   │   ├── models.py         # Entidades inmutables y máquina de estados (FSM: PENDING, DEPLOYED, REJECTED)
-│   │   └── ports.py          # Interfaces abstractas (DeployPort, DeploymentRepositoryPort)
-│   ├── application/          # Capa de Lógica de Aplicación
-│   │   ├── security_validator.py # Validación determinista de políticas de seguridad corporativas
-│   │   └── use_cases.py      # Casos de uso de procesamiento, aprobación y rechazo de solicitudes
-│   ├── infrastructure/       # Capa de Adaptadores de Entrada/Salida
-│   │   ├── fake_k8s_adapter.py # Adaptador de pruebas que emula despliegues y genera manifiestos YAML
-│   │   ├── main.py           # Servidor REST FastAPI, middleware CORS y despacho de eventos HITL
-│   │   └── repository.py     # Adaptador de persistencia SQLite (agentic_deployer.db)
-│   ├── agent_layer/          # Capa Cognitiva y Orquestación Agéntica
-│   │   ├── agent.py          # Motor ReAct con soporte multi-proveedor (Ollama, Gemini, OpenAI)
-│   │   ├── chat_app.py       # Interfaz conversacional para investigadores (Streamlit)
-│   │   ├── mcp_server.py     # Servidor MCP stdio con catálogo de herramientas de infraestructura
-│   │   └── tools.py          # Definición de herramientas del agente y adaptación a SDKs
-│   ├── frontend/             # Dashboard web para el Operador de Infraestructura HITL (HTML5/CSS3/JS)
-│   │   ├── index.html        # Vista operativa de solicitudes pendientes y auditoría
-│   │   ├── styles.css        # Hoja de estilos responsiva con tablas adaptadas
-│   │   └── app.js            # Lógica de consumo de API REST y transiciones de estado
-│   └── tests/                # Suite de pruebas automatizadas (unitarias, integración, PBT, mutación)
-├── demos/                    # Evidencia empírica de pruebas y transcripciones de ejecución real
-│   ├── session_logs/         # Trazas JSON de conversaciones reales con Ollama (Capítulo 8 de la memoria)
-│   └── README.md             # Documentación de escenarios de demostración
-├── memoria/                  # Documentación académica completa y memoria técnica oficial
-│   ├── 00_Portada.md ... 11_Bibliografia.md # Capítulos en Markdown (renderizables en GitHub)
-│   ├── Anexo_A_YAML.md ... Anexo_C_Manual.md # Anexos formales del TFM
-│   └── TFM_JesusSolisOrtega_DEFINITIVO.pdf # Documento final consolidado con portada vectorial
-├── scripts/                  # Scripts de utilidad para desarrollo, calidad y reproducibilidad
-│   ├── install.sh            # Inicialización automática del entorno virtual y dependencias
-│   ├── run_tests.sh          # Pipeline completo de aseguramiento de la calidad (QA)
-│   ├── run_tests_only.sh     # Ejecución rápida de la suite de pruebas Pytest
-│   ├── clean.sh              # Limpieza de cachés, mutantes y residuos de ejecución
-│   ├── locustfile.py         # Pruebas de estrés y evaluación de latencia de la API
-│   ├── compare_models.py     # Evaluación comparativa multi-modelo
-│   └── generate_demos.py     # Generación automatizada de sesiones de evidencia empírica
-├── requirements.txt          # Dependencias de producción y calidad fijadas
-├── pyproject.toml            # Configuración de herramientas de análisis y testing
-└── .env.example              # Plantilla de variables de entorno del sistema
+│   ├── domain/               # Core Layer: Pure domain models (DeploymentIntent) and port contracts (DeployPort)
+│   │   ├── exceptions.py     # Domain exceptions and security violations
+│   │   ├── models.py         # Immutable entities and state machine (FSM: PENDING, DEPLOYED, REJECTED)
+│   │   └── ports.py          # Abstract interfaces (DeployPort, DeploymentRepositoryPort)
+│   ├── application/          # Application Logic Layer
+│   │   ├── security_validator.py # Deterministic corporate security policy validation
+│   │   └── use_cases.py      # Use cases for request processing, approval, and rejection
+│   ├── infrastructure/       # Inbound and Outbound Adapters Layer
+│   │   ├── fake_k8s_adapter.py # Test adapter that emulates deployments and generates YAML manifests
+│   │   ├── main.py           # FastAPI REST server, CORS middleware, and HITL event dispatcher
+│   │   └── repository.py     # SQLite persistence adapter (agentic_deployer.db)
+│   ├── agent_layer/          # Cognitive Layer and Agent Orchestration
+│   │   ├── agent.py          # ReAct engine with multi-provider support (Ollama, Gemini, OpenAI)
+│   │   ├── chat_app.py       # Conversational interface for researchers (Streamlit)
+│   │   ├── mcp_server.py     # Stdio MCP server exposing an infrastructure tool catalog
+│   │   └── tools.py          # Agent tool definitions and SDK adaptation
+│   ├── frontend/             # Web dashboard for the HITL Infrastructure Operator (HTML5/CSS3/JS)
+│   │   ├── index.html        # Operational view of pending requests and audit trail
+│   │   ├── styles.css        # Responsive stylesheet with adapted tables
+│   │   └── app.js            # REST API client logic and state transitions
+│   └── tests/                # Automated test suite (unit, integration, PBT, mutation)
+├── demos/                    # Empirical test evidence and real execution transcripts
+│   ├── session_logs/         # JSON traces of real sessions with Ollama (Chapter 8 of the thesis)
+│   └── README.md             # Documentation of demonstration scenarios
+├── memoria/                  # Comprehensive academic documentation and official technical thesis
+│   ├── en/                   # Master's thesis chapters and annexes in English
+│   ├── es/                   # Master's thesis chapters and annexes in Spanish
+│   └── TFM_JesusSolisOrtega_ES.pdf # Final consolidated thesis in Spanish (with official vector cover)
+├── scripts/                  # Development, quality assurance, and reproducibility scripts
+│   ├── install.sh            # Automated virtual environment initialization and dependencies
+│   ├── run_tests.sh          # Full quality assurance (QA) pipeline
+│   ├── run_tests_only.sh     # Rapid execution of the Pytest test suite
+│   ├── clean.sh              # Cleanup of caches, mutants, and runtime artifacts
+│   ├── locustfile.py         # Stress testing and API latency evaluation
+│   ├── compare_models.py     # Multi-model comparative benchmark
+│   └── generate_demos.py     # Automated empirical session evidence generation
+├── requirements.txt          # Fixed production and testing dependencies
+├── pyproject.toml            # Tool configuration for linters, static analysis, and testing
+└── .env.example              # Environment variables template
 ```
 
 ---
 
-## 🚀 Instalación y Preparación del Entorno
+## 🚀 Installation and Environment Setup
 
-El sistema requiere **Python 3.11 o superior** y un sistema operativo tipo UNIX (GNU/Linux o macOS; compatible con Windows mediante WSL2).
+The system requires **Python 3.11 or higher** and a UNIX-like operating system (GNU/Linux or macOS; compatible with Windows via WSL2).
 
-### Opción A. Instalación Rápida Automatizada (Recomendada)
+### Option A. Automated Quick Installation (Recommended)
 
-Se proporciona un script que configura el entorno virtual, instala dependencias, provisiona los navegadores headless para pruebas E2E y genera el archivo `.env`:
+A setup script is provided to configure the virtual environment, install dependencies, provision headless browsers for E2E testing, and initialize `.env`:
 
 ```bash
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
 
-### Opción B. Instalación Manual Paso a Paso
+### Option B. Manual Step-by-Step Installation
 
 ```bash
-# 1. Crear y activar el entorno virtual
+# 1. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 2. Instalar dependencias del proyecto
+# 2. Install project dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 3. Provisionar navegadores para pruebas de interfaz E2E (Playwright)
+# 3. Provision browsers for E2E UI testing (Playwright)
 playwright install chromium
 
-# 4. Crear archivo de variables de entorno a partir de la plantilla
+# 4. Create environment variable file from template
 cp .env.example .env
 ```
 
 ---
 
-## ⚙️ Ejecución de los Subsistemas
+## ⚙️ Running Subsystems
 
-El sistema consta de dos procesos desacoplados que deben ejecutarse concurrentemente en terminales independientes con el entorno virtual activo (`source .venv/bin/activate`).
+The platform consists of two decoupled processes that run concurrently in separate terminals with the virtual environment activated (`source .venv/bin/activate`).
 
-### 1. Backend de Operaciones y Middleware HITL (FastAPI)
+### 1. Operations Backend and HITL Middleware (FastAPI)
 
-Expone la API REST, orquesta el validador de políticas y sirve la interfaz web de supervisión:
+Exposes the REST API, orchestrates deterministic policy validation, and serves the operator web interface:
 
 ```bash
 uvicorn app.infrastructure.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-* **Panel de Control de Operaciones (HITL):** [http://localhost:8000/](http://localhost:8000/) *(redirección automática hacia `/frontend/`)*
-* **Documentación Interactiva (Swagger / OpenAPI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **Endpoint de trazabilidad de solicitudes:** `GET http://localhost:8000/hitl/status/{deployment_id}`
+* **Operations Dashboard (HITL):** [http://localhost:8000/](http://localhost:8000/) *(automatic redirect to `/frontend/`)*
+* **Interactive API Documentation (Swagger / OpenAPI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Request status tracking endpoint:** `GET http://localhost:8000/hitl/status/{deployment_id}`
 
-### 2. Interfaz Conversacional del Asistente (Streamlit)
+### 2. Conversational Assistant Interface (Streamlit)
 
-La interfaz de chat asiste a los usuarios en la formulación de sus peticiones mediante razonamiento ReAct:
+The chat interface assists users in formulating infrastructure requests using ReAct reasoning:
 
-#### Modo On-Premise / Soberanía del Dato (Ollama — Recomendado)
-Permite inferencia local sin fuga de información a nubes de terceros (Zero Data Retention). El modelo base oficial evaluado en la investigación es `qwen2.5:7b` (compatible también con `qwen2.5-coder:7b`):
+#### On-Premise / Data Sovereignty Mode (Ollama — Recommended)
+Enables local inference without data leakage to external third-party cloud providers (Zero Data Retention). The official baseline model evaluated in the research is `qwen2.5:7b` (also compatible with `qwen2.5-coder:7b`):
 
 ```bash
-# En una terminal auxiliar, iniciar Ollama y descargar el modelo:
+# In an auxiliary terminal, launch Ollama and pull the model:
 ollama serve
 ollama pull qwen2.5:7b
 
-# Iniciar la interfaz conectada al modelo local:
+# Launch the chat interface connected to the local model:
 LLM_PROVIDER=ollama OLLAMA_MODEL=qwen2.5:7b streamlit run app/agent_layer/chat_app.py
 ```
 
-> **Servidores remotos con GPU:** Si el SIC aloja Ollama en un servidor corporativo centralizado, basta con configurar la variable `OLLAMA_HOST=http://<ip-o-dominio-gpu>:11434` en el archivo `.env`.
+> **Remote GPU Servers:** If the IT department hosts Ollama on a centralized corporate server, simply configure `OLLAMA_HOST=http://<gpu-ip-or-domain>:11434` in the `.env` file.
 
-#### Modo Demostración Rápida (Determinista, sin consumo de GPU ni API Keys)
+#### Fast Deterministic Demo Mode (No GPU or API Keys Required)
 ```bash
-streamlit run app/agent_layer/chat_app.py   # Utiliza LLM_PROVIDER=fake por defecto
+streamlit run app/agent_layer/chat_app.py   # Uses LLM_PROVIDER=fake by default
 ```
 
-#### Modo Modelos Comerciales (OpenAI / Gemini)
+#### Commercial Models Mode (OpenAI / Gemini)
 ```bash
 OPENAI_API_KEY=sk-... LLM_PROVIDER=openai streamlit run app/agent_layer/chat_app.py
 ```
 
-* **Punto de acceso al Chat:** [http://localhost:8501](http://localhost:8501)
+* **Chat Interface URL:** [http://localhost:8501](http://localhost:8501)
 
 ---
 
-## 🔄 Flujo de Operación Human-In-The-Loop (HITL)
+## 🔄 Human-In-The-Loop (HITL) Workflow
 
-1. **Petición en Lenguaje Natural:** El usuario introduce en el chat ([http://localhost:8501](http://localhost:8501)) una petición libre, por ejemplo:  
-   *«Necesito desplegar el portal web para el congreso de IA del departamento.»*
-2. **Razonamiento Agéntico y Validación:** El agente deduce parámetros de cómputo, imagen y puertos, invocando la herramienta MCP correspondiente. Si el despliegue vulnera alguna política (p. ej. puerto privilegiado `< 1024` o tag `:latest`), el validador emite una alerta determinista y el agente negocia parámetros seguros.
-3. **Registro en Cuarentena:** Se genera un registro con identificador único (ej. `120a9ea1`) en estado `PENDING_APPROVAL`.
-4. **Supervisión Humana:** El operador del SIC accede al Dashboard ([http://localhost:8000/](http://localhost:8000/)), examina la tarjeta técnica y valida las cuotas.
-5. **Decisión:**
-   * **Aprobar:** La máquina de estados transiciona a `DEPLOYED`, invocando el adaptador de despliegue y guardando la auditoría.
-   * **Rechazar:** La máquina transiciona a `REJECTED`, notificando la causa y cancelando la provisión.
-6. **Consulta Asíncrona:** El usuario puede pulsar **«Actualizar»** en el chat o preguntar *«¿Cuál es el estado de mi solicitud 120a9ea1?»* para conocer la resolución en tiempo real.
+1. **Natural Language Request:** The user submits a prompt in the chat interface ([http://localhost:8501](http://localhost:8501)), for example:  
+   *«I need to deploy the web portal for the departmental AI conference.»*
+2. **Agentic Reasoning and Policy Validation:** The agent derives compute resources, container image, and ports, invoking the corresponding MCP tool. If the deployment violates security policies (e.g., privileged port `< 1024` or `:latest` tag), the validator raises a deterministic error and the agent negotiates safe parameters.
+3. **Quarantine Registration:** A deployment record with a unique identifier (e.g., `120a9ea1`) is persisted in the `PENDING_APPROVAL` state.
+4. **Human Supervision:** The IT infrastructure operator opens the Dashboard ([http://localhost:8000/](http://localhost:8000/)), inspects the technical manifest card, and verifies quota allocations.
+5. **Decision:**
+   * **Approve:** The finite state machine transitions to `DEPLOYED`, executing the deployment adapter and storing audit logs.
+   * **Reject:** The state machine transitions to `REJECTED`, notifying the justification and cancelling the provision.
+6. **Asynchronous Polling:** The user can click **«Refresh»** in the chat or ask *«What is the status of request 120a9ea1?»* to track progress in real time.
 
 ---
 
-## 🛠️ Guía de Personalización y Extensión para el SIC
+## 🛠️ Customization and Extension Guide for Enterprise IT
 
-Esta sección detalla los puntos de extensión previstos para que el equipo de sistemas del Servicio de Informática y Comunicaciones (SIC) adapte la plataforma a la infraestructura corporativa de la Universidad de Sevilla mediante una rama propia de trabajo.
+This section describes extension points designed for systems engineering teams to adapt the platform to corporate infrastructure via a dedicated Git branch.
 
-### 1. Estrategia de Ramificación Recomendada (Git Branching)
+### 1. Recommended Branching Strategy
 
-Para preservar la base canónica del TFM y versionar de forma limpia las adaptaciones institucionales:
+To preserve the canonical TFM codebase and manage institutional customizations cleanly:
 
 ```bash
 git checkout -b corp/sic-deploy
 ```
 
-### 2. Conexión a Clúster OpenShift Real (`app/infrastructure/`)
+### 2. Connecting to a Production OpenShift Cluster (`app/infrastructure/`)
 
-El sistema utiliza el patrón Hexagonal. Para desplegar contenedores reales sobre Red Hat OpenShift o Kubernetes en lugar de emularlos:
+The platform implements the Hexagonal pattern. To deploy real container workloads to Red Hat OpenShift or Kubernetes instead of emulating them:
 
-1. Crear un adaptador concreto que implemente el contrato [`DeployPort`](file:///home/jesus/projects/TFM/app/domain/ports.py):
+1. Implement a concrete adapter matching the [`DeployPort`](file:///home/jesus/projects/TFM/app/domain/ports.py) contract:
    ```python
    # app/infrastructure/openshift_adapter.py
    from app.domain.ports import DeployPort
@@ -193,28 +197,28 @@ El sistema utiliza el patrón Hexagonal. Para desplegar contenedores reales sobr
        def deploy(self, intent: DeploymentIntent) -> str:
            if intent.action == DeploymentAction.DELETE:
                self.apps_api.delete_namespaced_deployment(name=intent.name, namespace=self.namespace)
-               return f"Recurso {intent.name} eliminado."
+               return f"Resource {intent.name} deleted."
            
-           # Generar y aplicar Deployment / Service / Route de OpenShift
+           # Generate and apply OpenShift Deployment / Service / Route
            # ...
            return f"https://{intent.name}.apps.openshift.us.es"
    ```
 
-2. Inyectar el nuevo adaptador en [`app/infrastructure/main.py`](file:///home/jesus/projects/TFM/app/infrastructure/main.py):
+2. Inject the concrete adapter into [`app/infrastructure/main.py`](file:///home/jesus/projects/TFM/app/infrastructure/main.py):
    ```python
-   # app/infrastructure/main.py (línea ~58)
+   # app/infrastructure/main.py (around line 58)
    from app.infrastructure.openshift_adapter import OpenshiftK8sAdapter
 
-   # Sustituir FakeK8sAdapter por el adaptador real:
+   # Replace FakeK8sAdapter with the real cluster adapter:
    k8s_adapter = OpenshiftK8sAdapter(namespace="sic-idp-apps")
    ```
 
-### 3. Ajuste de Políticas de Seguridad Institucionales
+### 3. Tuning Institutional Security Policies
 
-Las restricciones operativas se configuran en [`app/application/security_validator.py`](file:///home/jesus/projects/TFM/app/application/security_validator.py):
+Operational constraints are centralized in [`app/application/security_validator.py`](file:///home/jesus/projects/TFM/app/application/security_validator.py):
 
-* **Registros de Contenedores Confiables (`ALLOWED_REGISTRIES`):**  
-  Añadir los registros internos del SIC o corporativos:
+* **Trusted Container Registries (`ALLOWED_REGISTRIES`):**  
+  Add internal or corporate registries:
   ```python
   ALLOWED_REGISTRIES = (
       "docker.io/library/",
@@ -223,88 +227,89 @@ Las restricciones operativas se configuran en [`app/application/security_validat
       "harbor.sic.us.es/",
   )
   ```
-* **Cuotas de Recursos Departamentales:**  
-  Modificar `MAX_CPU_MILLICORES` (por defecto 4 Cores) y `MAX_RAM_MI` (por defecto 8 GiB) de acuerdo con los límites de cuota de los proyectos de OpenShift.
-* **Control de Secretos:**  
-  Ampliar la lista `FORBIDDEN_ENV_KEYS` para forzar el uso de `Secrets` / `ConfigMaps` en lugar de variables de entorno directas.
+* **Departmental Resource Quotas:**  
+  Modify `MAX_CPU_MILLICORES` (default 4 Cores) and `MAX_RAM_MI` (default 8 GiB) according to OpenShift project limits.
+* **Secret Protection:**  
+  Extend the `FORBIDDEN_ENV_KEYS` list to enforce Kubernetes `Secrets` / `ConfigMaps` rather than raw environment variables.
 
-### 4. Ampliación del Catálogo de Herramientas MCP (`mcp_server.py`)
+### 4. Extending the MCP Tool Catalog (`mcp_server.py`)
 
-Para exponer nuevos servicios institucionales (p. ej. portal institucional Drupal, instancia MariaDB departamental o gestor de tareas Celery):
+To expose additional institutional services (e.g., departmental MariaDB instances, Drupal portals, or Celery task workers):
 
-1. Definir la nueva herramienta en [`app/agent_layer/mcp_server.py`](file:///home/jesus/projects/TFM/app/agent_layer/mcp_server.py) bajo los decoradores `@server.list_tools()` y `@server.call_tool()`.
-2. Asignar parámetros declarativos seguros (imágenes auditadas, puertos $\ge 1024$, variables no sensibles).
-3. El agente descubrirá dinámicamente la herramienta en la fase de inicialización sin requerir cambios en el núcleo del orquestador.
+1. Define the tool in [`app/agent_layer/mcp_server.py`](file:///home/jesus/projects/TFM/app/agent_layer/mcp_server.py) with `@server.list_tools()` and `@server.call_tool()`.
+2. Configure declarative parameters (hardened images, ports $\ge 1024$, non-sensitive variables).
+3. The agent dynamically discovers new tools at initialization without requiring modifications to the orchestrator core.
 
-### 5. Persistencia en Base de Datos de Producción
+### 5. Production Database Persistence
 
-En el prototipo se emplea SQLite (`SQLiteDeploymentRepository`). Para producción, basta con crear una clase que implemente [`DeploymentRepositoryPort`](file:///home/jesus/projects/TFM/app/domain/ports.py) conectada a un servidor PostgreSQL corporativo y reemplazar la instancia en `app/infrastructure/main.py`.
+The prototype uses SQLite (`SQLiteDeploymentRepository`). For production environments, create a class implementing [`DeploymentRepositoryPort`](file:///home/jesus/projects/TFM/app/domain/ports.py) backed by a PostgreSQL cluster and instantiate it in `app/infrastructure/main.py`.
 
 ---
 
-## 🧪 Aseguramiento de la Calidad (QA) y Reproducibilidad
+## 🧪 Quality Assurance (QA) and Reproducibility
 
-El repositorio implementa una estrategia de verificación formal y multicapa orientada a garantizar la robustez del sistema frente al estocasticismo del LLM:
+The repository implements a multi-layer formal verification strategy designed to ensure system robustness against LLM stochasticity:
 
-* **Pruebas Basadas en Propiedades (*Property-Based Testing* con Hypothesis):** Fuzzing sistemático sobre el validador de seguridad con miles de combinaciones generadas pseudo-aleatoriamente.
-* **Testing de Mutación (*Mutation Testing* con Mutmut):** Introducción de mutantes lógicos en `SecurityContextValidator` para auditar la efectividad de la suite de tests.
-* **Testing Metamórfico:** Evaluación empírica de robustez del LLM ante perturbaciones semánticas, inyección de ruido léxico y variaciones de temperatura.
-* **Testing E2E de Flujo Completo (Playwright):** Automatización del ciclo interactivo navegando el dashboard HITL y comprobando la persistencia.
-* **Evaluación de Rendimiento y Carga (Locust):** Simulación de concurrencia y auditoría de tiempos de respuesta en la API de intermediación.
+* **Property-Based Testing (Hypothesis):** Systematic fuzzing over the security validator with thousands of pseudo-randomly generated inputs.
+* **Mutation Testing (Mutmut):** Introduction of logical mutants in `SecurityContextValidator` to evaluate test suite fault-detection capabilities.
+* **Metamorphic Testing:** Empirical robustness evaluation of LLMs under semantic perturbations, lexical noise, and temperature variations.
+* **End-to-End UI Testing (Playwright):** Full-flow verification automating the browser interaction through the HITL dashboard.
+* **Performance and Load Testing (Locust):** Concurrency simulation and API latency auditing under high request loads.
 
-### Ejecución de Pruebas
+### Test Execution
 
 ```bash
-# 1. Ejecución rápida de la suite de tests (65 tests en ~3.5 s):
+# 1. Quick test suite execution (65 tests in ~3.5 s):
 ./scripts/run_tests_only.sh
 
-# 2. Ejecución integral del pipeline de calidad (Linters, Tipos, Tests, Mutmut, Locust):
+# 2. Comprehensive QA pipeline (Linters, Type Checks, Tests, Mutmut, Locust):
 ./scripts/run_tests.sh
 
-# 3. Reproducción de las sesiones empíricas documentadas en el Capítulo 8:
+# 3. Reproduction of empirical sessions documented in Chapter 8:
 PYTHONPATH=. python3 scripts/generate_demos.py
 
-# 4. Evaluación comparativa entre familias de modelos (Qwen, Llama, Mistral):
+# 4. Multi-model comparative benchmark (Qwen, Llama, Mistral):
 PYTHONPATH=. python3 scripts/compare_models.py
 ```
 
-Para depurar y resetear los entornos de pruebas y reportes generados:
+To reset and clean up test fixtures and generated reports:
 ```bash
 ./scripts/clean.sh
 ```
 
 ---
 
-## 🔌 Validación Oficial con MCP Inspector
+## 🔌 Formal Validation with MCP Inspector
 
-El servidor MCP es interoperable con cualquier cliente estándar. Se puede inspeccionar visualmente su esquema declarativo e invocar herramientas en tiempo real usando la herramienta oficial de la especificación:
+The MCP server is interoperable with any compliant MCP client. Its declarative schema can be inspected and tools invoked in real time using the official MCP tool:
 
 ```bash
-# Requiere Node.js / npx
+# Requires Node.js / npx
 npx @modelcontextprotocol/inspector .venv/bin/python app/agent_layer/mcp_server.py
 ```
 
-Al iniciarse, abrirá el navegador en `http://localhost:5173`, permitiendo auditar las firmas JSON Schema de `deploy_congress_web`, `deploy_python_app`, `deploy_wordpress`, etc.
+Once launched, navigate to `http://localhost:5173` to inspect JSON Schema signatures for `deploy_congress_web`, `deploy_python_app`, `deploy_wordpress`, etc.
 
 ---
 
-## 📄 Memoria del Trabajo de Fin de Máster
+## 📄 Master's Thesis Documentation
 
-La documentación formal completa del proyecto se encuentra disponible en el directorio [`memoria/`](memoria/):
+Comprehensive formal academic documentation is available in the [`memoria/`](memoria/) directory:
 
-* **Capítulos del Documento:** Redactados en Markdown independiente con numeración canónica (`00_Portada.md` a `11_Bibliografia.md` y `Anexo_A` a `Anexo_C`), optimizados para su renderizado y lectura directa en GitHub.
-* **PDF Definitivo Oficial:** Documento consolidado (161 páginas) ensamblado con la cubierta vectorial oficial de la Universidad de Sevilla:  
-  👉 **[`memoria/TFM_JesusSolisOrtega_DEFINITIVO.pdf`](memoria/TFM_JesusSolisOrtega_DEFINITIVO.pdf)**
+* **Thesis Chapters:** Symmetrically structured in English ([`memoria/en/`](memoria/en/)) and Spanish ([`memoria/es/`](memoria/es/)), authored in standalone Markdown and optimized for direct rendering on GitHub.
+* **Official Consolidated PDF:** Final compiled thesis document (161 pages) assembled with the official vector cover of the University of Seville:  
+  👉 **[`memoria/TFM_JesusSolisOrtega_ES.pdf`](memoria/TFM_JesusSolisOrtega_ES.pdf)**
 
 ---
 
-## ⚖️ Licencia y Régimen de Explotación
+## ⚖️ License and Terms of Use
 
 Copyright (C) 2026 Jesús Solís Ortega.
 
-* **Software y Código Fuente:** Publicado bajo los términos de la **GNU Affero General Public License v3.0 (GNU AGPLv3)**. Consulta el archivo [`LICENSE`](LICENSE) para acceder al texto íntegro de la licencia.
-  * *Uso Abierto y Académico:* Se autoriza la copia, ejecución, inspección y modificación del software para fines personales, educativos, de investigación y proyectos sin ánimo de lucro, con la obligación recíproca de compartir las modificaciones y el código fuente derivado bajo esta misma licencia si se ofrece el software a través de una red telemática (Sección 13).
-  * *Licenciamiento Comercial y Consultoría:* Si representa a una entidad u organización que desea integrar, desplegar u operar esta plataforma en entornos corporativos privativos sin acogerse a las obligaciones de la licencia AGPLv3, o precisa soporte de arquitectura y adaptación a medida para OpenShift/Kubernetes, contacte directamente con el autor:  
+* **Software and Source Code:** Distributed under the terms of the **GNU Affero General Public License v3.0 (GNU AGPLv3)**. Refer to the [`LICENSE`](LICENSE) file for the full license text.
+  * *Open and Academic Use:* Copying, running, inspecting, and modifying the software is authorized for educational, personal, research, and non-profit purposes, subject to the reciprocal obligation to share derived source code under the same license if hosted over a computer network (Section 13).
+  * *Commercial Licensing and Professional Services:* Organizations wishing to integrate, deploy, or operate this platform in proprietary enterprise environments without AGPLv3 obligations, or seeking architectural guidance and custom OpenShift/Kubernetes integrations, may contact the author directly:  
     📫 **Jesús Solís Ortega** — [jesussolisortega@gmail.com](mailto:jesussolisortega@gmail.com)
 
-* **Memoria Técnica y Documentación:** La memoria académica del Trabajo de Fin de Máster y sus especificaciones formales se distribuyen bajo licencia **Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)**.
+* **Technical Thesis and Documentation:** The academic Master's Thesis and its formal specifications are licensed under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
+

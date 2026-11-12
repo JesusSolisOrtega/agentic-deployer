@@ -1,7 +1,7 @@
 # Anexo A. Manifiesto Kubernetes Generado — Escenario 1 (Happy Path)
 
 > **Referencia:** Sección 9.2.1 — *Walkthrough: Portal Web para Congreso Académico*
-> **Artefacto fuente:** [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml)
+> **Artefacto fuente:** [`demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml`](../../demos/outputs/dep-7f3a2c1b_congreso-ia-departamento.yaml)
 
 Este anexo contiene el manifiesto YAML completo generado automáticamente por el `FakeK8sAdapter` del *Agentic Deployer* a partir de una petición en lenguaje natural del investigador (véase Sección 9.2.1). El manifiesto es una salida declarativa autocontenida compuesta por tres recursos Kubernetes estándar:
 
@@ -150,7 +150,7 @@ spec:
 
 ## A.3. Relación con el Código Fuente
 
-El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/fake_k8s_adapter.py`](../app/infrastructure/fake_k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
+El manifiesto anterior es generado por el método `deploy()` del `FakeK8sAdapter`, implementado en [`app/infrastructure/fake_k8s_adapter.py`](../../app/infrastructure/fake_k8s_adapter.py). El adaptador recibe un objeto `DeploymentIntent` (Pydantic) y lo proyecta sobre plantillas f-string mediante `textwrap.dedent`, sin dependencias externas ni llamadas de red.
 
 En un entorno de producción, el `RealK8sAdapter` (trabajo futuro, Sección 10.3.1) sustituiría la escritura en disco por una llamada autenticada a la API de Kubernetes vía `kubernetes-client`:
 

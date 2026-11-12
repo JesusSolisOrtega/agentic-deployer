@@ -23,21 +23,21 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[7]** Gartner. (2023). *Top Strategic Technology Trends for 2024: Platform Engineering*. Gartner Research.
 *(Informe industrial utilizado para justificar el viraje del mercado hacia la Ingeniería de Plataformas y los Portales IDP referenciados en la Sección 1.1).*
 
-**[8]** Spotify Engineering. (2020). *How We Use Golden Paths to Solve Fragmentation in our Software Ecosystem*. Recuperado el 15/09/2026 de https://engineering.atspotify.com/2020/08/17/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/
+**[8]** Spotify Engineering. (2020). *How We Use Golden Paths to Solve Fragmentation in our Software Ecosystem*. Recuperado el 15/09/2026 de https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/
 *(Documentación técnica sobre la definición e implementación práctica del concepto de "Golden Path" en organizaciones tecnológicas).*
 
-**[9]** Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). *ReAct: Synergizing Reasoning and Acting in Language Models*. arXiv preprint arXiv:2210.03629. Recuperado el 15/09/2026 de https://arxiv.org/abs/2210.03629
+**[9]** Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2023). *ReAct: Synergizing Reasoning and Acting in Language Models*. Proceedings of the International Conference on Learning Representations (ICLR). arXiv preprint arXiv:2210.03629. Recuperado el 15/09/2026 de https://arxiv.org/abs/2210.03629
 *(Referencia metodológica para la formulación del bucle ReAct y la orquestación agéntica en el Capítulo 6).*
 
 **[10]** OpenTofu Authors. (2024). *OpenTofu: An open-source tool for building, changing, and versioning infrastructure safely and efficiently*. The Linux Foundation. Recuperado el 15/09/2026 de https://opentofu.org/
 *(Herramienta de Infraestructura como Código [IaC] de código abierto gobernada por la Linux Foundation, contemplada en la propuesta inicial del proyecto y analizada en las Secciones 1.2.2 y 4.4).*
-**[11]** Siddiq, M. L., & Santos, J. C. (2024). *Treat LLM-Generated Terraform as Untrusted: An Exploratory Security Study and a Practitioner's Verification Workflow*. IEEE Software. https://doi.org/10.1109/MS.2026.3721790
+**[11]** Siddiq, M. L., & Santos, J. C. (2026). *Treat LLM-Generated Terraform as Untrusted: An Exploratory Security Study and a Practitioner's Verification Workflow*. IEEE Software. https://doi.org/10.1109/MS.2026.3721790
 *(Estudio formal que evidencia la inseguridad del código IaC generado por LLMs, justificando la necesidad de validadores algorítmicos deterministas).*
 
-**[12]** Tarasova, N. A., Balp-Straffon, E., Iancheruk, A., Sielskyi, Y., Kozodoi, N., Byrne, L., Butler, J., Jiang, D., Czelej, M., & Ivanov, S. (2024). *Evaluating Language Models on Infrastructure-as-Code Development*. IEEE Cloud Summit. https://doi.org/10.1109/CloudSummit68932.2026.00021
+**[12]** Tarasova, N., Balp-Straffon, E., Iancheruk, A., Sielskyi, Y., Kozodoi, N., Byrne, L., Butler, J., Jiang, D., Czelej, M., Ang, A., Shah, Y., Blanco, R., & Ivanov, S. (2026). *Evaluating Language Models on Infrastructure-as-Code Development*. IEEE Cloud Summit. https://doi.org/10.1109/CloudSummit68932.2026.00021
 *(Estudio empírico cuantitativo a gran escala que evalúa la precisión y las limitaciones de los LLMs en la generación de especificaciones de infraestructura como código [IaC], citado en la Sección 2.5.2).*
 
-**[13]** Anthropic PBC. (2024). *Model Context Protocol (MCP) Specification*. GitHub Open Source Repository. Recuperado el 15/09/2026 de https://github.com/modelcontextprotocol/specification
+**[13]** Anthropic PBC. (2024). *Model Context Protocol (MCP) Specification*. GitHub Open Source Repository. Recuperado el 15/09/2026 de https://github.com/modelcontextprotocol/modelcontextprotocol
 *(Estándar tecnológico empleado para resolver el problema del 'Vendor Lock-in' y aislar la definición de herramientas JSON-RPC, documentado en la Sección 6.1).*
 
 **[14]** Hipp, D. R. (2024). *SQLite: A small, fast, reliable, self-contained, SQL database engine*. Recuperado el 15/09/2026 de https://www.sqlite.org/
@@ -61,7 +61,7 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[20]** Malul, E., Meidan, Y., Mimran, D., Elovici, Y., & Shabtai, A. (2024). *GenKubeSec: LLM-Based Kubernetes Misconfiguration Detection, Localization, Reasoning, and Remediation*. Proceedings of the 40th Annual Computer Security Applications Conference (ACSAC). arXiv preprint arXiv:2405.19954. https://doi.org/10.48550/arXiv.2405.19954
 *(Investigación académica que aborda la detección y resolución de malas configuraciones de seguridad en Kubernetes mediante LLMs, fundamentando la necesidad de validación estricta y supervisión HITL en la Sección 2.5.2).*
 
-**[21]** Leppänen, M., Mäkinen, S., Pagels, M., Eloranta, V. P., Itkonen, J., Mäntylä, M. V., & Männistö, T. (2015). *The Highways and Country Roads to DevOps*. IEEE Software, 32(3), 64–72. https://doi.org/10.1109/MS.2015.50
+**[21]** Leppänen, M., Mäkinen, S., Pagels, M., Eloranta, V. P., Itkonen, J., Mäntylä, M. V., & Männistö, T. (2015). *The Highways and Country Roads to Continuous Deployment*. IEEE Software, 32(2), 64–72. https://doi.org/10.1109/MS.2015.50
 *(Estudio empírico sobre la adopción de prácticas ChatOps e integración de herramientas conversacionales en pipelines CI/CD, citado en la Sección 2.5.2 como referencia de trabajo relacionado en la integración de asistentes en flujos DevOps).*
 
 **[22]** Chase, H. (2022). *LangChain: Building applications with LLMs through composability*. GitHub Open Source Repository. Recuperado el 15/09/2026 de https://github.com/langchain-ai/langchain
@@ -127,13 +127,13 @@ A continuación, se detalla la literatura académica, especificaciones técnicas
 **[42]** Wohlin, C., Runeson, P., Höst, M., Ohlsson, M. C., Regnell, B., & Wesslén, A. (2012). *Experimentation in Software Engineering*. Springer Science & Business Media.
 *(Obra de referencia metodológica sobre investigación empírica en ingeniería del software y formalización de amenazas a la validez [interna, externa, constructo y conclusión], citada en la Sección 9.6).*
 
-**[43]** Runeson, P., & Höst, M. (2009). *Guidelines for conducting and reporting case study research in software engineering*. Empirical Software Engineering, 14(2), 131-164.
+**[43]** Runeson, P., & Höst, M. (2009). *Guidelines for conducting and reporting case study research in software engineering*. Empirical Software Engineering, 14(2), 131-164. https://doi.org/10.1007/s10664-008-9102-8
 *(Guía metodológica para el diseño, ejecución y reporte de estudios de caso y validación empírica en ingeniería del software, citada en la Sección 9.6).*
 
 **[44]** OpenAI. (2024). *Hello GPT-4o*. Recuperado el 15/09/2026 de https://openai.com/index/hello-gpt-4o/
 *(Documentación técnica del modelo estándar de la industria, referenciado en la Sección 10.1.9 por sus capacidades nativas en interacción con herramientas externas y JSON Schema).*
 
-**[45]** Anthropic. (2024). *Claude 3.5 Sonnet: Intelligent, fast, and secure*. Recuperado el 15/09/2026 de https://www.anthropic.com/news/claude-3-5-sonnet
+**[45]** Anthropic. (2024). *Introducing Claude 3.5 Sonnet*. Recuperado el 15/09/2026 de https://www.anthropic.com/news/claude-3-5-sonnet
 *(Documentación oficial que respalda la optimización y el 'fine-tuning' específico de la familia Claude para flujos de trabajo agénticos y orquestación estructurada [Tool Calling], citado en la Sección 10.1.9).*
 
 **[46]** Open Policy Agent (OPA). (2024). *OPA: Policy-based control for cloud native environments*. Cloud Native Computing Foundation (CNCF). Recuperado el 15/09/2026 de https://www.openpolicyagent.org/

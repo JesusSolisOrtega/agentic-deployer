@@ -173,7 +173,7 @@ El adaptador secundario `FakeK8sAdapter` expande la plantilla *Golden Path*, gen
 | Reducción relativa del *Time-To-Market* | **99,8%** |
 <p align="center"><i><b>Tabla 26:</b> Métricas de rendimiento del walkthrough completo (Escenario 1).</i></p>
 
-*Registro completo de sesión:* [`demos/session_logs/escenario1_happy_path.json`](../demos/session_logs/escenario1_happy_path.json).
+*Registro completo de sesión:* [`demos/session_logs/escenario1_happy_path.json`](../../demos/session_logs/escenario1_happy_path.json).
 
 ---
 
@@ -242,7 +242,7 @@ A lo largo de 5 iteraciones de diálogo asistido, el modelo converge progresivam
 
 La intercepción se produjo **antes de que ninguna operación modificara el clúster**, validando el principio *Fail-Safe* y demostrando que la seguridad perimetral no depende de la fiabilidad estocástica de la IA, sino del rigor del núcleo hexagonal.
 
-*Registro completo de sesión:* [`demos/session_logs/escenario2_prompt_injection.json`](../demos/session_logs/escenario2_prompt_injection.json).
+*Registro completo de sesión:* [`demos/session_logs/escenario2_prompt_injection.json`](../../demos/session_logs/escenario2_prompt_injection.json).
 
 ---
 
@@ -260,7 +260,7 @@ Este caso de estudio evalúa la gestión de servicios complejos dependientes de 
 
 Durante el procesamiento, el agente infiere la necesidad de persistencia y la configuración del puerto 8080. Al registrarse la intención en la FSM, el técnico del SIC recibe la notificación asíncrona en el Dashboard. Tras verificar que el consumo de recursos se adecua a las cuotas del departamento solicitante, el operador aprueba la provisión, materializándose el YAML en el almacenamiento compartido.
 
-*Registro completo de sesión:* [`demos/session_logs/escenario3_hitl_completo.json`](../demos/session_logs/escenario3_hitl_completo.json).
+*Registro completo de sesión:* [`demos/session_logs/escenario3_hitl_completo.json`](../../demos/session_logs/escenario3_hitl_completo.json).
 
 ---
 
@@ -275,7 +275,7 @@ Para verificar la capacidad de recuperación autónoma ante errores de configura
 2. **Intercepción Determinista:** El validador detecta la falta de registro explícito y emite un `HTTP 422: "Untrusted registry"`.
 3. **Autocorrección Cognitiva:** El LLM procesa la observación devuelta, comprende la regla de registro y emite una segunda invocación corregida incorporando el espacio de nombres `docker.io/library/postgres:13.4`, completando el registro exitoso en 2 iteraciones (26,1 s).
 
-*Registro completo de sesión:* [`demos/session_logs/escenario4_autocorreccion.json`](../demos/session_logs/escenario4_autocorreccion.json).
+*Registro completo de sesión:* [`demos/session_logs/escenario4_autocorreccion.json`](../../demos/session_logs/escenario4_autocorreccion.json).
 
 ---
 

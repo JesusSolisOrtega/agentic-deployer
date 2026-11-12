@@ -50,9 +50,10 @@ Thumbs.db
 .temp_cuerpo.pdf
 
 # ── Memoria & Compilación Documental ──────────────────────────
-# Ignorar todos los markdowns en la raíz excepto README.md
+# Ignorar todos los markdowns en la raíz excepto README.md y README.es.md
 /*.md
 !/README.md
+!/README.es.md
 
 # PDFs de compilación intermedia en la raíz
 /*.pdf
@@ -66,6 +67,7 @@ memoria/diagrams_cache/
 memoria/img/
 memoria/portada.pdf
 memoria/portada_oficial.pdf
+memoria/portada_oficial_en.pdf
 memoria/INFORME_REVISION_TUTOR.md
 memoria/Guia de TFM*.pdf
 memoria/plantillas/

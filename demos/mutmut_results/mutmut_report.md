@@ -1,50 +1,49 @@
 # Mutation Testing Report — Agentic Deployer
-# Generated: 2026-09-27
-# Tool: mutmut 4.x
-# Config: test_mutmut.ini
-# Scope: app/application/ + app/domain/
+
+<p align="center">
+  <b>English Version</b> | <b><a href="mutmut_report.es.md">Versión en Español</a></b>
+</p>
+
+# Generated: 2026-09-27  
+# Tool: mutmut 4.x  
+# Config: test_mutmut.ini  
+# Scope: app/application/ + app/domain/  
 
 ## Summary
 
-| Módulo | Supervivientes | Causa | Criticidad |
+| Module | Surviving Mutants | Root Cause | Criticality |
 |---|---|---|---|
-| `domain.exceptions` | 2 | Mutaciones en `__init__` de la clase de excepción | Baja (mensaje de error, no lógica) |
-| `security_validator._parse_cpu/_parse_ram` | 24 | Funciones de conversión de strings sin tests unitarios directos | Media |
-| `security_validator.validate` | 3 | Condiciones límite en reglas compuestas | Media |
-| `use_cases.execute` | 1 | Rama alternativa de acción DELETE | Baja |
-| `agent.FakeLLMClient` | 54 | Módulo de demo sin tests (by design) | No aplicable |
-| `agent.AgentOrchestrator` | 45 | Agente cognitivo: testar LLM-dependent code es Out-of-Scope para mutmut | No aplicable |
-| `agent_layer.tools` | 14 | Herramientas MCP: requieren mocks de red | Baja-Media |
+| `domain.exceptions` | 2 | Mutations in exception class `__init__` | Low (error message formatting, not domain logic) |
+| `security_validator._parse_cpu/_parse_ram` | 24 | String conversion utility functions lacking direct unit tests | Medium |
+| `security_validator.validate` | 3 | Boundary conditions in compound validation rules | Medium |
+| `use_cases.execute` | 1 | Alternative execution branch for DELETE action | Low |
+| `agent.FakeLLMClient` | 54 | Demonstration mock without dedicated test suite (by design) | Not applicable |
+| `agent.AgentOrchestrator` | 45 | Cognitive agent: testing LLM-dependent stochastic code is out of scope for mutation testing | Not applicable |
+| `agent_layer.tools` | 14 | MCP tools: require network client mocks | Low-Medium |
 | **TOTAL** | **143** | | |
 
-## Análisis de Pertinencia
+## Relevance Analysis
 
-Los módulos **`agent.FakeLLMClient`** (54) y **`agent.AgentOrchestrator`** (45) acumulan el 69,9% de los supervivientes.
-Ambos quedan fuera del alcance de auditoría por diseño:
-- `FakeLLMClient` es código de demostración, no de producción.
-- `AgentOrchestrator` encapsula la lógica de interacción con el LLM, cuyo testeo mediante mutmut no es significativo
-  (el LLM es un sistema externo no determinista que no puede auditarse con aserciones deterministas).
+Modules **`agent.FakeLLMClient`** (54) and **`agent.AgentOrchestrator`** (45) account for 69.9% of all surviving mutants. Both remain outside the formal audit boundary by architectural design:
+- `FakeLLMClient` represents demonstration test double code rather than production logic.
+- `AgentOrchestrator` encapsulates interactions with the LLM inference engine; mutation testing on stochastic model prompts is methodologically unsound and cannot be validated with deterministic assertions.
 
-## Núcleo Hexagonal (Scope Principal)
+## Hexagonal Core (Primary Target Scope)
 
-El alcance declarado en `test_mutmut.ini` es `app/application/` + `app/domain/`.
-Sobre este scope, los supervivientes relevantes son:
+The formal audit scope defined in `test_mutmut.ini` covers `app/application/` and `app/domain/`. Within this scope, relevant surviving mutants are distributed as follows:
 
-| Módulo | Supervivientes |
+| Module | Surviving Mutants |
 |---|---|
 | `domain.exceptions` | 2 |
 | `security_validator._parse_cpu/_parse_ram` | 24 |
-| `security_validator.validate` (regla engine) | 3 |
+| `security_validator.validate` (rule engine) | 3 |
 | `use_cases.execute` | 1 |
-| **Subtotal núcleo hexagonal** | **30** |
+| **Hexagonal Core Subtotal** | **30** |
 
-Los 30 supervivientes del núcleo hexagonal identifican brechas en la cobertura de las
-funciones de conversión de recursos (`_parse_cpu`, `_parse_ram`) que convierten strings
-como `"500m"` o `"1024Mi"` a valores normalizados.
-Estas brechas son candidatas directas a T3-followup: añadir tests parametrizados
-para cada variante de formato de recursos.
+The 30 surviving mutants within the hexagonal core reveal test coverage gaps in resource conversion utility functions (`_parse_cpu`, `_parse_ram`), which parse declarative resource strings such as `"500m"` or `"1024Mi"` into normalized numerical values. These gaps represent direct opportunities for subsequent testing improvements via parameterized test cases covering diverse resource format permutations.
 
-## Archivos de Referencia
+## Reference Files
 
-- `mutmut_results_raw.txt` — Salida completa del comando `mutmut results`
-- Este archivo — Análisis categorizado
+- `mutmut_results_raw.txt` — Full raw stdout from the `mutmut results` command
+- This document — Categorized structural analysis
+
